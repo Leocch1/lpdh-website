@@ -19,7 +19,6 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
   { href: "/services", label: "Our Services" },
-  { href: "/updates", label: "Updates" },
   { href: "/careers", label: "Careers" },
   { href: "/contact", label: "Contact Us" },
 ];
@@ -45,7 +44,7 @@ export function Header() {
     <div className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
       <div className="hidden bg-background py-2 text-xs text-muted-foreground md:block">
         <div className="container flex items-center justify-between pr-12">
-          <div className="flex-1">
+          <div className="flex-1 pl-32">
              <Link href="/">
               <Logo />
             </Link>

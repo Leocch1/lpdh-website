@@ -21,7 +21,7 @@ export function Footer() {
   ];
 
   return (
-    <footer style={{ backgroundColor: '#76C093' }} className="text-white">
+    <footer style={{ backgroundColor: '#47524A' }} className="text-white">
       <div className="container mx-auto max-w-screen-2xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           <div className="flex flex-col items-center text-center lg:items-start lg:text-left col-span-1 lg:col-span-1">

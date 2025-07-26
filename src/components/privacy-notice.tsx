@@ -29,11 +29,21 @@ const noticePages = [
 ]
 
 export function PrivacyNotice() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+
+  useEffect(() => {
+    // Only show the privacy notice if it hasn't been shown in this session
+    const hasSeenNotice = sessionStorage.getItem('hasSeenPrivacyNotice');
+    if (!hasSeenNotice) {
+      setIsOpen(true);
+    }
+  }, []);
 
   const handleAccept = () => {
     setIsOpen(false);
+    // Mark that the user has seen the notice in this session
+    sessionStorage.setItem('hasSeenPrivacyNotice', 'true');
   };
   
   const handleNext = () => {
