@@ -8,7 +8,6 @@ import { Heart, Smile, Scissors } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { PrivacyNotice } from "@/components/privacy-notice"
-import Autoplay from "embla-carousel-autoplay"
 import React from "react"
 
 const ToothIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -30,10 +29,6 @@ const PillIcon = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export default function Home() {
-  const autoplay = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: false })
-  )
-
   const services = [
     { name: "Internal Medicine", icon: PillIcon, description: "Expert care for your heart's health." },
     { name: "Dentistry", icon: ToothIcon, description: "Lorem ipsum dolor sit amet." },
@@ -56,7 +51,7 @@ export default function Home() {
       <section className="w-full">
          <Carousel
           opts={{ loop: true }}
-          plugins={[autoplay.current]}
+          plugins={[]}
           className="relative"
         >
           <CarouselContent>
@@ -68,7 +63,7 @@ export default function Home() {
                   data-ai-hint={image.dataAiHint}
                   width={1600}
                   height={600}
-                  className="w-full h-[300px] md:h-[600px] object-cover"
+                  className="mx-auto object-cover"
                 />
               </CarouselItem>
             ))}
