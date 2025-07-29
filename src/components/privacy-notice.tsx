@@ -60,29 +60,32 @@ export function PrivacyNotice() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-2xl p-0" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
-        <DialogHeader className="p-6">
-            <div className="flex items-center gap-4">
-                 <Logo />
-                 <DialogTitle className="text-2xl font-bold text-foreground">LPDH Privacy Notice</DialogTitle>
-            </div>
-        </DialogHeader>
-        <div className="px-6 space-y-4">
-            <ScrollArea className="h-64 pr-4">
-                <div className="space-y-4">
-                    <h3 className="font-semibold text-lg">{noticePages[currentPage].title}</h3>
-                    <p className="text-muted-foreground">{noticePages[currentPage].content}</p>
-                </div>
-            </ScrollArea>
-            <div className="flex justify-end">
-                {!isLastPage && <Button variant="link" onClick={handleNext}>Next</Button>}
-            </div>
+      <DialogContent className="max-w-2xl p-0 bg-white/90 backdrop-blur-md border border-white/20 shadow-2xl" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        {/* Glass container wrapper */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg border border-white/30 shadow-lg m-4">
+          <DialogHeader className="p-6 bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 rounded-t-lg">
+              <div className="flex items-center gap-4">
+                   <Logo />
+                   <DialogTitle className="text-2xl font-bold text-foreground">LPDH Privacy Notice</DialogTitle>
+              </div>
+          </DialogHeader>
+          <div className="px-6 py-4 space-y-4 bg-white/60 backdrop-blur-sm">
+              <ScrollArea className="h-64 pr-4">
+                  <div className="space-y-4">
+                      <h3 className="font-semibold text-lg text-gray-800">{noticePages[currentPage].title}</h3>
+                      <p className="text-gray-600 leading-relaxed">{noticePages[currentPage].content}</p>
+                  </div>
+              </ScrollArea>
+              <div className="flex justify-end">
+                  {!isLastPage && <Button variant="link" onClick={handleNext} className="text-emerald-600 hover:text-emerald-700">Next</Button>}
+              </div>
+          </div>
+          <DialogFooter className="bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 backdrop-blur-sm p-6 rounded-b-lg border-t border-white/20">
+            <Button onClick={handleAccept} disabled={!isLastPage} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg shadow-lg transition-all duration-200">
+              I HAVE READ AND UNDERSTAND
+            </Button>
+          </DialogFooter>
         </div>
-        <DialogFooter className="bg-secondary p-6">
-          <Button onClick={handleAccept} disabled={!isLastPage} className="w-full">
-            I HAVE READ AND UNDERSTAND
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
