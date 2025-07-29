@@ -29,21 +29,21 @@ const updates = [
   {
     title: "MBD June 2025",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    image: "https://placehold.co/600x400.png",
+    image: "",
     dataAiHint: "people meeting",
     link: "#",
   },
   {
     title: "MBD June 2025",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    image: "https://placehold.co/600x400.png",
+    image: "",
     dataAiHint: "people meeting",
     link: "#",
   },
   {
     title: "MBD June 2025",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    image: "https://placehold.co/600x400.png",
+    image: "",
     dataAiHint: "people meeting",
     link: "#",
   },
@@ -52,13 +52,13 @@ const updates = [
 const healthAdvisories = [
     {
         title: "Motherhood Begins! Maternity Packages",
-        image: "https://placehold.co/600x800.png",
+        image: "",
         dataAiHint: "mother child",
         link: "#",
     },
     {
         title: "Signs and Symptoms of Leptospirosis",
-        image: "https://placehold.co/600x800.png",
+        image: "",
         dataAiHint: "health advisory",
         link: "#",
     }
