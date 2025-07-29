@@ -9,15 +9,6 @@ import Image from "next/image";
 export default function ContactPage() {
   return (
     <div className="flex flex-col">
-      <section className="bg-secondary py-12 md:py-24">
-        <div className="container text-center">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl">Contact Us</h1>
-          <p className="mx-auto mt-4 max-w-3xl text-lg text-muted-foreground">
-            We&apos;re here to help. Reach out to us for any inquiries.
-          </p>
-        </div>
-      </section>
-
       <section className="py-12 md:py-24">
         <div className="container">
           <div className="max-w-5xl mx-auto">
