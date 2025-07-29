@@ -2,8 +2,8 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Phone, MapPin } from "lucide-react";
-import { useState } from "react";
+import { Menu, Phone, MapPin, ChevronDown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
@@ -18,27 +18,121 @@ import Image from "next/image";
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
-  { href: "/services", label: "Our Services" },
+  { 
+    href: "/services", 
+    label: "Our Services",
+    dropdown: [
+      { href: "/services", label: "Services" },
+      { href: "/services/find-doctor", label: "Find a Doctor" },
+      { href: "/services/schedule-lab", label: "Schedule a Lab" }
+    ]
+  },
   { href: "/careers", label: "Careers" },
-  { href: "/contact", label: "Contact Us" },
+  { 
+    href: "/contact", 
+    label: "Contact Us",
+    dropdown: [
+      { href: "/contact", label: "Message Us" },
+      { href: "/contact/directories", label: "LPDH Directories" }
+    ]
+  },
 ];
 
 export function Header() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isContactDropdownOpen, setIsContactDropdownOpen] = useState(false);
+  const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
+  const contactDropdownRef = useRef<HTMLDivElement>(null);
+  const servicesDropdownRef = useRef<HTMLDivElement>(null);
 
-  const NavLinkItem = ({ href, label }: { href: string; label: string }) => (
-    <Link
-      href={href}
-      onClick={() => setIsMobileMenuOpen(false)}
-      className={cn(
-        "text-lg text-primary-foreground/90 transition-colors hover:text-white md:text-base",
-        pathname === href && "font-semibold text-white"
-      )}
-    >
-      {label}
-    </Link>
-  );
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (contactDropdownRef.current && !contactDropdownRef.current.contains(event.target as Node)) {
+        setIsContactDropdownOpen(false);
+      }
+      if (servicesDropdownRef.current && !servicesDropdownRef.current.contains(event.target as Node)) {
+        setIsServicesDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const NavLinkItem = ({ href, label, dropdown }: { href: string; label: string; dropdown?: Array<{href: string, label: string}> }) => {
+    if (dropdown) {
+      const isContactDropdown = label === "Contact Us";
+      const isServicesDropdown = label === "Our Services";
+      const isDropdownOpen = isContactDropdown ? isContactDropdownOpen : isServicesDropdownOpen;
+      const setDropdownOpen = isContactDropdown ? setIsContactDropdownOpen : setIsServicesDropdownOpen;
+      const dropdownRef = isContactDropdown ? contactDropdownRef : servicesDropdownRef;
+
+      return (
+        <div 
+          className="relative" 
+          ref={dropdownRef}
+          onMouseEnter={() => setDropdownOpen(true)}
+          onMouseLeave={() => setDropdownOpen(false)}
+        >
+          <div 
+            className="flex items-center gap-1 cursor-pointer"
+            onClick={() => setDropdownOpen(!isDropdownOpen)}
+          >
+            <span
+              className={cn(
+                "text-lg text-primary-foreground/90 transition-colors hover:text-[#e8f996] md:text-base",
+                (pathname === href || dropdown.some(item => pathname === item.href)) && "font-semibold text-white"
+              )}
+            >
+              {label}
+            </span>
+            <ChevronDown className={cn(
+              "h-4 w-4 text-primary-foreground/90 hover:text-[#e8f996] transition-transform",
+              isDropdownOpen && "rotate-180"
+            )} />
+          </div>
+          
+          {/* Desktop Dropdown */}
+          {isDropdownOpen && (
+            <div className="hidden md:block absolute left-0 top-full pt-2 z-50">
+              <div className="bg-primary rounded-lg shadow-lg border border-primary-foreground/20 min-w-[200px] py-2">
+                {dropdown.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setDropdownOpen(false)}
+                    className={cn(
+                      "block px-4 py-2 text-sm text-primary-foreground/90 hover:text-[#e8f996] hover:bg-primary-foreground/10 transition-colors",
+                      pathname === item.href && "bg-primary-foreground/10 text-[#e8f996] font-semibold"
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+
+    return (
+      <Link
+        href={href}
+        onClick={() => setIsMobileMenuOpen(false)}
+        className={cn(
+          "text-lg text-primary-foreground/90 transition-colors hover:text-[#e8f996] md:text-base",
+          pathname === href && "font-semibold text-white"
+        )}
+      >
+        {label}
+      </Link>
+    )
+  };
 
   return (
     <div className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
@@ -95,7 +189,34 @@ export function Header() {
                   </div>
                   <nav className="flex flex-col items-start gap-6">
                     {navLinks.map((link) => (
-                      <NavLinkItem key={link.href} {...link} />
+                      <div key={link.href}>
+                        <NavLinkItem href={link.href} label={link.label} dropdown={link.dropdown} />
+                        {/* Mobile dropdown items */}
+                        {link.dropdown && (
+                          (link.label === "Contact Us" && isContactDropdownOpen) ||
+                          (link.label === "Our Services" && isServicesDropdownOpen)
+                        ) && (
+                          <div className="ml-4 mt-2 space-y-2">
+                            {link.dropdown.map((item) => (
+                              <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={() => {
+                                  setIsMobileMenuOpen(false);
+                                  setIsContactDropdownOpen(false);
+                                  setIsServicesDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  "block text-base text-primary-foreground/80 transition-colors hover:text-[#e8f996]",
+                                  pathname === item.href && "font-semibold text-[#e8f996]"
+                                )}
+                              >
+                                {item.label}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </nav>
                 </div>
@@ -113,7 +234,7 @@ export function Header() {
           {/* Desktop Nav */}
           <nav className="hidden flex-1 items-center justify-center gap-8 text-sm md:flex">
             {navLinks.map((link) => (
-              <NavLinkItem key={link.href} {...link} />
+              <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} />
             ))}
           </nav>
 
