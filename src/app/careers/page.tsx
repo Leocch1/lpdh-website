@@ -1,0 +1,139 @@
+
+'use client';
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Briefcase, Search } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { client, urlFor, CAREERS_QUERY, JOB_OPENINGS_QUERY } from "@/lib/sanity";
+import { CareersData, JobOpening } from "@/types/sanity";
+
+
+export default function CareersPage() {
+  const [careersData, setCareersData] = useState<CareersData | null>(null)
+  const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+        
+        if (projectId && projectId !== 'your-project-id-here') {
+          // Fetch careers page data
+          const careersContent = await client.fetch(CAREERS_QUERY)
+          setCareersData(careersContent)
+          
+          // Fetch job openings
+          const jobs = await client.fetch(JOB_OPENINGS_QUERY)
+          setJobOpenings(jobs || [])
+        } else {
+          console.log('Project ID not configured properly')
+        }
+      } catch (error) {
+        console.error('Error fetching careers data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [])
+
+  // Get hero section data
+  const heroSection = careersData?.heroSection
+  const heroImageSrc = heroSection?.backgroundImage 
+    ? urlFor(heroSection.backgroundImage.asset).width(1600).height(600).url()
+    : "/contact.jpg" // fallback image
+
+  // Get job listings section data
+  const jobListingsSection = careersData?.jobListingsSection
+  return (
+    <div className="flex flex-col">
+      {/* Hero Section - Only show if data exists */}
+      {heroSection && (
+        <section className="relative w-full h-[400px] md:h-[500px]">
+          <Image
+              src={heroImageSrc}
+              alt="Hospital interior"
+              data-ai-hint="hospital interior"
+              fill
+              className="object-cover"
+          />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
+            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+              {heroSection.heroTitle}
+            </h1>
+            <Button asChild className="mt-8" size="lg">
+              <Link href="#openings">{heroSection.buttonText}</Link>
+            </Button>
+          </div>
+        </section>
+      )}
+      
+      {/* Job Listings Section - Only show if data exists */}
+      {jobListingsSection && (
+        <section id="openings" className="py-12 md:py-24">
+          <div className="container">
+            <h2 className="font-headline text-center text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+              {jobListingsSection.sectionTitle}
+            </h2>
+            <div className="mt-8 mx-auto max-w-2xl flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input placeholder={jobListingsSection.searchPlaceholder} className="pl-10" />
+                </div>
+                <Select>
+                  <SelectTrigger className="w-full sm:w-[200px]">
+                    <SelectValue placeholder={jobListingsSection.categoryPlaceholder} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobListingsSection.categories?.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+            </div>
+            
+            {/* Job Cards - Only show if there are job openings */}
+            {jobOpenings.length > 0 && (
+              <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {jobOpenings.map((job) => (
+                      <Card key={job._id} className="flex flex-col">
+                          <CardHeader>
+                              <CardTitle>{job.title}</CardTitle>
+                              <p className="text-sm font-medium text-muted-foreground pt-1">{job.department}</p>
+                          </CardHeader>
+                          <CardContent className="flex-grow">
+                             <p className="text-muted-foreground line-clamp-3">{job.summary}</p>
+                          </CardContent>
+                          <CardFooter>
+                             <Button asChild>
+                                  <Link href={`/careers/${job.slug.current}`}>Apply Now</Link>
+                             </Button>
+                          </CardFooter>
+                      </Card>
+                  ))}
+              </div>
+            )}
+            
+            {/* No jobs message */}
+            {jobOpenings.length === 0 && !loading && (
+              <div className="mt-12 text-center">
+                <p className="text-muted-foreground text-lg">No job openings available at the moment.</p>
+                <p className="text-muted-foreground mt-2">Please check back later for new opportunities.</p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

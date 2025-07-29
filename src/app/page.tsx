@@ -8,7 +8,9 @@ import { Heart, Smile, Scissors } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { PrivacyNotice } from "@/components/privacy-notice"
-import React from "react"
+import React, { useEffect, useState } from "react"
+import { client, urlFor, HOMEPAGE_QUERY, TEST_QUERY } from "@/lib/sanity"
+import { HomepageData } from "@/types/sanity"
 
 const ToothIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -29,6 +31,48 @@ const PillIcon = (props: React.SVGProps<SVGSVGElement>) => (
 )
 
 export default function Home() {
+  const [homepageData, setHomepageData] = useState<HomepageData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [hmoImageError, setHmoImageError] = useState(false)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Only fetch if we have valid project ID (not placeholder)
+         const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID
+        
+        if (projectId && projectId !== 'your-project-id-here') {
+          // Now try the main query
+          const data = await client.fetch(HOMEPAGE_QUERY)
+          
+          // If main query returns null, try alternative approach
+          if (!data) {
+            const altQuery = `*[_type == "homepage"]{
+              _id,
+              title,
+              carouselImages,
+              legacySection
+            }`
+            const altData = await client.fetch(altQuery)
+            if (altData && altData.length > 0) {
+              setHomepageData(altData[0])
+            }
+          } else {
+            setHomepageData(data)
+          }
+        } else {
+          console.log('Project ID not configured properly')
+        }
+      } catch (error) {
+        console.error('Error fetching homepage data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchData()
+  }, [])
+
   const services = [
     { name: "Internal Medicine", icon: PillIcon, description: "Expert care for your heart's health." },
     { name: "Dentistry", icon: ToothIcon, description: "Lorem ipsum dolor sit amet." },
@@ -36,40 +80,95 @@ export default function Home() {
     { name: "Surgery", icon: Scissors, description: "Lorem ipsum dolor sit amet." },
   ]
 
-  const heroImages = [
-    { src: "/land1.png", alt: "Las Piñas Doctors Hospital exterior", dataAiHint: "hospital building" },
-    { src: "/Facade 1.png", alt: "Hospital Facade 1", dataAiHint: "hospital building" },
-    { src: "/Facade 2.png", alt: "Hospital Facade 2", dataAiHint: "hospital building" },
-    { src: "/Facade 3.png", alt: "Hospital Facade 3", dataAiHint: "hospital building" },
-    { src: "/Facade 5.png", alt: "Hospital Facade 5", dataAiHint: "hospital building" },
-  ]
+  // Only use Sanity data - no fallbacks
+  const heroImages = homepageData?.carouselImages?.filter(img => img?.asset).map(img => ({
+    src: urlFor(img.asset).width(1600).height(600).url(),
+    alt: img.alt,
+    dataAiHint: img.dataAiHint || "hospital building"
+  })) || []
+
+  // Dynamic animation timing based on number of images (6 seconds per image)
+  const imageCount = heroImages.length
+  const intervalPerImage = 6 // seconds
+  const totalAnimationDuration = imageCount * intervalPerImage
+
+  // Generate dynamic CSS for carousel timing
+  const generateCarouselCSS = () => {
+    if (imageCount === 0) return ''
+    
+    const fadeInOutDuration = (intervalPerImage / totalAnimationDuration) * 100 // percentage
+    const stayVisibleDuration = fadeInOutDuration * 0.8 // 80% visible, 20% for fade transition
+    
+    let css = `
+      @keyframes dynamic-fade-in-out {
+        0% { opacity: 0; }
+        ${(fadeInOutDuration * 0.1)}% { opacity: 1; }
+        ${stayVisibleDuration}% { opacity: 1; }
+        ${fadeInOutDuration}% { opacity: 0; }
+        100% { opacity: 0; }
+      }
+      
+      .dynamic-carousel-item {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        animation: dynamic-fade-in-out ${totalAnimationDuration}s linear infinite;
+        opacity: 0;
+      }
+    `
+    
+    // Generate delays for each image
+    for (let i = 0; i < imageCount; i++) {
+      const delay = (imageCount - 1 - i) * intervalPerImage
+      css += `
+        .dynamic-carousel-item:nth-child(${i + 1}) {
+          animation-delay: ${delay}s;
+        }
+      `
+    }
+    
+    return css
+  }
+
+  const legacySection = homepageData?.legacySection
+  const legacyImageSrc = homepageData?.legacySection?.image 
+    ? urlFor(homepageData.legacySection.image.asset).width(600).height(400).url()
+    : null
+
+  const hmoPartnersSection = homepageData?.hmoPartnersSection
+  const hmoImageSrc = homepageData?.hmoPartnersSection?.image 
+    ? urlFor(homepageData.hmoPartnersSection.image.asset).fit('max').width(1400).quality(85).format('webp').url()
+    : null
 
   return (
     <div className="flex flex-col">
       <PrivacyNotice />
 
-      <section className="w-full">
-         <Carousel
-          opts={{ loop: true }}
-          plugins={[]}
-          className="relative"
-        >
-          <CarouselContent>
+      {/* Dynamic CSS for carousel timing */}
+      {heroImages.length > 0 && (
+        <style dangerouslySetInnerHTML={{ __html: generateCarouselCSS() }} />
+      )}
+
+      {/* Only show carousel if there are images from Sanity */}
+      {heroImages.length > 0 && (
+        <section className="w-full">
+          <div className="fade-in-fade-out">
             {heroImages.map((image, index) => (
-              <CarouselItem key={index}>
+              <div key={index} className="dynamic-carousel-item">
                 <Image
                   src={image.src}
                   alt={image.alt}
                   data-ai-hint={image.dataAiHint}
                   width={1600}
                   height={600}
-                  className="mx-auto object-cover"
+                  className="mx-auto object-cover w-full h-full"
                 />
-              </CarouselItem>
+              </div>
             ))}
-          </CarouselContent>
-        </Carousel>
-      </section>
+          </div>
+        </section>
+      )}
 
       <section id="services" className="py-12 md:py-24">
         <div className="container px-4 md:px-6">
@@ -97,51 +196,80 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="bg-secondary py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid items-center gap-8 md:grid-cols-2">
-            <div className="flex justify-center">
-              <Image
-                src="/legacy.png"
-                alt="Hospital building"
-                data-ai-hint="hospital building"
-                width={600}
-                height={400}
-                className="rounded-lg shadow-xl"
-              />
-            </div>
-            <div className="text-center md:text-left">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                A Legacy of Healing and Trust
-              </h2>
-              <p className="mt-4 text-lg text-muted-foreground">
-                For decades, Las Piñas Doctors Hospital has been a cornerstone of health in our community. We combine state-of-the-art technology with a tradition of heartfelt care.
-              </p>
-              <div className="mt-8">
-                <Button asChild>
-                  <Link href="/about">Learn More About Us</Link>
-                </Button>
+      {/* Only show legacy section if there's data from Sanity */}
+      {legacySection && legacyImageSrc && (
+        <section className="bg-secondary py-12 md:py-24">
+          <div className="container px-4 md:px-6">
+            <div className="grid items-center gap-8 md:grid-cols-2">
+              <div className="flex justify-center">
+                <Image
+                  src={legacyImageSrc}
+                  alt="Hospital building"
+                  data-ai-hint="hospital building"
+                  width={600}
+                  height={400}
+                  className="rounded-lg shadow-xl"
+                />
+              </div>
+              <div className="text-center md:text-left">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  {legacySection.title}
+                </h2>
+                <p className="mt-4 text-lg text-muted-foreground">
+                  {legacySection.description}
+                </p>
+                <div className="mt-8">
+                  <Button asChild>
+                    <Link href={legacySection.linkUrl}>{legacySection.linkText}</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      <section className="py-12 md:py-24">
-        <div className="container px-4 text-center md:px-6">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Our Accredited HMO Partners</h2>
-          <div className="mt-12">
-            <Image
-              src="/logos.png"
-              alt="HMO logos"
-              data-ai-hint="logos"
-              width={1200}
-              height={500}
-              className="mx-auto"
-            />
+      {/* Only show HMO Partners section if there's data from Sanity */}
+      {hmoPartnersSection && hmoImageSrc && !hmoImageError && (
+        <section className="py-12 md:py-24">
+          <div className="container px-4 text-center md:px-6">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              {hmoPartnersSection.title}
+            </h2>
+            <div className="mt-12">
+              <Image
+                src={hmoImageSrc}
+                alt={hmoPartnersSection.alt}
+                data-ai-hint="hmo partner logos"
+                width={1400}
+                height={400}
+                className="mx-auto max-w-full h-auto object-contain"
+                priority={false}
+                onError={() => {
+                  console.log('HMO image failed to load')
+                  setHmoImageError(true)
+                }}
+              />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+
+      {/* Fallback HMO Partners section if image fails to load */}
+      {hmoPartnersSection && hmoImageError && (
+        <section className="py-12 md:py-24">
+          <div className="container px-4 text-center md:px-6">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              {hmoPartnersSection.title}
+            </h2>
+            <div className="mt-12">
+              <p className="text-muted-foreground">
+                Image temporarily unavailable. Please check back later.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="bg-secondary py-12 md:py-24">
         <div className="container px-4 text-center md:px-6">

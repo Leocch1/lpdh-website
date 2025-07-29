@@ -15,11 +15,12 @@ export function urlFor(source: any) {
 }
 
 // GROQ queries
-export const HOMEPAGE_QUERY = `*[_type == "homepage"][0]{
+export const HOMEPAGE_QUERY = `*[_type == "homepage"] | order(_updatedAt desc) [0]{
   _id,
+  title,
   carouselImages[]{
     _key,
-    asset->,
+    asset,
     alt,
     dataAiHint
   },
@@ -31,5 +32,69 @@ export const HOMEPAGE_QUERY = `*[_type == "homepage"][0]{
     },
     linkText,
     linkUrl
+  },
+  hmoPartnersSection{
+    title,
+    image{
+      asset->
+    },
+    alt
   }
 }`
+
+// Careers page query
+export const CAREERS_QUERY = `*[_type == "careers"][0]{
+  _id,
+  heroSection{
+    backgroundImage{
+      asset->
+    },
+    heroTitle,
+    buttonText
+  },
+  jobListingsSection{
+    sectionTitle,
+    searchPlaceholder,
+    categoryPlaceholder,
+    categories
+  }
+}`
+
+// Job openings query
+export const JOB_OPENINGS_QUERY = `*[_type == "jobOpening" && isActive == true] | order(_createdAt desc){
+  _id,
+  title,
+  slug,
+  department,
+  type,
+  category,
+  summary,
+  duties[]{
+    text
+  },
+  qualifications[]{
+    text
+  },
+  isActive
+}`
+
+// Single job opening query
+export const JOB_OPENING_QUERY = `*[_type == "jobOpening" && slug.current == $slug][0]{
+  _id,
+  title,
+  slug,
+  department,
+  type,
+  category,
+  summary,
+  duties[]{
+    text
+  },
+  qualifications[]{
+    text
+  },
+  isActive
+}`
+
+// Simple test query to check if documents exist
+export const TEST_QUERY = `*[_type == "homepage"]`
