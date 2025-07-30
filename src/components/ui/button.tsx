@@ -47,11 +47,22 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button"
 
+  // Filter out problematic props that shouldn't reach the DOM when using asChild with Next.js Link
+  const { 
+    disableTransition,
+    prefetch,
+    replace,
+    scroll,
+    shallow,
+    locale,
+    ...filteredProps 
+  } = props as any
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      {...filteredProps}
     />
   )
 }
