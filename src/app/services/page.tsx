@@ -61,7 +61,7 @@ export default function ServicesPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[400px] md:h-[500px]">
+      <section className="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden">
         <Image
           src="/contact.jpg"
           alt="Hospital services"
@@ -71,17 +71,17 @@ export default function ServicesPage() {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             Our Medical Services
           </h1>
-          <p className="mt-4 text-lg max-w-2xl">
+          <p className="mt-4 text-lg max-w-3xl lg:text-xl">
             Comprehensive healthcare services delivered by our team of experienced medical professionals
           </p>
-          <div className="mt-8 flex gap-4">
-            <Button asChild size="lg">
+          <div className="mt-8 flex gap-4 lg:gap-6">
+            <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8">
               <Link href="#services">View Services</Link>
             </Button>
-            <Button asChild variant="secondary" size="lg">
+            <Button asChild variant="secondary" size="lg" className="text-base lg:text-lg px-6 lg:px-8">
               <Link href="/services/find-doctor">Find a Doctor</Link>
             </Button>
           </div>
@@ -90,31 +90,31 @@ export default function ServicesPage() {
 
       {/* Services Grid */}
       <section id="services" className="py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="mx-auto max-w-2xl text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <div className="container">
+          <div className="mx-auto max-w-4xl text-center mb-12 lg:mb-16">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               Comprehensive Medical Care
             </h2>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-muted-foreground lg:text-xl">
               We offer a wide range of medical specialties to meet all your healthcare needs under one roof.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-10">
             {services.map((service) => (
-              <Card key={service.title} className="h-full transition-shadow duration-300 hover:shadow-lg">
+              <Card key={service.title} className="h-full transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                 <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <service.icon className="h-8 w-8" />
+                  <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground lg:size-20">
+                    <service.icon className="h-8 w-8 lg:h-10 lg:w-10" />
                   </div>
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                  <CardTitle className="text-xl lg:text-2xl">{service.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                  <p className="text-muted-foreground mb-4">{service.description}</p>
+                  <p className="text-muted-foreground mb-4 lg:text-base">{service.description}</p>
                   <ul className="space-y-2">
                     {service.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-sm text-muted-foreground">
-                        <div className="w-2 h-2 bg-primary rounded-full mr-2 flex-shrink-0" />
+                      <li key={index} className="flex items-center text-sm text-muted-foreground lg:text-base">
+                        <div className="w-2 h-2 bg-primary rounded-full mr-2 flex-shrink-0 lg:w-2.5 lg:h-2.5" />
                         {feature}
                       </li>
                     ))}
@@ -128,23 +128,25 @@ export default function ServicesPage() {
 
       {/* CTA Section */}
       <section id="appointment" className="bg-secondary py-12 md:py-24">
-        <div className="container px-4 text-center md:px-6">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Ready to Schedule Your Appointment?
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Our medical professionals are here to provide you with the best possible care. Schedule your appointment today.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
-              <Link href="/services/find-doctor">Find a Doctor</Link>
-            </Button>
-            <Button asChild variant="ghost" size="lg">
-              <Link href="/services/schedule-lab">Schedule Lab Work</Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/contact">Contact Us</Link>
-            </Button>
+        <div className="container">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              Ready to Schedule Your Appointment?
+            </h2>
+            <p className="mx-auto mt-4 max-w-4xl text-lg text-muted-foreground lg:text-xl">
+              Our medical professionals are here to provide you with the best possible care. Schedule your appointment today.
+            </p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:gap-6">
+              <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8">
+                <Link href="/services/find-doctor">Find a Doctor</Link>
+              </Button>
+              <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8">
+                <Link href="/services/schedule-lab">Schedule Lab Work</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8">
+                <Link href="/contact">Contact Us</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </section>

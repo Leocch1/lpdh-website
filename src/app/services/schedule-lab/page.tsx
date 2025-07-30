@@ -96,7 +96,7 @@ export default function ScheduleLabPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[300px] md:h-[400px]">
+      <section className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
         <Image
           src="/contact.jpg"
           alt="Laboratory services"
@@ -106,10 +106,10 @@ export default function ScheduleLabPage() {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             Schedule Lab Work
           </h1>
-          <p className="mt-4 text-lg max-w-2xl">
+          <p className="mt-4 text-lg max-w-3xl lg:text-xl">
             Book your laboratory tests and imaging services with our experienced technicians
           </p>
         </div>
@@ -117,28 +117,28 @@ export default function ScheduleLabPage() {
 
       {/* Main Content */}
       <section className="py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="container">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
             
             {/* Test Selection */}
             <div className="lg:col-span-2 space-y-6">
               <div>
-                <h2 className="text-2xl font-bold text-foreground mb-6">Select Lab Tests</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-6 lg:text-3xl">Select Lab Tests</h2>
                 
                 {labTests.map((category) => (
                   <Card key={category.category} className="mb-6">
                     <CardHeader>
-                      <CardTitle className="text-lg">{category.category}</CardTitle>
+                      <CardTitle className="text-lg lg:text-xl">{category.category}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="space-y-3">
+                      <div className="space-y-3 lg:space-y-4">
                         {category.tests.map((test) => (
                           <div 
                             key={test.name}
-                            className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
                               selectedTests.includes(test.name) 
-                                ? 'border-primary bg-primary/5' 
-                                : 'border-border hover:border-primary/50'
+                                ? 'border-primary bg-primary/5 scale-[1.02]' 
+                                : 'border-border hover:border-primary/50 hover:scale-[1.01]'
                             }`}
                             onClick={() => handleTestSelection(test.name)}
                           >
@@ -146,7 +146,7 @@ export default function ScheduleLabPage() {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                   <CheckCircle 
-                                    className={`h-5 w-5 ${
+                                    className={`h-5 w-5 lg:h-6 lg:w-6 ${
                                       selectedTests.includes(test.name) 
                                         ? 'text-primary' 
                                         : 'text-muted-foreground'

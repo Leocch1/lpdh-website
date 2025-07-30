@@ -110,7 +110,7 @@ export default function FindDoctorPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[300px] md:h-[400px]">
+      <section className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
         <Image
           src="/contact.jpg"
           alt="Find a doctor"
@@ -120,10 +120,10 @@ export default function FindDoctorPage() {
         />
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             Find a Doctor
           </h1>
-          <p className="mt-4 text-lg max-w-2xl">
+          <p className="mt-4 text-lg max-w-3xl lg:text-xl">
             Connect with our experienced medical professionals and schedule your appointment
           </p>
         </div>
@@ -131,20 +131,20 @@ export default function FindDoctorPage() {
 
       {/* Search Section */}
       <section className="py-8 bg-secondary/50">
-        <div className="container px-4 md:px-6">
-          <div className="mx-auto max-w-4xl">
-            <div className="flex flex-col md:flex-row gap-4">
+        <div className="container">
+          <div className="mx-auto max-w-5xl">
+            <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   placeholder="Search by doctor name or specialty"
-                  className="pl-10"
+                  className="pl-10 h-12 text-base"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
-                <SelectTrigger className="w-full md:w-[250px]">
+                <SelectTrigger className="w-full md:w-[280px] h-12 text-base">
                   <SelectValue placeholder="Select Specialty" />
                 </SelectTrigger>
                 <SelectContent>
@@ -162,23 +162,23 @@ export default function FindDoctorPage() {
 
       {/* Doctors Grid */}
       <section className="py-12 md:py-24">
-        <div className="container px-4 md:px-6">
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-foreground">
+        <div className="container">
+          <div className="mb-8 lg:mb-12">
+            <h2 className="text-2xl font-bold text-foreground lg:text-3xl">
               {filteredDoctors.length} Doctor{filteredDoctors.length !== 1 ? 's' : ''} Found
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground lg:text-lg">
               {selectedSpecialty !== "All Specialties" && `Showing ${selectedSpecialty} specialists`}
             </p>
           </div>
 
           {filteredDoctors.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8">
               {filteredDoctors.map((doctor) => (
-                <Card key={doctor.id} className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+                <Card key={doctor.id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02]">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4">
-                      <div className="relative w-16 h-16 rounded-full overflow-hidden bg-secondary">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden bg-secondary lg:w-20 lg:h-20">
                         <Image
                           src={doctor.image}
                           alt={doctor.name}
@@ -187,14 +187,14 @@ export default function FindDoctorPage() {
                         />
                       </div>
                       <div className="flex-1">
-                        <CardTitle className="text-lg">{doctor.name}</CardTitle>
+                        <CardTitle className="text-lg lg:text-xl">{doctor.name}</CardTitle>
                         <Badge variant="secondary" className="mt-1">
                           {doctor.specialty}
                         </Badge>
                         <div className="flex items-center gap-1 mt-2">
                           <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm font-medium">{doctor.rating}</span>
-                          <span className="text-sm text-muted-foreground">({doctor.reviews} reviews)</span>
+                          <span className="text-sm font-medium lg:text-base">{doctor.rating}</span>
+                          <span className="text-sm text-muted-foreground lg:text-base">({doctor.reviews} reviews)</span>
                         </div>
                       </div>
                     </div>
