@@ -117,6 +117,7 @@ export interface Doctor {
   roomNumber?: string
   phone: string
   availableDays: string[]
+  availabilityTime?: string
   rating?: number
   secretary?: string
   secretary2?: string

@@ -249,6 +249,11 @@ export default function FindDoctorPage() {
                               </Badge>
                             ))}
                           </div>
+                          {doctor.availabilityTime && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {doctor.availabilityTime}
+                            </p>
+                          )}
                         </div>
 
                         {/* Secretary Info */}

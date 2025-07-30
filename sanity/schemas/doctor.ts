@@ -102,6 +102,13 @@ export const doctor = {
       validation: (Rule: any) => Rule.required().min(1)
     },
     {
+      name: 'availabilityTime',
+      title: 'Time of Availability',
+      type: 'string',
+      description: 'e.g., "9:00 AM - 5:00 PM", "Morning: 8:00 AM - 12:00 PM, Afternoon: 2:00 PM - 6:00 PM"',
+      placeholder: 'Enter the time of availability'
+    },
+    {
       name: 'secretary',
       title: 'Secretary Contact',
       type: 'string'

@@ -124,6 +124,7 @@ export const DOCTORS_QUERY = `*[_type == "doctor" && isActive == true] | order(n
   roomNumber,
   phone,
   availableDays,
+  availabilityTime,
   rating,
   secretary,
   secretary2
