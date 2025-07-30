@@ -108,7 +108,7 @@ export const DOCTORS_QUERY = `*[_type == "doctor" && isActive == true] | order(n
     name,
     slug
   },
-  medicalSpecialty->{
+  medicalSpecialty[]->{
     _id,
     name,
     slug,
@@ -150,7 +150,7 @@ export const DOCTORS_BY_SPECIALTY_QUERY = `*[_type == "doctor" && isActive == tr
     name,
     slug
   },
-  medicalSpecialty->{
+  medicalSpecialty[]->{
     _id,
     name,
     slug,
@@ -195,4 +195,45 @@ export const SPECIALTIES_BY_DEPARTMENT_QUERY = `*[_type == "specialty" && isActi
     slug
   },
   description
+}`
+
+// About page query
+export const ABOUT_PAGE_QUERY = `*[_type == "aboutPage"] | order(_updatedAt desc) [0]{
+  _id,
+  title,
+  subtitle,
+  description,
+  heroImage{
+    asset->,
+    alt
+  },
+  vision,
+  mission,
+  coreValues[]{
+    letter,
+    value
+  }
+}`
+
+// Health advisories query
+export const HEALTH_ADVISORIES_QUERY = `*[_type == "healthAdvisory" && isActive == true] | order(order asc){
+  _id,
+  title,
+  description,
+  image{
+    asset->,
+    alt
+  },
+  link
+}`
+
+// News updates query
+export const NEWS_UPDATES_QUERY = `*[_type == "newsUpdate" && isActive == true] | order(order asc){
+  _id,
+  title,
+  image{
+    asset->,
+    alt
+  },
+  link
 }`

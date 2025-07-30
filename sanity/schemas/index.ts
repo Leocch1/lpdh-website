@@ -4,5 +4,8 @@ import { jobOpening } from './jobOpening'
 import { doctor } from './doctor'
 import { department } from './department'
 import { specialty } from './specialty'
+import aboutPage from './aboutPage'
+import healthAdvisory from './healthAdvisory'
+import newsUpdate from './newsUpdate'
 
-export const schemaTypes = [homepage, careers, jobOpening, doctor, department, specialty]
+export const schemaTypes = [homepage, careers, jobOpening, doctor, department, specialty, aboutPage, healthAdvisory, newsUpdate]

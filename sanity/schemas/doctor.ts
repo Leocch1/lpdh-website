@@ -22,14 +22,30 @@ export const doctor = {
     },
     {
       name: 'medicalSpecialty',
-      title: 'Medical Specialty',
-      type: 'reference',
-      to: [{ type: 'specialty' }],
-      options: {
-        filter: 'isActive == true',
-        disableNew: true
-      },
-      description: 'Optional: Select a specific specialty within the department'
+      title: 'Medical Specialties',
+      type: 'array',
+      of: [
+        {
+          type: 'reference',
+          to: [{ type: 'specialty' }],
+          options: {
+            filter: ({ document }: { document: any }) => {
+              if (!document?.specialty?._ref) {
+                return {
+                  filter: 'isActive == true',
+                  params: {}
+                };
+              }
+              return {
+                filter: 'isActive == true && department._ref == $departmentId',
+                params: { departmentId: document.specialty._ref }
+              };
+            },
+            disableNew: true
+          }
+        }
+      ],
+      description: 'Select one or more medical specialties from the selected department'
     },
     {
       name: 'image',

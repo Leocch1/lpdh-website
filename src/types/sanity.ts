@@ -111,7 +111,7 @@ export interface Doctor {
       _id: string
       name: string
     }
-  }
+  }[]
   image?: SanityImage
   strictlyByAppointment: boolean
   roomNumber?: string
@@ -146,4 +146,37 @@ export interface Department {
   }
   description?: string
   icon?: SanityImage
+}
+
+export interface AboutPage {
+  _id: string
+  title: string
+  subtitle: string
+  description: string
+  heroImage?: SanityImage
+  vision: string
+  mission: string[]
+  coreValues: {
+    letter: string
+    value: string
+  }[]
+}
+
+export interface HealthAdvisory {
+  _id: string
+  title: string
+  description?: string
+  image?: SanityImage
+  link?: string
+  isActive: boolean
+  order: number
+}
+
+export interface NewsUpdate {
+  _id: string
+  title: string
+  image?: SanityImage
+  link?: string
+  isActive: boolean
+  order: number
 }

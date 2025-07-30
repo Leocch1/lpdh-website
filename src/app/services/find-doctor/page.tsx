@@ -41,7 +41,9 @@ export default function FindDoctorPage() {
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          doctor.specialty.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (doctor.medicalSpecialty && doctor.medicalSpecialty.name.toLowerCase().includes(searchTerm.toLowerCase()));
+                         (doctor.medicalSpecialty && doctor.medicalSpecialty.some(specialty => 
+                           specialty.name.toLowerCase().includes(searchTerm.toLowerCase())
+                         ));
     const matchesSpecialty = selectedSpecialty === "All Specialties" || doctor.specialty.name === selectedSpecialty;
     return matchesSearch && matchesSpecialty;
   });
@@ -140,7 +142,7 @@ export default function FindDoctorPage() {
                           onClick={() => setSelectedSpecialty(department.name)}
                         >
                           <div className="mr-3 flex items-center">
-                            {department.icon ? (
+                            {department.icon && department.icon.asset ? (
                               <div className="relative w-5 h-5">
                                 <Image
                                   src={urlFor(department.icon).url()}
@@ -199,9 +201,17 @@ export default function FindDoctorPage() {
                           </div>
                           <div className="flex-1">
                             <CardTitle className="text-lg lg:text-xl">{doctor.name}</CardTitle>
-                            <Badge variant="secondary" className="mt-1">
-                              {doctor.medicalSpecialty ? doctor.medicalSpecialty.name : doctor.specialty.name}
-                            </Badge>
+                            
+                            {/* Display multiple specialties */}
+                            <div className="mt-1 flex flex-wrap gap-1 justify-center">
+                              {doctor.medicalSpecialty && doctor.medicalSpecialty.length > 0 ? (
+                                doctor.medicalSpecialty.map((specialty) => (
+                                  <Badge key={specialty._id} variant="secondary" className="text-xs">
+                                    {specialty.name}
+                                  </Badge>
+                                ))
+                              ) : null}
+                            </div>
                             
                             {/* Strictly by Appointment Badge */}
                             {doctor.strictlyByAppointment && (
