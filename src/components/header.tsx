@@ -1,4 +1,3 @@
-
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -84,14 +83,14 @@ export function Header() {
           >
             <span
               className={cn(
-                "text-lg text-primary-foreground/90 transition-colors hover:text-[#e8f996] md:text-base",
-                (pathname === href || dropdown.some(item => pathname === item.href)) && "font-semibold text-white"
+                "text-lg font-semibold text-primary-foreground transition-colors md:text-base",
+                (pathname === href || dropdown.some(item => pathname === item.href)) ? "font-semibold text-[#e8f996] [text-shadow:0_4px_4px_rgba(25,25,25,0.25)]" : "hover:text-[#e8f996]"
               )}
             >
-              {label}
+              {label}   
             </span>
             <ChevronDown className={cn(
-              "h-4 w-4 text-primary-foreground/90 hover:text-[#e8f996] transition-transform",
+              "h-4 w-4 text-primary-foreground hover:text-[#e8f996] transition-transform",
               isDropdownOpen && "rotate-180"
             )} />
           </div>
@@ -106,7 +105,7 @@ export function Header() {
                     href={item.href}
                     onClick={() => setDropdownOpen(false)}
                     className={cn(
-                      "block px-4 py-2 text-sm text-primary-foreground/90 hover:text-[#e8f996] hover:bg-primary-foreground/10 transition-colors",
+                      "block px-4 py-2 text-sm text-primary-foreground hover:text-[#e8f996] hover:bg-primary-foreground/10 transition-colors",
                       pathname === item.href && "bg-primary-foreground/10 text-[#e8f996] font-semibold"
                     )}
                   >
@@ -125,37 +124,37 @@ export function Header() {
         href={href}
         onClick={() => setIsMobileMenuOpen(false)}
         className={cn(
-          "text-lg text-primary-foreground/90 transition-colors hover:text-[#e8f996] md:text-base",
-          pathname === href && "font-semibold text-white"
+          "text-lg font-semibold text-primary-foreground transition-colors md:text-base",
+          pathname === href ? "font-bold text-[#e8f996] [text-shadow:0_4px_4px_rgba(25,25,25,0.25)]" : "hover:text-[#e8f996]"
         )}
       >
-        {label}
+        <span className="font-semibold">{label}</span>
       </Link>
     )
   };
 
   return (
-    <div className="sticky top-0 z-50 w-full border-b bg-background shadow-sm">
+    <div className="sticky top-0 z-50 w-full bg-background [box-shadow:0_4px_13px_rgba(25,25,25,0.25)]">
       <div className="hidden bg-background py-2 text-xs text-muted-foreground md:block">
-        <div className="container flex items-center justify-between pr-12">
+        <div className="container flex items-center justify-between pr-4 md:pr-8 lg:pr-12">
           <div className="flex-1 pl-32">
              <Link href="/">
               <Logo />
             </Link>
           </div>
-          <div className="flex flex-1 items-center justify-end gap-6">
+          <div className="flex flex-1 items-center justify-end gap-2 md:gap-4 lg:gap-6">
             <div className="flex items-center gap-2">
               <Phone className="h-8 w-8 text-primary" />
               <div>
                 <p className="font-semibold text-primary">EMERGENCY</p>
-                <p className="text-foreground">(09) 8825-5236</p>
+                <p className="text-foreground font-semibold">(09) 8820-9376</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="h-8 w-8 text-primary" />
               <div>
                  <p className="font-semibold text-primary">LOCATION</p>
-                 <p className="text-foreground">#8009 CAA Road, Pulanglupa II, Las Pinas City</p>
+                 <p className="text-foreground font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
               </div>
             </div>
             <Image
@@ -174,7 +173,7 @@ export function Header() {
           <div className="flex-1 md:hidden">
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-primary/90 hover:text-primary-foreground">
+                <Button variant="ghost" size="icon" className="hover:bg-primary hover:text-primary-foreground">
                   <Menu className="h-6 w-6" />
                   <span className="sr-only">Open Menu</span>
                 </Button>
@@ -198,17 +197,17 @@ export function Header() {
                         ) && (
                           <div className="ml-4 mt-2 space-y-2">
                             {link.dropdown.map((item) => (
-                              <Link
+                              <Link 
                                 key={item.href}
                                 href={item.href}
                                 onClick={() => {
                                   setIsMobileMenuOpen(false);
                                   setIsContactDropdownOpen(false);
                                   setIsServicesDropdownOpen(false);
-                                }}
+                                }}          
                                 className={cn(
-                                  "block text-base text-primary-foreground/80 transition-colors hover:text-[#e8f996]",
-                                  pathname === item.href && "font-semibold text-[#e8f996]"
+                                  "block text-base font-semibold text-primary-foreground transition-colors hover:text-yellow",
+                                  pathname === item.href && "font-bold text-[#e8f996]"
                                 )}
                               >
                                 {item.label}
@@ -241,7 +240,7 @@ export function Header() {
 
           {/* Right side: Button */}
           <div className="flex flex-1 items-center justify-end">
-            <Button asChild variant="secondary" className="bg-secondary/90 hover:bg-white text-secondary-foreground hover:text-primary rounded-lg">
+            <Button asChild variant="secondary" className="bg-secondary/90 font-semibold hover:bg-white text-secondary-foreground hover:text-primary rounded-lg [box-shadow:0_4px_4px_rgba(25,25,25,0.25)]">
               <Link href="/services#appointment">Find a Doctor</Link>
             </Button>
           </div>
