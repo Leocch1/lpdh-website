@@ -11,7 +11,7 @@ export const doctor = {
     },
     {
       name: 'specialty',
-      title: 'Specialty/Department',
+      title: 'Department',
       type: 'reference',
       to: [{ type: 'department' }],
       validation: (Rule: any) => Rule.required(),
@@ -19,6 +19,17 @@ export const doctor = {
         filter: 'isActive == true',
         disableNew: true
       }
+    },
+    {
+      name: 'medicalSpecialty',
+      title: 'Medical Specialty',
+      type: 'reference',
+      to: [{ type: 'specialty' }],
+      options: {
+        filter: 'isActive == true',
+        disableNew: true
+      },
+      description: 'Optional: Select a specific specialty within the department'
     },
     {
       name: 'image',

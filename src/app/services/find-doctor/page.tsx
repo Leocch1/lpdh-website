@@ -40,7 +40,8 @@ export default function FindDoctorPage() {
   
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         doctor.specialty.name.toLowerCase().includes(searchTerm.toLowerCase());
+                         doctor.specialty.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (doctor.medicalSpecialty && doctor.medicalSpecialty.name.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesSpecialty = selectedSpecialty === "All Specialties" || doctor.specialty.name === selectedSpecialty;
     return matchesSearch && matchesSpecialty;
   });
@@ -199,7 +200,7 @@ export default function FindDoctorPage() {
                           <div className="flex-1">
                             <CardTitle className="text-lg lg:text-xl">{doctor.name}</CardTitle>
                             <Badge variant="secondary" className="mt-1">
-                              {doctor.specialty.name}
+                              {doctor.medicalSpecialty ? doctor.medicalSpecialty.name : doctor.specialty.name}
                             </Badge>
                             
                             {/* Strictly by Appointment Badge */}

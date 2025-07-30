@@ -101,6 +101,17 @@ export interface Doctor {
       current: string
     }
   }
+  medicalSpecialty?: {
+    _id: string
+    name: string
+    slug: {
+      current: string
+    }
+    department: {
+      _id: string
+      name: string
+    }
+  }
   image?: SanityImage
   strictlyByAppointment: boolean
   roomNumber?: string
@@ -109,6 +120,22 @@ export interface Doctor {
   rating?: number
   secretary?: string
   secretary2?: string
+}
+
+export interface Specialty {
+  _id: string
+  name: string
+  slug: {
+    current: string
+  }
+  department: {
+    _id: string
+    name: string
+    slug: {
+      current: string
+    }
+  }
+  description?: string
 }
 
 export interface Department {

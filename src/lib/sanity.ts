@@ -108,6 +108,15 @@ export const DOCTORS_QUERY = `*[_type == "doctor" && isActive == true] | order(n
     name,
     slug
   },
+  medicalSpecialty->{
+    _id,
+    name,
+    slug,
+    department->{
+      _id,
+      name
+    }
+  },
   image{
     asset->
   },
@@ -141,6 +150,15 @@ export const DOCTORS_BY_SPECIALTY_QUERY = `*[_type == "doctor" && isActive == tr
     name,
     slug
   },
+  medicalSpecialty->{
+    _id,
+    name,
+    slug,
+    department->{
+      _id,
+      name
+    }
+  },
   image{
     asset->
   },
@@ -151,4 +169,30 @@ export const DOCTORS_BY_SPECIALTY_QUERY = `*[_type == "doctor" && isActive == tr
   rating,
   secretary,
   secretary2
+}`
+
+// Specialties query
+export const SPECIALTIES_QUERY = `*[_type == "specialty" && isActive == true] | order(order asc){
+  _id,
+  name,
+  slug,
+  department->{
+    _id,
+    name,
+    slug
+  },
+  description
+}`
+
+// Specialties by department query
+export const SPECIALTIES_BY_DEPARTMENT_QUERY = `*[_type == "specialty" && isActive == true && department->name == $department] | order(order asc){
+  _id,
+  name,
+  slug,
+  department->{
+    _id,
+    name,
+    slug
+  },
+  description
 }`
