@@ -237,3 +237,28 @@ export const NEWS_UPDATES_QUERY = `*[_type == "newsUpdate" && isActive == true] 
   },
   link
 }`
+
+// History page query
+export const HISTORY_PAGE_QUERY = `*[_type == "historyPage"] | order(_updatedAt desc) [0]{
+  _id,
+  title,
+  heroSection{
+    headline,
+    images[]{
+      _key,
+      image{
+        asset->
+      },
+      alt,
+      aiHint
+    },
+    description,
+    newEraTitle,
+    newEraContent
+  },
+  historySections[]{
+    _key,
+    title,
+    content
+  }
+}`

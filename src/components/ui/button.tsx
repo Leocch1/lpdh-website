@@ -47,11 +47,14 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button"
 
+  // Filter out problematic props that shouldn't reach the DOM
+  const { disableTransition, ...filteredProps } = props as any
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      {...filteredProps}
     />
   )
 }

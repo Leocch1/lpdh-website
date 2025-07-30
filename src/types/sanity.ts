@@ -180,3 +180,36 @@ export interface NewsUpdate {
   isActive: boolean
   order: number
 }
+
+export interface HistoryImage {
+  _key: string
+  image: {
+    asset: {
+      _id: string
+      url: string
+    }
+  }
+  alt: string
+  aiHint?: string
+}
+
+export interface HistorySection {
+  _key: string
+  title: string
+  content: string
+}
+
+export interface HistoryHeroSection {
+  headline: string
+  images: HistoryImage[]
+  description: string
+  newEraTitle: string
+  newEraContent: string
+}
+
+export interface HistoryPage {
+  _id: string
+  title: string
+  heroSection: HistoryHeroSection
+  historySections: HistorySection[]
+}

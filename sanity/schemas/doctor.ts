@@ -1,6 +1,6 @@
 export const doctor = {
   name: 'doctor',
-  title: 'Doctor',
+  title: 'Doctors\' Information',
   type: 'document',
   fields: [
     {
