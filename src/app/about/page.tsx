@@ -217,9 +217,11 @@ export default function AboutPage() {
               <p className="mt-4 text-muted-foreground">
                 {aboutData.description}
               </p>
-              <Button asChild variant="outline" className="mt-6">
-                <Link href="/about/history">See History</Link>
-              </Button>
+              <Link href="/about/history">
+                <Button variant="outline" className="mt-6">
+                  See History
+                </Button>
+              </Link>
             </div>
         </div>
         <div className="relative order-1 md:order-2 min-h-[300px] md:min-h-0">
@@ -353,7 +355,12 @@ export default function AboutPage() {
                   )}
                   {advisory.link && (
                     <CardFooter>
-                      <Link href={advisory.link} className="text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+                      <Link 
+                        href={advisory.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
                         View <ArrowRight className="h-4 w-4" />
                       </Link>
                     </CardFooter>
