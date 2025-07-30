@@ -98,3 +98,57 @@ export const JOB_OPENING_QUERY = `*[_type == "jobOpening" && slug.current == $sl
 
 // Simple test query to check if documents exist
 export const TEST_QUERY = `*[_type == "homepage"]`
+
+// Doctors query
+export const DOCTORS_QUERY = `*[_type == "doctor" && isActive == true] | order(name asc){
+  _id,
+  name,
+  specialty->{
+    _id,
+    name,
+    slug
+  },
+  image{
+    asset->
+  },
+  strictlyByAppointment,
+  roomNumber,
+  phone,
+  availableDays,
+  rating,
+  secretary,
+  secretary2
+}`
+
+// Departments query
+export const DEPARTMENTS_QUERY = `*[_type == "department" && isActive == true] | order(order asc){
+  _id,
+  name,
+  slug,
+  description,
+  icon{
+    asset->,
+    alt
+  }
+}`
+
+// Doctors by specialty query
+export const DOCTORS_BY_SPECIALTY_QUERY = `*[_type == "doctor" && isActive == true && specialty->name == $specialty] | order(name asc){
+  _id,
+  name,
+  specialty->{
+    _id,
+    name,
+    slug
+  },
+  image{
+    asset->
+  },
+  strictlyByAppointment,
+  roomNumber,
+  phone,
+  availableDays,
+  rating,
+  secretary,
+  secretary2
+}`

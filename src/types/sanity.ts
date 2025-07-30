@@ -82,3 +82,41 @@ export interface HomepageData {
   legacySection: LegacySection
   hmoPartnersSection: HmoPartnersSection
 }
+
+export interface SanityImage {
+  asset: {
+    _id: string
+    url: string
+  }
+  alt?: string
+}
+
+export interface Doctor {
+  _id: string
+  name: string
+  specialty: {
+    _id: string
+    name: string
+    slug: {
+      current: string
+    }
+  }
+  image?: SanityImage
+  strictlyByAppointment: boolean
+  roomNumber?: string
+  phone: string
+  availableDays: string[]
+  rating?: number
+  secretary?: string
+  secretary2?: string
+}
+
+export interface Department {
+  _id: string
+  name: string
+  slug: {
+    current: string
+  }
+  description?: string
+  icon?: SanityImage
+}
