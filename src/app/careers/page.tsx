@@ -84,10 +84,10 @@ export default function CareersPage() {
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase()
       filtered = filtered.filter(job => 
-        job.title.toLowerCase().includes(searchLower) ||
+        job.title.toLowerCase().includes(searchLower) ||           // ✅ Job Title
         job.department.toLowerCase().includes(searchLower) ||
         job.summary?.toLowerCase().includes(searchLower) ||
-        job.category?.label.toLowerCase().includes(searchLower)
+        job.category?.label.toLowerCase().includes(searchLower)   // ✅ Category
       )
     }
 
@@ -149,7 +149,7 @@ export default function CareersPage() {
                     placeholder={jobListingsSection.searchPlaceholder || "Search jobs..."}
                     className="pl-10"
                     value={searchTerm}
-                    onChange={handleSearchChange}
+                    onChange={handleSearchChange}  // Updates searchTerm state
                   />
                 </div>
                 <Select value={selectedCategory} onValueChange={handleCategoryChange}>
