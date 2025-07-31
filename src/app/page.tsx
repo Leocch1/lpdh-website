@@ -216,7 +216,7 @@ export default function Home() {
                         {/* Card content */}
                         <div className="relative z-10 h-full flex flex-col">
                           <CardHeader className="pb-3 flex-shrink-0">
-                            <div className="mx-auto mb-4 flex size-24 md:size-28 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                            <div className="mx-auto mb-4 flex size-24 md:size-28 items-center justify-center rounded-full bg-white group-hover:bg-secondary text-primary transition-colors duration-300">
                               {service.iconSrc && (
                                 <Image
                                   src={service.iconSrc}
@@ -238,7 +238,7 @@ export default function Home() {
                             
                             {/* Learn More button inside card */}
                             <div className="flex justify-center mt-auto">
-                              <div className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:text-primary-foreground transition-colors">
+                              <div className="inline-flex items-center gap-2 text-primary font-medium text-sm transition-colors">
                                 <span>LEARN MORE</span>
                                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                               </div>

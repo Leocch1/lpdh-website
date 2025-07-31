@@ -1,55 +1,68 @@
+
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
+
+const directoryData = [
+  { department: "ACCOUNTING", local: "117 / 198", direct: "8829-8164", cellphone: "09178369466" },
+  { department: "ADMITTING", local: "170", direct: "", cellphone: "09178369466" },
+  { department: "BILLING", local: "122 / 168", direct: "", cellphone: "09178289433" },
+  { department: "BOARD ROOM", local: "172 / 163", direct: "8636-9414", cellphone: "" },
+  { department: "CARD-PULMO", local: "132", direct: "8332-6268", cellphone: "09171479949" },
+  { department: "CASHIER", local: "120", direct: "8829-8297", cellphone: "09178005487" },
+  { department: "CT-SCAN", local: "169", direct: "", cellphone: "09951629112" },
+  { department: "ER / ER HMO", local: "147 / 167", direct: "8820-0079", cellphone: "09178554590" },
+  { department: "ICU", local: "164", direct: "8829-5277", cellphone: "09175402203" },
+  { department: "INDUSTRIAL", local: "166", direct: "8332-6264", cellphone: "09178514431" },
+  { department: "INFORMATION", local: "102", direct: "8825-5236", cellphone: "09178369466" },
+  { department: "LPCHP GREEN CARD", local: "306", direct: "8829-7715", cellphone: "" },
+  { department: "NICU", local: "158", direct: "", cellphone: "09950154862" },
+  { department: "ONCOLOGY UNIT", local: "204", direct: "", cellphone: "09182785775" },
+  { department: "REHAB", local: "506", direct: "8332-6250", cellphone: "09178062050" },
+  { department: "STATION 1", local: "771", direct: "8332-6283", cellphone: "09178514499" },
+  { department: "STATION 2", local: "156", direct: "8820-5211", cellphone: "09178514507" },
+  { department: "STATION 3A", local: "773", direct: "8829-5694", cellphone: "09178514521" },
+  { department: "STATION 3B", local: "772", direct: "8829-5926", cellphone: "09178514524" },
+  { department: "STATION 4", local: "774", direct: "8829-2108", cellphone: "09178514531" },
+];
+
 export default function DirectoriesPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8">LPDH Directories</h1>
-        
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold mb-4 text-primary">Medical Staff Directory</h2>
-            <p className="text-muted-foreground mb-4">
-              Find our medical professionals and specialists.
-            </p>
-            {/* Add your medical staff directory content here */}
-            <div className="space-y-2">
-              <p className="text-sm">Coming soon...</p>
+    <div className="bg-secondary">
+        <div className="container py-12 md:py-24">
+            <div className="text-center mb-12">
+                <h1 className="font-headline text-5xl font-bold tracking-tight text-primary">LPDH Directory</h1>
             </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold mb-4 text-primary">Department Directory</h2>
-            <p className="text-muted-foreground mb-4">
-              Browse our medical departments and services.
-            </p>
-            {/* Add your department directory content here */}
-            <div className="space-y-2">
-              <p className="text-sm">Coming soon...</p>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold mb-4 text-primary">Administrative Staff</h2>
-            <p className="text-muted-foreground mb-4">
-              Contact our administrative personnel.
-            </p>
-            {/* Add your administrative staff content here */}
-            <div className="space-y-2">
-              <p className="text-sm">Coming soon...</p>
-            </div>
-          </div>
-          
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-semibold mb-4 text-primary">Emergency Contacts</h2>
-            <p className="text-muted-foreground mb-4">
-              Important emergency contact information.
-            </p>
-            <div className="space-y-2">
-              <p className="font-semibold">Emergency Line: (09) 8825-5236</p>
-              <p className="text-sm text-muted-foreground">24/7 Emergency Services</p>
-            </div>
-          </div>
+
+            <Card className="max-w-4xl mx-auto shadow-lg overflow-hidden">
+                <Table>
+                <TableHeader className="sticky top-0 bg-card">
+                    <TableRow>
+                    <TableHead className="w-[300px] font-semibold text-foreground">DEPARTMENT</TableHead>
+                    <TableHead className="font-semibold text-foreground">LOCAL</TableHead>
+                    <TableHead className="font-semibold text-foreground">DIRECT</TableHead>
+                    <TableHead className="text-right font-semibold text-foreground">CELLPHONE</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {directoryData.map((item) => (
+                    <TableRow key={item.department}>
+                        <TableCell className="font-medium">{item.department}</TableCell>
+                        <TableCell>{item.local || '-'}</TableCell>
+                        <TableCell>{item.direct || '-'}</TableCell>
+                        <TableCell className="text-right">{item.cellphone || '-'}</TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+            </Card>
         </div>
-      </div>
     </div>
-  )
+  );
 }

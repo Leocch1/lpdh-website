@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 import { client, HISTORY_PAGE_QUERY, urlFor } from "@/lib/sanity";
 import type { HistoryPage } from "@/types/sanity";
@@ -119,11 +118,18 @@ export default async function HistoryPage() {
           </div>
         </section>
 
-        <section className="max-w-4xl mx-auto space-y-12 text-left">
-          {historyData.historySections?.map((section) => (
-            <div key={section._key}>
-              <h2 className="text-3xl font-bold text-foreground mb-4">{section.title}</h2>
-              <p className="text-muted-foreground">{section.content}</p>
+        <section className="space-y-0 text-left">
+          {historyData.historySections?.map((section, index) => (
+            <div 
+              key={section._key}
+              className={`py-12 md:py-16 ${
+                index % 2 === 0 ? 'bg-secondary' : 'bg-background'
+              }`}
+            >
+              <div className="max-w-4xl mx-auto px-4">
+                <h2 className="text-3xl font-bold text-foreground mb-4">{section.title}</h2>
+                <p className="text-muted-foreground">{section.content}</p>
+              </div>
             </div>
           ))}
         </section>
