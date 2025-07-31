@@ -76,22 +76,30 @@ export const CAREERS_QUERY = `*[_type == "careers"][0]{
 }`
 
 // Job openings query
-export const JOB_OPENINGS_QUERY = `*[_type == "jobOpening" && isActive == true] | order(_createdAt desc){
+export const JOB_OPENINGS_QUERY = `*[_type == "jobOpening" && isActive == true] | order(_createdAt desc) {
   _id,
   title,
   slug,
   department,
   type,
-  category,
   summary,
-  duties[]{
-    text
-  },
-  qualifications[]{
-    text
-  },
-  isActive
-}`
+  duties,
+  qualifications,
+  category->{
+    _id,
+    value,
+    label
+  }
+}`;
+
+// Job categories query
+export const JOB_CATEGORIES_QUERY = `*[_type == "jobCategory" && isActive == true] | order(order asc) {
+  _id,
+  value,
+  label,
+  description,
+  order
+}`;
 
 // Single job opening query
 export const JOB_OPENING_QUERY = `*[_type == "jobOpening" && slug.current == $slug][0]{

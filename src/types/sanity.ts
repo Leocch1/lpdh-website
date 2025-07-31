@@ -57,8 +57,12 @@ export interface HmoPartnersSection {
 }
 
 export interface JobCategory {
-  value: string
-  label: string
+  _id: string;
+  value: string;
+  label: string;
+  description?: string;
+  order: number;
+  isActive: boolean;
 }
 
 export interface HeroSection {
@@ -86,18 +90,26 @@ export interface CareersData {
 }
 
 export interface JobOpening {
-  _id: string
-  title: string
+  _id: string;
+  title: string;
   slug: {
-    current: string
-  }
-  department: string
-  type: string
-  category: string
-  summary: string
-  duties?: { text: string }[]
-  qualifications?: { text: string }[]
-  isActive: boolean
+    current: string;
+  };
+  department: string;
+  type: 'full-time' | 'part-time' | 'contract' | 'temporary';
+  summary: string;
+  duties?: Array<{
+    text: string;
+  }>;
+  qualifications?: Array<{
+    text: string;
+  }>;
+  category?: {
+    _id: string;
+    value: string;
+    label: string;
+  };
+  isActive: boolean;
 }
 
 export interface HomepageData {

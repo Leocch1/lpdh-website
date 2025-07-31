@@ -45,16 +45,12 @@ export const jobOpening = defineType({
     defineField({
       name: 'category',
       title: 'Category',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Nursing', value: 'nursing' },
-          { title: 'Allied Health', value: 'allied-health' },
-          { title: 'Administration', value: 'admin' },
-          { title: 'Support Services', value: 'support' },
-        ],
-      },
+      type: 'reference',
+      to: [{ type: 'jobCategory' }],
       validation: Rule => Rule.required(),
+      options: {
+        filter: 'isActive == true',
+      },
     }),
     defineField({
       name: 'summary',
@@ -137,13 +133,14 @@ export const jobOpening = defineType({
       title: 'title',
       department: 'department',
       type: 'type',
+      category: 'category.label',
       isActive: 'isActive',
     },
     prepare(selection) {
-      const { title, department, type, isActive } = selection
+      const { title, department, type, category, isActive } = selection
       return {
         title: title,
-        subtitle: `${department} - ${type}${isActive ? '' : ' (Inactive)'}`,
+        subtitle: `${department} - ${type} (${category || 'No category'})${isActive ? '' : ' (Inactive)'}`,
       }
     },
   },

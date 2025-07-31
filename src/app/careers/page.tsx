@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from "react";
@@ -12,10 +11,21 @@ import Link from "next/link";
 import { client, urlFor, CAREERS_QUERY, JOB_OPENINGS_QUERY } from "@/lib/sanity";
 import { CareersData, JobOpening } from "@/types/sanity";
 
+// Add query for job categories
+const JOB_CATEGORIES_QUERY = `*[_type == "jobCategory" && isActive == true] | order(order asc) {
+  _id,
+  value,
+  label,
+  order
+}`;
 
 export default function CareersPage() {
   const [careersData, setCareersData] = useState<CareersData | null>(null)
   const [jobOpenings, setJobOpenings] = useState<JobOpening[]>([])
+  const [jobCategories, setJobCategories] = useState<any[]>([])
+  const [filteredJobs, setFilteredJobs] = useState<JobOpening[]>([])
+  const [selectedCategory, setSelectedCategory] = useState<string>("all")
+  const [searchTerm, setSearchTerm] = useState<string>("")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -28,9 +38,26 @@ export default function CareersPage() {
           const careersContent = await client.fetch(CAREERS_QUERY)
           setCareersData(careersContent)
           
-          // Fetch job openings
-          const jobs = await client.fetch(JOB_OPENINGS_QUERY)
+          // Fetch job openings with category references
+          const jobsQuery = `*[_type == "jobOpening" && isActive == true] | order(_createdAt desc) {
+            _id,
+            title,
+            slug,
+            department,
+            type,
+            summary,
+            category->{
+              _id,
+              value,
+              label
+            }
+          }`;
+          const jobs = await client.fetch(jobsQuery)
           setJobOpenings(jobs || [])
+          
+          // Fetch job categories
+          const categories = await client.fetch(JOB_CATEGORIES_QUERY)
+          setJobCategories(categories || [])
         } else {
           console.log('Project ID not configured properly')
         }
@@ -44,6 +71,37 @@ export default function CareersPage() {
     fetchData()
   }, [])
 
+  // Filter jobs based on category and search term
+  useEffect(() => {
+    let filtered = jobOpenings
+
+    // Filter by category
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(job => job.category?.value === selectedCategory)
+    }
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(job => 
+        job.title.toLowerCase().includes(searchLower) ||           // ✅ Job Title
+        job.department.toLowerCase().includes(searchLower) ||
+        job.summary?.toLowerCase().includes(searchLower) ||
+        job.category?.label.toLowerCase().includes(searchLower)   // ✅ Category
+      )
+    }
+
+    setFilteredJobs(filtered)
+  }, [jobOpenings, selectedCategory, searchTerm])
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value)
+  }
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value)
+  }
+
   // Get hero section data
   const heroSection = careersData?.heroSection
   const heroImageSrc = heroSection?.backgroundImage 
@@ -52,6 +110,7 @@ export default function CareersPage() {
 
   // Get job listings section data
   const jobListingsSection = careersData?.jobListingsSection
+
   return (
     <div className="flex flex-col">
       {/* Hero Section - Only show if data exists */}
@@ -86,15 +145,21 @@ export default function CareersPage() {
             <div className="mt-8 mx-auto max-w-2xl flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input placeholder={jobListingsSection.searchPlaceholder} className="pl-10" />
+                  <Input 
+                    placeholder={jobListingsSection.searchPlaceholder || "Search jobs..."}
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={handleSearchChange}  // Updates searchTerm state
+                  />
                 </div>
-                <Select>
+                <Select value={selectedCategory} onValueChange={handleCategoryChange}>
                   <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder={jobListingsSection.categoryPlaceholder} />
+                    <SelectValue placeholder={jobListingsSection.categoryPlaceholder || "Select Category"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {jobListingsSection.categories?.map((category) => (
-                      <SelectItem key={category.value} value={category.value}>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {jobCategories.map((category) => (
+                      <SelectItem key={category._id} value={category.value}>
                         {category.label}
                       </SelectItem>
                     ))}
@@ -102,21 +167,50 @@ export default function CareersPage() {
                 </Select>
             </div>
             
-            {/* Job Cards - Only show if there are job openings */}
-            {jobOpenings.length > 0 && (
-              <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {jobOpenings.map((job) => (
-                      <Card key={job._id} className="flex flex-col">
+            {/* Results count */}
+            {!loading && (
+              <div className="mt-6 text-center">
+                <p className="text-muted-foreground">
+                  {filteredJobs.length === 0 
+                    ? "No jobs found matching your criteria"
+                    : `Showing ${filteredJobs.length} of ${jobOpenings.length} job${jobOpenings.length !== 1 ? 's' : ''}`
+                  }
+                </p>
+              </div>
+            )}
+            
+            {/* Job Cards - Show filtered results */}
+            {filteredJobs.length > 0 && (
+              <div className="mt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  {filteredJobs.map((job) => (
+                      <Card key={job._id} className="flex flex-col group hover:shadow-lg transition-shadow">
                           <CardHeader>
-                              <CardTitle>{job.title}</CardTitle>
-                              <p className="text-sm font-medium text-muted-foreground pt-1">{job.department}</p>
+                              <div className="flex items-start justify-between gap-2">
+                                <CardTitle className="group-hover:text-primary transition-colors">
+                                  {job.title}
+                                </CardTitle>
+                                {job.category && (
+                                  <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full whitespace-nowrap">
+                                    {job.category.label}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm font-medium text-muted-foreground">{job.department}</p>
+                                {job.type && (
+                                  <p className="text-xs text-muted-foreground capitalize">{job.type.replace('-', ' ')}</p>
+                                )}
+                              </div>
                           </CardHeader>
                           <CardContent className="flex-grow">
-                             <p className="text-muted-foreground line-clamp-3">{job.summary}</p>
+                             <p className="text-muted-foreground line-clamp-3 text-sm">{job.summary}</p>
                           </CardContent>
                           <CardFooter>
-                             <Button asChild>
-                                  <Link href={`/careers/${job.slug.current}`}>Apply Now</Link>
+                             <Button asChild className="w-full">
+                                  <Link href={`/careers/${job.slug.current}`}>
+                                    <Briefcase className="h-4 w-4 mr-2" />
+                                    Apply Now
+                                  </Link>
                              </Button>
                           </CardFooter>
                       </Card>
@@ -125,10 +219,35 @@ export default function CareersPage() {
             )}
             
             {/* No jobs message */}
+            {filteredJobs.length === 0 && !loading && jobOpenings.length > 0 && (
+              <div className="mt-12 text-center">
+                <p className="text-muted-foreground text-lg">No jobs match your current filters.</p>
+                <p className="text-muted-foreground mt-2">Try adjusting your search or category selection.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => {
+                    setSelectedCategory("all")
+                    setSearchTerm("")
+                  }}
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+
+            {/* No jobs at all message */}
             {jobOpenings.length === 0 && !loading && (
               <div className="mt-12 text-center">
                 <p className="text-muted-foreground text-lg">No job openings available at the moment.</p>
                 <p className="text-muted-foreground mt-2">Please check back later for new opportunities.</p>
+              </div>
+            )}
+
+            {/* Loading state */}
+            {loading && (
+              <div className="mt-12 text-center">
+                <p className="text-muted-foreground text-lg">Loading job openings...</p>
               </div>
             )}
           </div>
