@@ -8,6 +8,30 @@ export interface CarouselImage {
   dataAiHint?: string
 }
 
+export interface Service {
+  name: string
+  description: string
+  icon: {
+    asset: {
+      _id: string
+      url: string
+    }
+  }
+  backgroundImage?: {
+    asset: {
+      _id: string
+      url: string
+    }
+  }
+  linkUrl?: string
+}
+
+export interface ServicesSection {
+  title: string
+  description: string
+  services: Service[]
+}
+
 export interface LegacySection {
   title: string
   description: string
@@ -79,6 +103,7 @@ export interface JobOpening {
 export interface HomepageData {
   _id: string
   carouselImages: CarouselImage[]
+  servicesSection: ServicesSection
   legacySection: LegacySection
   hmoPartnersSection: HmoPartnersSection
 }

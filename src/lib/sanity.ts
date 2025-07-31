@@ -24,6 +24,21 @@ export const HOMEPAGE_QUERY = `*[_type == "homepage"] | order(_updatedAt desc) [
     alt,
     dataAiHint
   },
+  servicesSection{
+    title,
+    description,
+    services[]{
+      name,
+      description,
+      icon{
+        asset->
+      },
+      backgroundImage{
+        asset->
+      },
+      linkUrl
+    }
+  },
   legacySection{
     title,
     description,

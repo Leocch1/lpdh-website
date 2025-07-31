@@ -56,6 +56,86 @@ export const homepage = defineType({
       validation: Rule => Rule.min(1).max(10).error('Please add 1-10 carousel images'),
     }),
     defineField({
+      name: 'servicesSection',
+      title: 'Services Section',
+      type: 'object',
+      fields: [
+        {
+          name: 'title',
+          title: 'Section Title',
+          type: 'string',
+          initialValue: 'Our Services',
+        },
+        {
+          name: 'description',
+          title: 'Section Description',
+          type: 'text',
+          rows: 3,
+          initialValue: 'We offer a wide range of specialties to meet your healthcare needs.',
+        },
+        {
+          name: 'services',
+          title: 'Services',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              name: 'service',
+              title: 'Service',
+              fields: [
+                {
+                  name: 'name',
+                  title: 'Service Name',
+                  type: 'string',
+                  validation: Rule => Rule.required(),
+                },
+                {
+                  name: 'description',
+                  title: 'Description',
+                  type: 'text',
+                  rows: 3,
+                  validation: Rule => Rule.required(),
+                },
+                {
+                  name: 'icon',
+                  title: 'Icon Image',
+                  type: 'image',
+                  options: {
+                    hotspot: true,
+                  },
+                  description: 'Upload an icon/image for this service (recommended size: 64x64px)',
+                  validation: Rule => Rule.required(),
+                },
+                {
+                  name: 'backgroundImage',
+                  title: 'Background Image',
+                  type: 'image',
+                  options: {
+                    hotspot: true,
+                  },
+                  description: 'Optional background image for the card (will be displayed with low opacity)',
+                },
+                {
+                  name: 'linkUrl',
+                  title: 'Service Link',
+                  type: 'string',
+                  description: 'Optional link for this service (e.g., /services/internal-medicine)',
+                },
+              ],
+              preview: {
+                select: {
+                  title: 'name',
+                  subtitle: 'description',
+                  media: 'icon',
+                },
+              },
+            },
+          ],
+          validation: Rule => Rule.min(1).max(8).error('Please add 1-8 services'),
+        },
+      ],
+    }),
+    defineField({
       name: 'legacySection',
       title: 'Legacy Section',
       type: 'object',
