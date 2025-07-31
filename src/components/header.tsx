@@ -136,7 +136,7 @@ export function Header() {
   return (
     <div className="sticky top-0 z-50 w-full [box-shadow:0_4px_13px_rgba(25,25,25,0.25)]">
       {/* Upper Header - Desktop Only */}
-      <div className="hidden py-2 text-xs text-muted-foreground md:block">
+      <div className="hidden bg-primary-foreground py-2 text-xs text-muted-foreground md:block">
         <div className="w-full px-12 sm:px-16 lg:px-40">
           <div className="flex items-center justify-between">
             <div className="flex-shrink-0">
