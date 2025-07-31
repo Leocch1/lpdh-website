@@ -1,4 +1,3 @@
-
 'use client'
 
 import { Button } from "@/components/ui/button"
@@ -142,7 +141,7 @@ export default function Home() {
     : null
 
   return (
-    <div className="flex flex-col">
+    <div className="w-full min-h-screen flex flex-col overflow-x-hidden bg-background">
       <PrivacyNotice />
 
       {/* Dynamic CSS for carousel timing */}
@@ -152,17 +151,31 @@ export default function Home() {
 
       {/* Only show carousel if there are images from Sanity */}
       {heroImages.length > 0 && (
-        <section className="w-full">
-          <div className="fade-in-fade-out">
+        <section className="w-full p-0 m-0 bg-white" style={{ margin: 0, padding: 0 }}>
+          <div
+            className="relative w-full"
+            style={{ 
+              maxWidth: '100vw', 
+              overflow: 'hidden', 
+              margin: 0, 
+              padding: 0,
+              aspectRatio: '1920/880', // Maintain exact aspect ratio
+              width: '100%'
+            }}
+          >
             {heroImages.map((image, index) => (
               <div key={index} className="dynamic-carousel-item">
                 <Image
                   src={image.src}
                   alt={image.alt}
                   data-ai-hint={image.dataAiHint}
-                  width={1600}
-                  height={600}
-                  className="mx-auto object-cover w-full h-full"
+                  width={1920}
+                  height={880}
+                  className="object-contain w-full h-full select-none pointer-events-none"
+                  sizes="100vw"
+                  priority={index === 0}
+                  draggable={false}
+                  style={{ maxWidth: '100%', height: '100%', margin: 0, padding: 0 }}
                 />
               </div>
             ))}
@@ -170,8 +183,8 @@ export default function Home() {
         </section>
       )}
 
-      <section id="services" className="py-12 md:py-24">
-        <div className="container px-4 md:px-6">
+      <section id="services" className="py-12 md:py-24 ">
+        <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Our Services</h2>
             <p className="mt-4 text-lg text-muted-foreground">
@@ -187,11 +200,11 @@ export default function Home() {
                   </div>
                   <CardTitle>{service.name}</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{service.description}</p>
-                </CardContent>
+              <CardContent>
+                 <p className="text-muted-foreground">{service.description}</p>
+              </CardContent>
               </Card>
-            ))}
+              ))}
           </div>
         </div>
       </section>
@@ -199,7 +212,7 @@ export default function Home() {
       {/* Only show legacy section if there's data from Sanity */}
       {legacySection && legacyImageSrc && (
         <section className="bg-secondary py-12 md:py-24">
-          <div className="container px-4 md:px-6">
+          <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
             <div className="grid items-center gap-8 md:grid-cols-2">
               <div className="flex justify-center">
                 <Image
@@ -232,7 +245,7 @@ export default function Home() {
       {/* Only show HMO Partners section if there's data from Sanity */}
       {hmoPartnersSection && hmoImageSrc && !hmoImageError && (
         <section className="py-12 md:py-24">
-          <div className="container px-4 text-center md:px-6">
+          <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {hmoPartnersSection.title}
             </h2>
@@ -258,7 +271,7 @@ export default function Home() {
       {/* Fallback HMO Partners section if image fails to load */}
       {hmoPartnersSection && hmoImageError && (
         <section className="py-12 md:py-24">
-          <div className="container px-4 text-center md:px-6">
+          <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {hmoPartnersSection.title}
             </h2>
@@ -272,7 +285,7 @@ export default function Home() {
       )}
 
       <section className="bg-secondary py-12 md:py-24">
-        <div className="container px-4 text-center md:px-6">
+        <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Ready to Take the Next Step?</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             Your journey to better health starts here. Contact us to learn more or to schedule your appointment with one of our specialists.
