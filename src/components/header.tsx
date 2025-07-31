@@ -134,115 +134,121 @@ export function Header() {
   };
 
   return (
-    <div className="sticky top-0 z-50 w-full bg-background [box-shadow:0_4px_13px_rgba(25,25,25,0.25)]">
-      <div className="hidden bg-background py-2 text-xs text-muted-foreground md:block">
-        <div className="container flex items-center justify-between pr-4 md:pr-8 lg:pr-12">
-          <div className="flex-1 pl-32">
-             <Link href="/">
-              <Logo />
-            </Link>
-          </div>
-          <div className="flex flex-1 items-center justify-end gap-2 md:gap-4 lg:gap-6">
-            <div className="flex items-center gap-2">
-              <Phone className="h-8 w-8 text-primary" />
-              <div>
-                <p className="font-semibold text-primary">EMERGENCY</p>
-                <p className="text-foreground font-semibold">(09) 8820-9376</p>
-              </div>
+    <div className="sticky top-0 z-50 w-full [box-shadow:0_4px_13px_rgba(25,25,25,0.25)]">
+      {/* Upper Header - Desktop Only */}
+      <div className="hidden py-2 text-xs text-muted-foreground md:block">
+        <div className="w-full px-12 sm:px-16 lg:px-40">
+          <div className="flex items-center justify-between">
+            <div className="flex-shrink-0">
+              <Link href="/">
+                <Logo />
+              </Link>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="h-8 w-8 text-primary" />
-              <div>
-                 <p className="font-semibold text-primary">LOCATION</p>
-                 <p className="text-foreground font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
+            <div className="flex items-center gap-4 lg:gap-6">
+              <div className="flex items-center gap-2">
+                <Phone className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="font-semibold text-primary">EMERGENCY</p>
+                  <p className="text-foreground font-semibold">(09) 8820-9376</p>
+                </div>
               </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-8 w-8 text-primary" />
+                <div>
+                   <p className="font-semibold text-primary">LOCATION</p>
+                   <p className="text-foreground font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
+                </div>
+              </div>
+              <Image
+                src="/iso.jpg"
+                alt="ISO 9001:2015 Certified"
+                data-ai-hint="iso certificate"
+                width={120}
+                height={50}
+              />
             </div>
-            <Image
-              src="/iso.jpg"
-              alt="ISO 9001:2015 Certified"
-              data-ai-hint="iso certificate"
-              width={120}
-              height={50}
-            />
           </div>
         </div>
       </div>
+
+      {/* Lower Header - Navigation */}
       <header className="bg-primary text-primary-foreground">
-        <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          {/* Mobile: Hamburger */}
-          <div className="flex-1 md:hidden">
-            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="hover:bg-primary hover:text-primary-foreground">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Open Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] bg-primary text-primary-foreground">
-                <SheetTitle className="sr-only">Menu</SheetTitle>
-                <div className="p-4">
-                  <div className="mb-8">
-                    <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Logo />
-                    </Link>
+        <div className="w-full px-12 sm:px-16 lg:px-40">
+          <div className="flex h-16 items-center justify-between">
+            {/* Mobile: Hamburger */}
+            <div className="flex-shrink-0 md:hidden">
+              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon" className="hover:bg-primary hover:text-primary-foreground">
+                    <Menu className="h-6 w-6" />
+                    <span className="sr-only">Open Menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-[300px] bg-primary text-primary-foreground">
+                  <SheetTitle className="sr-only">Menu</SheetTitle>
+                  <div className="p-4">
+                    <div className="mb-8">
+                      <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Logo />
+                      </Link>
+                    </div>
+                    <nav className="flex flex-col items-start gap-6">
+                      {navLinks.map((link) => (
+                        <div key={link.href}>
+                          <NavLinkItem href={link.href} label={link.label} dropdown={link.dropdown} />
+                          {/* Mobile dropdown items */}
+                          {link.dropdown && (
+                            (link.label === "Contact Us" && isContactDropdownOpen) ||
+                            (link.label === "Our Services" && isServicesDropdownOpen)
+                          ) && (
+                            <div className="ml-4 mt-2 space-y-2">
+                              {link.dropdown.map((item) => (
+                                <Link 
+                                  key={item.href}
+                                  href={item.href}
+                                  onClick={() => {
+                                    setIsMobileMenuOpen(false);
+                                    setIsContactDropdownOpen(false);
+                                    setIsServicesDropdownOpen(false);
+                                  }}          
+                                  className={cn(
+                                    "block text-base font-semibold text-primary-foreground transition-colors hover:text-yellow",
+                                    pathname === item.href && "font-bold text-[#e8f996]"
+                                  )}
+                                >
+                                  {item.label}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </nav>
                   </div>
-                  <nav className="flex flex-col items-start gap-6">
-                    {navLinks.map((link) => (
-                      <div key={link.href}>
-                        <NavLinkItem href={link.href} label={link.label} dropdown={link.dropdown} />
-                        {/* Mobile dropdown items */}
-                        {link.dropdown && (
-                          (link.label === "Contact Us" && isContactDropdownOpen) ||
-                          (link.label === "Our Services" && isServicesDropdownOpen)
-                        ) && (
-                          <div className="ml-4 mt-2 space-y-2">
-                            {link.dropdown.map((item) => (
-                              <Link 
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => {
-                                  setIsMobileMenuOpen(false);
-                                  setIsContactDropdownOpen(false);
-                                  setIsServicesDropdownOpen(false);
-                                }}          
-                                className={cn(
-                                  "block text-base font-semibold text-primary-foreground transition-colors hover:text-yellow",
-                                  pathname === item.href && "font-bold text-[#e8f996]"
-                                )}
-                              >
-                                {item.label}
-                              </Link>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </nav>
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-          
-           {/* Mobile: Logo in center */}
-           <div className="flex justify-center md:hidden flex-1">
-            <Link href="/">
-              <Logo />
-            </Link>
-          </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+            
+             {/* Mobile: Logo in center */}
+             <div className="flex justify-center md:hidden flex-1">
+              <Link href="/">
+                <Logo />
+              </Link>
+            </div>
 
-          {/* Desktop Nav */}
-          <nav className="hidden flex-1 items-center justify-center gap-8 text-sm md:flex">
-            {navLinks.map((link) => (
-              <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} />
-            ))}
-          </nav>
+            {/* Desktop Nav - Starts from left, aligning with logo above */}
+            <nav className="hidden flex-1 items-center justify-start gap-8 text-sm md:flex pl-5">
+              {navLinks.map((link) => (
+                <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} />
+              ))}
+            </nav>
 
-
-          {/* Right side: Button */}
-          <div className="flex flex-1 items-center justify-end">
-            <Button asChild variant="secondary" className="bg-secondary/90 font-semibold hover:bg-white text-secondary-foreground hover:text-primary rounded-lg [box-shadow:0_4px_4px_rgba(25,25,25,0.25)]">
-              <Link href="/services#appointment">Find a Doctor</Link>
-            </Button>
+            {/* Right side: Button */}
+            <div className="flex items-center justify-end flex-shrink-0">
+              <Button asChild variant="secondary" className="bg-secondary/90 font-semibold hover:bg-white text-secondary-foreground hover:text-primary rounded-lg [box-shadow:0_4px_4px_rgba(25,25,25,0.25)]">
+                <Link href="/services#appointment">Find a Doctor</Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
