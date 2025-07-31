@@ -246,7 +246,7 @@ export default function Home() {
       {hmoPartnersSection && hmoImageSrc && !hmoImageError && (
         <section className="py-12 md:py-24">
           <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-center">
               {hmoPartnersSection.title}
             </h2>
             <div className="mt-12">
