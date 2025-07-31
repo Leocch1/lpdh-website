@@ -66,36 +66,6 @@ export const careers = defineType({
           type: 'string',
           initialValue: 'Select Category',
         },
-        {
-          name: 'categories',
-          title: 'Job Categories',
-          type: 'array',
-          of: [
-            {
-              type: 'object',
-              fields: [
-                {
-                  name: 'value',
-                  title: 'Value',
-                  type: 'string',
-                  validation: Rule => Rule.required(),
-                },
-                {
-                  name: 'label',
-                  title: 'Label',
-                  type: 'string',
-                  validation: Rule => Rule.required(),
-                },
-              ],
-            },
-          ],
-          initialValue: [
-            { value: 'nursing', label: 'Nursing' },
-            { value: 'allied-health', label: 'Allied Health' },
-            { value: 'admin', label: 'Administration' },
-            { value: 'support', label: 'Support Services' },
-          ],
-        },
       ],
     }),
   ],
