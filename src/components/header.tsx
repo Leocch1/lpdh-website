@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Phone, MapPin, ChevronDown, Clock, Mail } from "lucide-react";
+import { Menu, Paperclip, MapPin, ChevronDown, Clock, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -22,7 +22,7 @@ const navLinks = [
     label: "Our Services",
     dropdown: [
       { href: "/services", label: "Services" },
-      { href: "/services/find-doctor", label: "Find a Doctor" },
+      { href: "/services/admission", label: "Admission" },
       { href: "/services/schedule-lab", label: "Schedule a Lab" }
     ]
   },
@@ -157,7 +157,7 @@ export function Header() {
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
-                  <Phone className="h-5 w-5 text-red-600" />
+                  <Paperclip className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
                   <p className="font-semibold text-red-600 text-xs uppercase tracking-wide">Emergency</p>
@@ -251,19 +251,35 @@ export function Header() {
                       ))}
                     </nav>
                     
+                    {/* Mobile CTA Buttons */}
+                    <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
+                      <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
+                        <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Activity className="h-4 w-4 mr-2" />
+                          Find a Doctor
+                        </Link>
+                      </Button>
+                      <Button asChild className="w-full bg-primary hover:bg-primary text-white font-semibold shadow-sm">
+                        <Link href="/services#appointment" onClick={() => setIsMobileMenuOpen(false)}>
+                          <Paperclip className="h-4 w-4 mr-2" />
+                          Get Result Online
+                        </Link>
+                      </Button>
+                    </div>
+                    
                     {/* Mobile contact info */}
-                    <div className="mt-8 pt-6 border-t border-slate-200 space-y-4">
+                    <div className="mt-6 pt-6 border-t border-slate-200 space-y-4">
                       <div className="flex items-center gap-3">
-                        <Phone className="h-5 w-5 text-red-600" />
+                        <Paperclip className="h-5 w-5 text-red-600" />
                         <div>
                           <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Emergency</p>
                           <p className="text-sm font-semibold text-slate-800">(09) 8820-9376</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-blue-600" />
+                        <Clock className="h-5 w-5 text-primary" />
                         <div>
-                          <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Hours</p>
+                          <p className="text-xs font-semibold text-primary uppercase tracking-wide">Hours</p>
                           <p className="text-sm font-semibold text-slate-800">24/7 Emergency Care</p>
                         </div>
                       </div>
@@ -273,12 +289,15 @@ export function Header() {
               </Sheet>
             </div>
             
-             {/* Mobile: Logo in center */}
+             {/* Mobile: Logo in center (no buttons beside it) */}
              <div className="flex justify-center md:hidden flex-1">
               <Link href="/" className="transition-opacity hover:opacity-80">
                 <Logo />
               </Link>
             </div>
+
+            {/* Mobile: Empty div to maintain flexbox layout */}
+            <div className="flex-shrink-0 md:hidden w-10"></div>
 
             {/* Desktop Nav - Starts from left, aligning with logo above */}
             <nav className="hidden flex-1 items-center justify-start gap-8 text-sm md:flex">
@@ -287,18 +306,18 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Right side: CTA Buttons */}
-            <div className="flex items-center justify-end gap-3 flex-shrink-0">
-              <Button asChild variant="outline" className="hidden sm:inline-flex border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
-                <Link href="/contact">
-                  <Mail className="h-4 w-4 mr-2" />
-                  Contact Us
+            {/* Desktop: CTA Buttons */}
+            <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
+              <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
+                <Link href="/services/find-doctor">
+                  <Activity className="h-4 w-4 mr-2" />
+                  Find a Doctor
                 </Link>
               </Button>
               <Button asChild className="bg-primary hover:bg-primary text-white font-semibold shadow-sm">
-                <Link href="/services#appointment">
-                  <Phone className="h-4 w-4 mr-2" />
-                  Find a Doctor
+                <Link href="/get-result">
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Get Result Online
                 </Link>
               </Button>
             </div>
