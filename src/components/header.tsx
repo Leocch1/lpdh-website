@@ -12,6 +12,12 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { X } from "lucide-react";
 import Image from "next/image";
 
 const navLinks = [
@@ -44,6 +50,7 @@ export function Header() {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [mobileContactDropdownOpen, setMobileContactDropdownOpen] = useState(false);
   const [mobileServicesDropdownOpen, setMobileServicesDropdownOpen] = useState(false);
+  const [isIsoImageOpen, setIsIsoImageOpen] = useState(false);
   const contactDropdownRef = useRef<HTMLDivElement>(null);
   const servicesDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -183,14 +190,39 @@ export function Header() {
                 </div>
               </div>
               <div className="border-l border-slate-300 pl-6">
-                <Image
-                  src="/iso.jpg"
-                  alt="ISO 9001:2015 Certified"
-                  data-ai-hint="iso certificate"
-                  width={100}
-                  height={40}
-                  className="opacity-80 hover:opacity-100 transition-opacity"
-                />
+                <button 
+                  onClick={() => setIsIsoImageOpen(true)}
+                  className="cursor-pointer transition-opacity hover:opacity-100"
+                >
+                  <Image
+                    src="/iso.jpg"
+                    alt="ISO 9001:2015 Certified"
+                    data-ai-hint="iso certificate"
+                    width={100}
+                    height={40}
+                    className="opacity-80 hover:opacity-100 transition-opacity"
+                  />
+                </button>
+
+                <Dialog open={isIsoImageOpen} onOpenChange={setIsIsoImageOpen}>
+                  <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
+                    <div className="relative">
+                      <DialogClose className="absolute right-4 top-4 z-10 rounded-full bg-black/40 p-2 hover:bg-black/60 transition-colors">
+                        <X className="h-6 w-6 text-white" />
+                      </DialogClose>
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Image
+                          src="/iso.jpg"
+                          alt="ISO 9001:2015 Certified"
+                          className="w-auto h-auto max-w-full max-h-[85vh] object-contain"
+                          width={1000}
+                          height={800}
+                          priority
+                        />
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
