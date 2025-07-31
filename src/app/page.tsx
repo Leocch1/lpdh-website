@@ -183,7 +183,7 @@ export default function Home() {
         <section id="services" className="py-16 md:py-32">
           <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
             <div className="mx-auto max-w-4xl text-center">
-              <h2 className="mt-6 text-4xl font-bold tracking-tight text-secondary-foreground sm:text-5xl lg:text-6xl">
+              <h2 className="font-headline mt-6 text-4xl tracking-tight text-secondary-foreground sm:text-5xl lg:text-6xl">
                 {servicesSection.title}
               </h2>
               <p className="mt-6 text-xl text-muted-foreground lg:text-2xl">
@@ -337,7 +337,7 @@ export default function Home() {
       {hmoPartnersSection && hmoImageSrc && !hmoImageError && (
         <section className="py-12 md:py-24">
           <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-center">
+            <h2 className="text-3xl font-headline tracking-tight text-foreground sm:text-4xl text-center">
               {hmoPartnersSection.title}
             </h2>
             <div className="mt-12">

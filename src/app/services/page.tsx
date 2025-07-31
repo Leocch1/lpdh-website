@@ -68,7 +68,7 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 items-center">
             <div className="items-center ">
-            <h1 className="font-headline text-5xl md:text-7xl font-bold text-primary md:mx-24 md:text-left">
+            <h1 className="font-headline text-5xl md:text-7xl text-primary md:mx-24 md:text-left">
               SAFE AT<br />ALAGA KA
             </h1>
             <p className="mt-4 text-muted-foreground max-w-lg mx-auto md:mx-24 md:text-left">
@@ -136,7 +136,7 @@ export default function ServicesPage() {
       <section className="py-12 md:py-24 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="font-headline text-4xl font-bold text-primary">Services</h2>
+            <h2 className="font-extrabold text-4xl text-primary">Services</h2>
           </div>
           <div className="mx-auto max-w-6xl">
             <Accordion type="single" collapsible className="w-full grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
@@ -172,14 +172,11 @@ export default function ServicesPage() {
               Our medical professionals are here to provide you with the best possible care. Schedule your appointment today.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:gap-6">
-              <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8">
+              <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
                 <Link href="/services/find-doctor">Find a Doctor</Link>
               </Button>
-              <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8">
+              <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8 hover:bg-transparent hover:text-primary transition-colors">
                 <Link href="/services/schedule-lab">Schedule Lab Work</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="text-base lg:text-lg px-6 lg:px-8">
-                <Link href="/contact">Contact Us</Link>
               </Button>
             </div>
           </div>

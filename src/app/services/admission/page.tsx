@@ -76,7 +76,7 @@ export default function AdmissionPage() {
         <div className="container mx-auto px-4 max-w-4xl text-center">
             <div className="flex flex-col items-center gap-6">
                 <Image 
-                    src="/philhealth-logo.png"
+                    src="/philhealth.jpg"
                     alt="PhilHealth Logo"
                     data-ai-hint="company logo"
                     width={300}
