@@ -183,7 +183,7 @@ export default function Home() {
         <section id="services" className="py-16 md:py-32">
           <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
             <div className="mx-auto max-w-4xl text-center">
-              <h2 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+              <h2 className="mt-6 text-4xl font-bold tracking-tight text-secondary-foreground sm:text-5xl lg:text-6xl">
                 {servicesSection.title}
               </h2>
               <p className="mt-6 text-xl text-muted-foreground lg:text-2xl">
@@ -196,7 +196,7 @@ export default function Home() {
 
                 if (isClickable) {
                   return (
-                    <Link key={service.name} href={service.linkUrl}>
+                    <Link key={service.name} href={service.linkUrl} target="_blank" rel="noopener noreferrer">
                       <Card 
                         className="text-center transition-all duration-300 hover:shadow-lg relative overflow-hidden group min-h-[340px] md:min-h-[360px] cursor-pointer hover:scale-105"
                       >
@@ -323,7 +323,7 @@ export default function Home() {
                   {legacySection.description}
                 </p>
                 <div className="mt-8">
-                  <Button asChild>
+                  <Button asChild className="[box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
                     <Link href={legacySection.linkUrl}>{legacySection.linkText}</Link>
                   </Button>
                 </div>
@@ -382,10 +382,10 @@ export default function Home() {
             Your journey to better health starts here. Contact us to learn more or to schedule your appointment with one of our specialists.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="[box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
               <Link href="/services#appointment">Book an Appointment</Link>
             </Button>
-            <Button asChild variant="ghost" size="lg">
+            <Button asChild variant="ghost" size="lg" className="hover:bg-transparent hover:text-primary transition-colors">
               <Link href="/contact">Contact Us</Link>
             </Button>
           </div>
