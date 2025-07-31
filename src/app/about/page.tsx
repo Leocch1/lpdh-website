@@ -256,7 +256,7 @@ export default function AboutPage() {
       </section>
 
       <section className="text-primary-foreground py-12 md:py-6" style={{ backgroundColor: '#169A53' }}>
-        <div className="container px-4 md:px-6">
+        <div className="container px-4 md:px-6 mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
             
             {/* Vision */}
@@ -285,7 +285,7 @@ export default function AboutPage() {
             </div>
 
             {/* Core Values */}
-            <div className="flex flex-col justify-center text-center py-14 md:py-24 md:text-left md:pl-8">
+            <div className="flex flex-col justify-center text-center py-14 md:py-24 md:text-left md:pl-8 mx-auto">
               <div>
                 <h3 className="font-headline text-2xl font-bold mb-6">Core Values</h3>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-base md:text-sm">
@@ -305,7 +305,7 @@ export default function AboutPage() {
 
 
       
-      <section className="py-12 md:py-24">
+      <section className="py-12 md:py-24 mx-auto">
         <div className="container px-4 md:px-6">
           <div className="grid items-center gap-12 md:grid-cols-2 max-w-5xl mx-auto">
             <div className="flex justify-center order-2 md:order-1">

@@ -35,7 +35,7 @@ const directoryData = [
 export default function DirectoriesPage() {
   return (
     <div className="bg-secondary">
-        <div className="container py-12 md:py-24">
+        <div className="container py-12 md:py-24 mx-auto px-4">
             <div className="text-center mb-12">
                 <h1 className="font-headline text-5xl font-bold tracking-tight text-primary">LPDH Directory</h1>
             </div>

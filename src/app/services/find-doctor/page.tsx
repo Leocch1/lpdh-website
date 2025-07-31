@@ -106,7 +106,7 @@ export default function FindDoctorPage() {
       </section>
 
       {/* Main Content Section */}
-      <section className="py-12 bg-gray-50 min-h-screen">
+      <section className="py-12 bg-gray-50 min-h-screen mx-auto px-4">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Search and Department Selection */}
