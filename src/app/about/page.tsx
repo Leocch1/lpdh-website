@@ -1,4 +1,3 @@
-
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,16 @@ const getCardsPerView = () => {
   if (width >= 1024) return 3; // lg
   if (width >= 768) return 2;  // md
   return 1;                    // sm
+};
+
+const getHealthCardsPerView = () => {
+  if (typeof window === "undefined") return 1;
+  const width = window.innerWidth;
+  if (width >= 1536) return 5; // 2xl - show 5 cards
+  if (width >= 1280) return 4; // xl - show 4 cards  
+  if (width >= 1024) return 3; // lg - show 3 cards
+  if (width >= 768) return 2;  // md - show 2 cards
+  return 1;                    // sm - show 1 card
 };
 
 // Custom hook to hide scrollbar
@@ -132,6 +141,7 @@ const useCarousel = (totalItems: number, cardsPerView: number) => {
 
 export default function AboutPage() {
   const [cardsPerView, setCardsPerView] = useState(3);
+  const [healthCardsPerView, setHealthCardsPerView] = useState(5);
   const [aboutData, setAboutData] = useState<AboutPage | null>(null);
   const [healthAdvisories, setHealthAdvisories] = useState<HealthAdvisory[]>([]);
   const [newsUpdates, setNewsUpdates] = useState<NewsUpdate[]>([]);
@@ -162,6 +172,7 @@ export default function AboutPage() {
   useEffect(() => {
     const handleResize = () => {
       setCardsPerView(getCardsPerView());
+      setHealthCardsPerView(getHealthCardsPerView());
     };
 
     handleResize();
@@ -174,7 +185,7 @@ export default function AboutPage() {
     currentSlide: currentHealthSlide, 
     totalSlides: totalHealthSlides, 
     goToSlide: goToHealthSlide 
-  } = useCarousel(healthAdvisories.length, cardsPerView);
+  } = useCarousel(healthAdvisories.length, healthCardsPerView);
 
   const {
     containerRef: updatesContainerRef,
@@ -318,20 +329,21 @@ export default function AboutPage() {
       </section>
 
       <section className="py-12 md:py-16" style={{ backgroundColor: '#c2d7c9' }}>
-        <div className="container mx-auto px-4 w-[60%] max-w-[1400px] h-[500px]">
+        <div className="container mx-auto px-4 w-[80%] max-w-[1600px]">
           <h2 className="font-headline text-3xl font-bold text-center mb-8 text-foreground">What's Happening</h2>
           <div
           ref={healthContainerRef}
           className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
+          style={{ minHeight: '400px' }}
         >
             {healthAdvisories.map((advisory, index) => (
               <div
                 key={advisory._id}
                 className="snap-center flex-shrink-0"
-                style={{ width: `calc((100% / ${cardsPerView}) - 1rem)` }}
+                style={{ width: `calc((100% / ${healthCardsPerView}) - 1rem)` }}
               >
-                <Card className="h-full flex flex-col bg-white shadow-lg rounded-lg overflow-hidden">
-                  <div className="relative h-48 w-full">
+                <Card className="h-full flex flex-col bg-white shadow-lg rounded-lg overflow-hidden min-h-[380px]">
+                  <div className="relative h-48 w-full flex-shrink-0">
                     {advisory.image ? (
                       <Image
                         src={urlFor(advisory.image).url()}
@@ -345,16 +357,16 @@ export default function AboutPage() {
                       </div>
                     )}
                   </div>
-                  <CardHeader>
-                    <CardTitle className="text-lg font-bold">{advisory.title}</CardTitle>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg font-bold leading-tight">{advisory.title}</CardTitle>
                   </CardHeader>
                   {advisory.description && (
-                    <CardContent className="flex-grow">
-                      <p className="text-sm text-muted-foreground">{advisory.description}</p>
+                    <CardContent className="flex-grow pt-0 pb-3">
+                      <p className="text-sm text-muted-foreground line-clamp-3">{advisory.description}</p>
                     </CardContent>
                   )}
                   {advisory.link && (
-                    <CardFooter>
+                    <CardFooter className="pt-0 mt-auto">
                       <Link 
                         href={advisory.link} 
                         target="_blank" 
@@ -387,10 +399,11 @@ export default function AboutPage() {
 
       <section className="py-12 md:py-16" style={{ backgroundColor: '#c2d7c9' }}>
         <div className="container mx-auto px-4 max-w-[1400px]">
-                <div
-          ref={updatesContainerRef}
-          className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
-        >
+          <h2 className="font-headline text-3xl font-bold text-center mb-8 text-foreground">News & Updates</h2>
+          <div
+            ref={updatesContainerRef}
+            className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
+          >
             {newsUpdates.map((update, index) => (
               <div
                 key={update._id}
@@ -398,15 +411,41 @@ export default function AboutPage() {
                 style={{ width: `calc((100% / ${cardsPerView}) - 1rem)` }}
               >
                 {update.image ? (
-                  <Image
-                    src={urlFor(update.image).url()}
-                    alt={update.image.alt || update.title}
-                    width={300}
-                    height={500}
-                    className="w-[100%] h-[400px] mx-auto object-cover pointer-events-none"
-                  />
+                  update.link ? (
+                    <a
+                      href={update.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full h-[700px] relative group cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Image
+                        src={urlFor(update.image).url()}
+                        alt={update.image.alt || update.title}
+                        width={300}
+                        height={800}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                      {/* Overlay for visual feedback */}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-2">
+                          <ArrowRight className="h-6 w-6 text-primary" />
+                        </div>
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="w-full h-[700px] relative">
+                      <Image
+                        src={urlFor(update.image).url()}
+                        alt={update.image.alt || update.title}
+                        width={300}
+                        height={800}
+                        className="w-full h-full object-cover pointer-events-none"
+                      />
+                    </div>
+                  )
                 ) : (
-                  <div className="w-[100%] h-[400px] mx-auto bg-gray-200 flex items-center justify-center">
+                  <div className="w-full h-[700px] bg-gray-200 flex items-center justify-center">
                     <span className="text-gray-500">No image</span>
                   </div>
                 )}
