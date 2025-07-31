@@ -229,8 +229,8 @@ export default function AboutPage() {
                 {aboutData.description}
               </p>
               <Link href="/about/history">
-                <Button variant="outline" className="mt-6">
-                  See History
+                <Button variant="outline" className="mt-6 border-primary text-dark hover:bg-secondary-foreground hover:text-white hover:border-primary">
+                  Learn the LPDH History
                 </Button>
               </Link>
             </div>
@@ -255,57 +255,57 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="text-primary-foreground py-12 md:py-6" style={{ backgroundColor: '#169A53' }}>
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 max-w-6xl mx-auto">
-            
-            {/* Vision */}
-            <div className="flex flex-col justify-center text-center py-14 md:py-24 md:text-left md:border-r md:border-primary-foreground/30 md:pr-8">
-              <div>
-                <h3 className="font-headline text-2xl font-bold mb-4">Vision</h3>
-                <p className="text-primary-foreground/90 text-base md:text-sm">
-                  {aboutData.vision}
-                </p>
-              </div>
-            </div>
+     <section className="text-primary-foreground py-6" style={{ backgroundColor: '#169A53' }}>
+  <div className="container px-4 md:px-6 mx-auto">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-6xl mx-auto">
 
-            {/* Mission */}
-            <div className="flex flex-col justify-center text-center py-14 md:py-24 md:text-left md:border-r md:border-primary-foreground/30 md:px-8">
-              <div>
-                <h3 className="font-headline text-2xl font-bold mb-4">Mission</h3>
-                <ul className="space-y-3 text-primary-foreground/90 text-base md:text-sm">
-                  {aboutData.mission.map((point, index) => (
-                    <li key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 mt-1 flex-shrink-0" />
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+      {/* Vision */}
+      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:pr-4">
+        <div>
+          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Vision</h3>
+          <p className="text-primary-foreground/90 text-sm leading-relaxed">
+            {aboutData.vision}
+          </p>
+        </div>
+      </div>
 
-            {/* Core Values */}
-            <div className="flex flex-col justify-center text-center py-14 md:py-24 md:text-left md:pl-8 mx-auto">
-              <div>
-                <h3 className="font-headline text-2xl font-bold mb-6">Core Values</h3>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-base md:text-sm">
-                  {aboutData.coreValues.map(item => (
-                    <div key={item.value} className="flex items-center">
-                      <span className="font-bold text-lg">{item.letter}</span>
-                      <span className="ml-2">- {item.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+      {/* Mission */}
+      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:-mx-12">
+        <div>
+          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Mission</h3>
+          <ul className="space-y-3 text-primary-foreground/90 text-sm leading-relaxed">
+            {aboutData.mission.map((point, index) => (
+              <li key={index} className="flex items-start gap-3">
+                <CheckCircle className="h-4 w-4 mt-1 flex-shrink-0" />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
 
+      {/* Core Values */}
+      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:pl-4 mx-auto">
+        <div>
+          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {aboutData.coreValues.map(item => (
+              <div key={item.value} className="flex items-center">
+                <span className="font-bold text-base">{item.letter}</span>
+                <span className="ml-2">- {item.value}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </section>
+      </div>
+
+    </div>
+  </div>
+</section>
 
 
-      
-      <section className="py-12 md:py-24 mx-auto">
+
+      <section className="py-12 md:py-24 mx-auto px-4">
         <div className="container px-4 md:px-6">
           <div className="grid items-center gap-12 md:grid-cols-2 max-w-5xl mx-auto">
             <div className="flex justify-center order-2 md:order-1">
