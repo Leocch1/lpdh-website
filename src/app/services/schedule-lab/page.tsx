@@ -117,7 +117,7 @@ export default function ScheduleLabPage() {
 
       {/* Main Content */}
       <section className="py-12 md:py-24">
-        <div className="container">
+        <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
             
             {/* Test Selection */}

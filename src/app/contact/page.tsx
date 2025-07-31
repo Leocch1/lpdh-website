@@ -9,7 +9,7 @@ import Image from "next/image";
 export default function ContactPage() {
   return (
     <div className="flex flex-col">
-      <section className="py-12 md:py-24">
+      <section className="py-12 md:py-24 mx-auto px-4">
         <div className="container">
           <div className="max-w-5xl mx-auto">
             <Card className="overflow-hidden shadow-lg">

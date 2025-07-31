@@ -137,7 +137,7 @@ export default function CareersPage() {
       
       {/* Job Listings Section - Only show if data exists */}
       {jobListingsSection && (
-        <section id="openings" className="py-12 md:py-24">
+        <section id="openings" className="py-12 md:py-24 mx-auto px-4">
           <div className="container">
             <h2 className="font-headline text-center text-3xl font-bold tracking-tight text-primary sm:text-4xl">
               {jobListingsSection.sectionTitle}

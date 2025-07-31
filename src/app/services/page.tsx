@@ -163,7 +163,7 @@ export default function ServicesPage() {
       </section>
       {/* CTA Section */}
       <section id="appointment" className="bg-secondary py-12 md:py-24">
-        <div className="container">
+        <div className="container mx-auto px-4  ">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               Ready to Schedule Your Appointment?
