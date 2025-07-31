@@ -2,32 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
-import { Heart, Smile, Scissors } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { PrivacyNotice } from "@/components/privacy-notice"
 import React, { useEffect, useState } from "react"
-import { client, urlFor, HOMEPAGE_QUERY, TEST_QUERY } from "@/lib/sanity"
+import { client, urlFor, HOMEPAGE_QUERY } from "@/lib/sanity"
 import { HomepageData } from "@/types/sanity"
-
-const ToothIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="M12.5 5.5c-1-2.5-3-3-4.5-3-2.5 0-4.5 2-4.5 4.5 0 2.43 1.97 4.5 4.5 4.5h4.5c2.5 0 4.5-2.07 4.5-4.5 0-2.5-2-4.5-4.5-4.5-1.5 0-3.5.5-4.5 3Z" />
-    <path d="m18.5 11 .5 2.5" />
-    <path d="m5 11-.5 2.5" />
-    <path d="m17 16-1-1" />
-    <path d="m7 16 1-1" />
-    <path d="M15 19.5a2.5 2.5 0 0 1-5 0" />
-  </svg>
-)
-
-const PillIcon = (props: React.SVGProps<SVGSVGElement>) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-    <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z" />
-    <path d="m8.5 8.5 7 7" />
-  </svg>
-)
 
 export default function Home() {
   const [homepageData, setHomepageData] = useState<HomepageData | null>(null)
@@ -48,9 +29,10 @@ export default function Home() {
           if (!data) {
             const altQuery = `*[_type == "homepage"]{
               _id,
-              title,
               carouselImages,
-              legacySection
+              servicesSection,
+              legacySection,
+              hmoPartnersSection
             }`
             const altData = await client.fetch(altQuery)
             if (altData && altData.length > 0) {
@@ -71,13 +53,6 @@ export default function Home() {
     
     fetchData()
   }, [])
-
-  const services = [
-    { name: "Internal Medicine", icon: PillIcon, description: "Expert care for your heart's health." },
-    { name: "Dentistry", icon: ToothIcon, description: "Lorem ipsum dolor sit amet." },
-    { name: "Pediatrics", icon: Smile, description: "Compassionate care for your little ones." },
-    { name: "Surgery", icon: Scissors, description: "Lorem ipsum dolor sit amet." },
-  ]
 
   // Only use Sanity data - no fallbacks
   const heroImages = homepageData?.carouselImages?.filter(img => img?.asset).map(img => ({
@@ -130,6 +105,7 @@ export default function Home() {
     return css
   }
 
+  const servicesSection = homepageData?.servicesSection
   const legacySection = homepageData?.legacySection
   const legacyImageSrc = homepageData?.legacySection?.image 
     ? urlFor(homepageData.legacySection.image.asset).width(600).height(400).url()
@@ -139,6 +115,25 @@ export default function Home() {
   const hmoImageSrc = homepageData?.hmoPartnersSection?.image 
     ? urlFor(homepageData.hmoPartnersSection.image.asset).fit('max').width(1400).quality(85).format('webp').url()
     : null
+
+  // Only use services from Sanity - no fallbacks
+  const services = servicesSection?.services?.map(service => ({
+    name: service.name,
+    description: service.description,
+    iconSrc: service.icon ? urlFor(service.icon.asset).width(80).height(80).url() : null,
+    backgroundImageSrc: service.backgroundImage ? urlFor(service.backgroundImage.asset).width(400).height(300).quality(60).url() : null,
+    linkUrl: service.linkUrl || '#'
+  })) || []
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col overflow-x-hidden bg-background">
@@ -183,31 +178,127 @@ export default function Home() {
         </section>
       )}
 
-      <section id="services" className="py-12 md:py-24 ">
-        <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Our Services</h2>
-            <p className="mt-4 text-lg text-muted-foreground">
-              We offer a wide range of specialties to meet your healthcare needs.
-            </p>
+      {/* Only show services section if there's data from Sanity */}
+      {servicesSection && services.length > 0 && (
+        <section id="services" className="py-16 md:py-32">
+          <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8">
+            <div className="mx-auto max-w-4xl text-center">
+              <h2 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+                {servicesSection.title}
+              </h2>
+              <p className="mt-6 text-xl text-muted-foreground lg:text-2xl">
+                {servicesSection.description}
+              </p>
+            </div>
+            <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2">
+              {services.map((service, index) => {
+                const isClickable = service.linkUrl && service.linkUrl !== '#'
+
+                if (isClickable) {
+                  return (
+                    <Link key={service.name} href={service.linkUrl}>
+                      <Card 
+                        className="text-center transition-all duration-300 hover:shadow-lg relative overflow-hidden group min-h-[340px] md:min-h-[360px] cursor-pointer hover:scale-105"
+                      >
+                        {/* Background image with lower opacity */}
+                        {service.backgroundImageSrc && (
+                          <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                            <Image
+                              src={service.backgroundImageSrc}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 50vw"
+                            />
+                          </div>
+                        )}
+                        
+                        {/* Card content */}
+                        <div className="relative z-10 h-full flex flex-col">
+                          <CardHeader className="pb-3 flex-shrink-0">
+                            <div className="mx-auto mb-4 flex size-24 md:size-28 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                              {service.iconSrc && (
+                                <Image
+                                  src={service.iconSrc}
+                                  alt={`${service.name} icon`}
+                                  width={56}
+                                  height={56}
+                                  className="object-contain"
+                                />
+                              )}
+                            </div>
+                            <CardTitle className="text-2xl md:text-3xl font-bold leading-tight">
+                              {service.name}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="px-6 pb-4 flex-grow flex flex-col justify-between">
+                            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed text-center mb-4">
+                              {service.description}
+                            </p>
+                            
+                            {/* Learn More button inside card */}
+                            <div className="flex justify-center mt-auto">
+                              <div className="inline-flex items-center gap-2 text-primary font-medium text-sm group-hover:text-primary-foreground transition-colors">
+                                <span>LEARN MORE</span>
+                                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                              </div>
+                            </div>
+                          </CardContent>
+                        </div>
+                      </Card>
+                    </Link>
+                  )
+                }
+
+                return (
+                  <Card 
+                    key={service.name}
+                    className="text-center transition-all duration-300 hover:shadow-lg relative overflow-hidden group min-h-[340px] md:min-h-[360px]"
+                  >
+                    {/* Background image with lower opacity */}
+                    {service.backgroundImageSrc && (
+                      <div className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity duration-300">
+                        <Image
+                          src={service.backgroundImageSrc}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 50vw"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Card content */}
+                    <div className="relative z-10 h-full flex flex-col">
+                      <CardHeader className="pb-3 flex-shrink-0">
+                        <div className="mx-auto mb-4 flex size-24 md:size-28 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          {service.iconSrc && (
+                            <Image
+                              src={service.iconSrc}
+                              alt={`${service.name} icon`}
+                              width={56}
+                              height={56}
+                              className="object-contain"
+                            />
+                          )}
+                        </div>
+                        <CardTitle className="text-2xl md:text-3xl font-bold leading-tight">
+                          {service.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="px-6 pb-4 flex-grow flex flex-col justify-center">
+                        <p className="text-lg md:text-xl text-muted-foreground leading-relaxed text-center">
+                          {service.description}
+                        </p>
+                      </CardContent>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
           </div>
-          <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {services.map((service) => (
-              <Card key={service.name} className="text-center transition-shadow duration-300 hover:shadow-lg">
-                <CardHeader>
-                  <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <service.icon className="h-8 w-8" />
-                  </div>
-                  <CardTitle>{service.name}</CardTitle>
-                </CardHeader>
-              <CardContent>
-                 <p className="text-muted-foreground">{service.description}</p>
-              </CardContent>
-              </Card>
-              ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Only show legacy section if there's data from Sanity */}
       {legacySection && legacyImageSrc && (
