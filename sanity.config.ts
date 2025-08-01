@@ -63,6 +63,9 @@ export default defineConfig({
                     S.listItem()
                       .title('Job Openings')
                       .child(S.documentTypeList('jobOpening').title('Job Openings')),
+                    S.listItem()
+                      .title('Job Categories')
+                      .child(S.documentTypeList('jobCategory').title('Job Categories')),
                   ])
               ),
             S.listItem()
@@ -106,7 +109,7 @@ export default defineConfig({
                   ])
               ),
             ...S.documentTypeListItems().filter(
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment'].includes(listItem.getId() || '')
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment'].includes(listItem.getId() || '')
             ),
           ]),
     }),
