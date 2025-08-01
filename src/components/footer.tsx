@@ -4,14 +4,13 @@ import { Logo } from "./logo";
 
 export function Footer() {
   const socialLinks = [
-    { name: "Facebook", icon: Facebook, url: "#" },
+    { name: "Facebook", icon: Facebook, url: "https://www.facebook.com/LasPinasDoctorsHospitalOfficial" },
   ];
 
   const exploreLinks = [
     { href: "/", label: "Home" },
     { href: "/about", label: "About Us" },
     { href: "/services", label: "Our Services" },
-    { href: "/updates", label: "Updates" },
     { href: "/contact", label: "Contact Us" },
   ];
 
