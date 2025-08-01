@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Phone, Calendar, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Phone, Calendar, Star, ChevronLeft, ChevronRight, Building2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, DOCTORS_QUERY, DEPARTMENTS_QUERY, urlFor } from "@/lib/sanity";
@@ -168,7 +169,82 @@ export default function FindDoctorPage() {
                   {/* Department Selection */}
                   <div className="mb-6">
                     <h2 className="text-xl font-semibold text-green-600 mb-4">Select Department</h2>
-                    <div className="space-y-2">
+                    
+                    {/* Mobile Dropdown */}
+                    <div className="block md:hidden">
+                      <Select value={selectedSpecialty} onValueChange={setSelectedSpecialty}>
+                        <SelectTrigger className="w-full h-12 text-left border-gray-300">
+                          <div className="flex items-center gap-3">
+                            {selectedSpecialty === "All Specialties" ? (
+                              <Building2 className="h-5 w-5 text-green-600" />
+                            ) : (
+                              departments.find(dept => dept.name === selectedSpecialty)?.icon?.asset ? (
+                                <div className="relative w-5 h-5">
+                                  <Image
+                                    src={urlFor(departments.find(dept => dept.name === selectedSpecialty)!.icon!).url()}
+                                    alt={departments.find(dept => dept.name === selectedSpecialty)!.icon!.alt || `${selectedSpecialty} icon`}
+                                    fill
+                                    className="object-contain"
+                                  />
+                                </div>
+                              ) : (
+                                <span className="text-green-600">$</span>
+                              )
+                            )}
+                            <SelectValue placeholder="Select Department" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="All Specialties">
+                            <div className="flex items-center gap-3">
+                              <div className="relative w-4 h-4">
+                                <Image
+                                  src="/lpdh profile.png"
+                                  alt="LPDH Hospital Logo"
+                                  fill
+                                  className="object-contain"
+                                />
+                              </div>
+                              <span>All Departments</span>
+                            </div>
+                          </SelectItem>
+                          {departments.map((department) => (
+                            <SelectItem key={department._id} value={department.name}>
+                              <div className="flex items-center gap-3">
+                                <div className="w-4 h-4 flex items-center justify-center">
+                                  <span className="text-green-600 text-sm">•</span>
+                                </div>
+                                <span>{department.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Desktop Button List */}
+                    <div className="hidden md:block space-y-2">
+                      {/* All Specialties Button */}
+                      <Button
+                        variant={selectedSpecialty === "All Specialties" ? "default" : "outline"}
+                        className={`w-full justify-start h-12 text-left ${
+                          selectedSpecialty === "All Specialties" 
+                            ? "bg-green-600 hover:bg-green-700 text-white" 
+                            : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                        }`}
+                        onClick={() => setSelectedSpecialty("All Specialties")}
+                      >
+                        <div className="mr-3 flex items-center">
+                          <Building2 className={`h-5 w-5 ${
+                            selectedSpecialty === "All Specialties" 
+                              ? "text-white" 
+                              : "text-green-600"
+                          }`} />
+                        </div>
+                        All Departments
+                      </Button>
+                      
+                      {/* Department Buttons */}
                       {departments.map((department) => (
                         <Button
                           key={department._id}
@@ -178,7 +254,14 @@ export default function FindDoctorPage() {
                               ? "bg-green-600 hover:bg-green-700 text-white" 
                               : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
                           }`}
-                          onClick={() => setSelectedSpecialty(department.name)}
+                          onClick={() => {
+                            // If clicking on already selected department, unselect it
+                            if (selectedSpecialty === department.name) {
+                              setSelectedSpecialty("All Specialties");
+                            } else {
+                              setSelectedSpecialty(department.name);
+                            }
+                          }}
                         >
                           <div className="mr-3 flex items-center">
                             {department.icon && department.icon.asset ? (
@@ -216,7 +299,7 @@ export default function FindDoctorPage() {
                     : "Showing all doctors"
                   }
                   {totalPages > 1 && (
-                    <span> - Page {currentPage} of {totalPages} ({isMobile ? '6' : '9'} per page)</span>
+                    <span> - Page {currentPage} of {totalPages}</span>
                   )}
                 </p>
               </div>
