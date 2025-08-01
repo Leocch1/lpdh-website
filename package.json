@@ -21,6 +21,7 @@
     "@sanity/client": "^7.8.1",
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^4.1.1",
+    "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-autoplay": "^8.6.0",
@@ -33,7 +34,8 @@
     "react-dom": "19.1.0",
     "sanity": "^4.1.1",
     "styled-components": "^6.1.19",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

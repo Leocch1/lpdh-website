@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@sanity/client';
+import { v4 as uuidv4 } from 'uuid'; // Install uuid: npm install uuid @types/uuid
 
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
   useCdn: false,
   apiVersion: '2024-01-01',
-  token: process.env.SANITY_API_TOKEN!, // Server-side token
+  token: process.env.SANITY_API_TOKEN!,
 });
 
 export async function POST(request: NextRequest) {
@@ -35,8 +36,11 @@ export async function POST(request: NextRequest) {
       appointmentDate: appointmentData.date,
       appointmentTime: appointmentData.time,
       selectedTests: appointmentData.selectedTests.map((testId: string) => ({
-        _type: 'reference',
-        _ref: testId
+        _key: uuidv4(), // Generate unique key for each array item
+        test: {
+          _type: 'reference',
+          _ref: testId
+        }
       })),
       notes: appointmentData.notes || '',
       status: 'pending',
@@ -52,7 +56,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating appointment:', error);
     
-    // More detailed error handling
     if (error instanceof Error) {
       if (error.message.includes('Insufficient permissions')) {
         return NextResponse.json(
@@ -74,7 +77,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET method to fetch appointments (optional)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -92,7 +94,7 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json(appointments);
     } else {
-      // Fetch all appointments
+      // Fetch all appointments with populated test references
       const appointments = await writeClient.fetch(
         `*[_type == "appointment"] | order(appointmentDate desc, appointmentTime asc) {
           _id,
@@ -100,6 +102,15 @@ export async function GET(request: NextRequest) {
           patientInfo,
           appointmentDate,
           appointmentTime,
+          selectedTests[] {
+            _key,
+            test-> {
+              _id,
+              name,
+              category
+            }
+          },
+          notes,
           status,
           createdAt
         }`

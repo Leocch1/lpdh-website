@@ -560,7 +560,7 @@ export default function ScheduleLabPage() {
                       )}
                       {bookedTimes.length > 0 && formData.date && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          Booked times: {bookedTimes.join(', ')}
+                          Booked hours: {bookedTimes.join(', ')}
                         </p>
                       )}
                     </div>
@@ -585,27 +585,6 @@ export default function ScheduleLabPage() {
                       {submitting ? 'Scheduling...' : 'Schedule Appointment'}
                     </Button>
                   </form>
-                </CardContent>
-              </Card>
-
-              {/* Contact Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-primary" />
-                    <span>(02) 8825-5236</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>#8009 CAA Road, Pulanglupa II, Las Pinas City</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span>Mon-Sat: 8:00 AM - 5:00 PM</span>
-                  </div>
                 </CardContent>
               </Card>
             </div>

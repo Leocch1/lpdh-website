@@ -61,8 +61,28 @@ export const appointment = defineType({
       type: 'array',
       of: [
         {
-          type: 'reference',
-          to: [{ type: 'labTest' }]
+          type: 'object',
+          fields: [
+            {
+              name: 'test',
+              title: 'Lab Test',
+              type: 'reference',
+              to: [{ type: 'labTest' }],
+              validation: Rule => Rule.required()
+            }
+          ],
+          preview: {
+            select: {
+              title: 'test.name',
+              category: 'test.category'
+            },
+            prepare({ title, category }) {
+              return {
+                title: title || 'Unknown Test',
+                subtitle: category || 'No Category'
+              }
+            }
+          }
         }
       ],
       validation: Rule => Rule.min(1).error('At least one test must be selected')
@@ -122,6 +142,14 @@ export const appointment = defineType({
       by: [
         { field: 'appointmentDate', direction: 'desc' },
         { field: 'appointmentTime', direction: 'asc' }
+      ]
+    },
+    {
+      title: 'Status',
+      name: 'status',
+      by: [
+        { field: 'status', direction: 'asc' },
+        { field: 'appointmentDate', direction: 'desc' }
       ]
     }
   ]
