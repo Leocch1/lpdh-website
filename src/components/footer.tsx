@@ -71,7 +71,7 @@ export function Footer() {
                     <button 
                       key={link.label} 
                       onClick={link.onClick}
-                      className="text-sm text-white/80 hover:text-white text-left"
+                      className="text-sm text-white/80 hover:text-white text-center sm:text-left"
                     >
                       {link.label}
                     </button>
