@@ -1,11 +1,9 @@
-
 'use client';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Stethoscope, Eye, Bone, Smile, Pill, Syringe } from "lucide-react";
+import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, Plus, Minus } from "lucide-react";
 import Image from "next/image";
-import React from "react";
+import React, { useState } from "react";
 
 const OtorhinolaryngologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -16,7 +14,6 @@ const OtorhinolaryngologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <path d="M16 10V8a4 4 0 0 0-4-4" />
     </svg>
 );
-
 
 const ObGyneIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -46,22 +43,259 @@ const LungIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+// Service Card Component - FIXED for proper expansion
+const ServiceCard = ({ service, isOpen, onToggle }: { service: any, isOpen: boolean, onToggle: () => void }) => {
+  const IconComponent = service.icon;
+  
+  return (
+    <div className="w-full bg-white rounded-lg shadow-md border border-gray-100 hover:shadow-lg hover:border-primary/50 transition-all duration-300">
+      <button
+        onClick={onToggle}
+        className="w-full p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset rounded-lg"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4 min-w-0 flex-1">
+            <div className="flex-shrink-0">
+              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                isOpen ? 'bg-primary text-white' : 'bg-secondary text-primary hover:bg-secondary/80'
+              }`}>
+                <IconComponent className="h-6 w-6" />
+              </div>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className={`text-lg font-semibold transition-colors duration-200 ${
+                isOpen ? 'text-primary' : 'text-foreground hover:text-primary'
+              }`}>
+                {service.title}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1 truncate">
+                {service.subtitle || "Professional healthcare services"}
+              </p>
+            </div>
+          </div>
+          <div className="flex-shrink-0 ml-4">
+            {isOpen ? (
+              <Minus className="h-5 w-5 text-primary transition-colors duration-200" />
+            ) : (
+              <Plus className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-200" />
+            )}
+          </div>
+        </div>
+      </button>
+      
+      {isOpen && (
+        <div className="px-4 pb-4 pt-2 border-t border-gray-100">
+          <div className="border-l-4 border-primary/30 pl-4 mt-2">
+            {service.details.map((detail: string, index: number) => (
+              <p key={index} className="text-muted-foreground leading-relaxed mb-2 last:mb-0 text-sm">
+                {detail}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
-const serviceCategories = [
-  { title: "Internal Medicine", icon: Stethoscope, details: ["Primary care, consultations, and regular check-ups."] },
-  { title: "Ophthalmology", icon: Eye, details: ["Advanced imaging and laboratory tests for accurate diagnosis."] },
-  { title: "Anesthesiology", icon: Bone, details: ["Expert treatment in various medical fields."] },
-  { title: "Pediatrics", icon: Smile, details: ["A wide range of inpatient and outpatient surgical options."] },
-  { title: "Otorhinolaryngology", icon: OtorhinolaryngologyIcon, details: ["24/7 emergency room for immediate medical attention."] },
-  { title: "Pulmonary Dept.", icon: LungIcon, details: ["Programs to help you recover and maintain a healthy lifestyle."] },
-  { title: "OB Gyne", icon: ObGyneIcon, details: ["Details for OB Gyne services."] },
-  { title: "Dentistry", icon: DentistryIcon, details: ["Details for Dentistry services."] },
-  { title: "Others", icon: Pill, details: ["Details for Other services."] },
-  { title: "Surgery", icon: Syringe, details: ["Details for Surgery services."] },
-  { title: "Dermatology", icon: Stethoscope, details: ["Details for Dermatology services."] },
+// Updated service data with better descriptions
+const medicalServices = [
+  { 
+    title: "Internal Medicine", 
+    icon: Stethoscope, 
+    subtitle: "Primary Care",
+    details: [
+      "Comprehensive primary care consultations and regular health check-ups",
+      "Preventive medicine and health screenings",
+      "Management of chronic conditions and adult diseases"
+    ] 
+  },
+  { 
+    title: "Ophthalmology", 
+    icon: Eye, 
+    subtitle: "Eye Care",
+    details: [
+      "Complete eye examinations and vision assessments",
+      "Advanced diagnostic imaging and retinal analysis",
+      "Treatment of eye diseases and vision correction"
+    ] 
+  },
+  { 
+    title: "Anesthesiology", 
+    icon: Bone, 
+    subtitle: "Surgical Support",
+    details: [
+      "Pre-operative assessment and consultation",
+      "Safe anesthesia administration for all surgical procedures",
+      "Post-operative pain management and recovery monitoring"
+    ] 
+  },
+  { 
+    title: "Pediatrics", 
+    icon: Smile, 
+    subtitle: "Child Healthcare",
+    details: [
+      "Comprehensive pediatric care from infancy to adolescence",
+      "Childhood immunizations and developmental assessments",
+      "Treatment of childhood illnesses and growth monitoring"
+    ] 
+  },
+  { 
+    title: "Otorhinolaryngology", 
+    icon: OtorhinolaryngologyIcon, 
+    subtitle: "ENT Services",
+    details: [
+      "Diagnosis and treatment of ear, nose, and throat conditions",
+      "Hearing assessments and audiology services",
+      "Surgical and non-surgical ENT procedures"
+    ] 
+  },
+  { 
+    title: "Pulmonary Dept.", 
+    icon: LungIcon, 
+    subtitle: "Lung Care",
+    details: [
+      "Comprehensive respiratory system evaluation and treatment",
+      "Pulmonary function testing and sleep studies",
+      "Management of asthma, COPD, and other lung conditions"
+    ] 
+  },
+  { 
+    title: "OB Gyne", 
+    icon: ObGyneIcon, 
+    subtitle: "Women's Health",
+    details: [
+      "Comprehensive women's healthcare and reproductive services",
+      "Prenatal care, delivery, and postpartum support",
+      "Gynecological examinations and women's wellness programs"
+    ] 
+  },
+  { 
+    title: "Dentistry", 
+    icon: DentistryIcon, 
+    subtitle: "Oral Health",
+    details: [
+      "Complete dental examinations and oral health assessments",
+      "Preventive dentistry and professional cleanings",
+      "Restorative and cosmetic dental procedures"
+    ] 
+  },
+  { 
+    title: "Surgery", 
+    icon: Syringe, 
+    subtitle: "Surgical Care",
+    details: [
+      "Wide range of inpatient and outpatient surgical procedures",
+      "Minimally invasive laparoscopic surgery options",
+      "Expert surgical care with modern techniques and equipment"
+    ] 
+  },
+  { 
+    title: "Dermatology", 
+    icon: Stethoscope, 
+    subtitle: "Skin Care",
+    details: [
+      "Comprehensive skin health evaluations and treatments",
+      "Dermatological procedures and cosmetic services",
+      "Treatment of skin conditions and preventive care"
+    ] 
+  },
+  { 
+    title: "Others", 
+    icon: Pill, 
+    subtitle: "Additional Services",
+    details: [
+      "Specialized medical services and consultations",
+      "Multidisciplinary care and treatment options",
+      "Additional healthcare services as needed"
+    ] 
+  }
+];
+
+const clinicalServices = [
+  { 
+    title: "Laboratory Services", 
+    icon: Pill, 
+    subtitle: "Diagnostic Testing",
+    details: [
+      "Complete blood chemistry panels and hematology testing",
+      "Microbiology and infectious disease diagnostics",
+      "Specialized laboratory tests and rapid result processing"
+    ] 
+  },
+  { 
+    title: "Radiology & Imaging", 
+    icon: Eye, 
+    subtitle: "Medical Imaging",
+    details: [
+      "Digital X-rays, CT scans, and MRI imaging services",
+      "Ultrasound and Doppler studies",
+      "Advanced imaging interpretation by certified radiologists"
+    ] 
+  },
+  { 
+    title: "Emergency Services", 
+    icon: Stethoscope, 
+    subtitle: "24/7 Emergency Care",
+    details: [
+      "Round-the-clock emergency medical services",
+      "Trauma care and critical patient stabilization",
+      "Emergency diagnostic and treatment capabilities"
+    ] 
+  },
+  { 
+    title: "Pharmacy Services", 
+    icon: Pill, 
+    subtitle: "Medication Management",
+    details: [
+      "In-house pharmacy with comprehensive medication dispensing",
+      "Medication counseling and drug interaction screening",
+      "Specialized pharmaceutical compounding services"
+    ] 
+  },
+  { 
+    title: "Physical Therapy", 
+    icon: Bone, 
+    subtitle: "Rehabilitation",
+    details: [
+      "Comprehensive rehabilitation and physical therapy programs",
+      "Post-surgical recovery and mobility restoration",
+      "Pain management and therapeutic exercise programs"
+    ] 
+  },
+  { 
+    title: "Cardiology Services", 
+    icon: Stethoscope, 
+    subtitle: "Heart Care",
+    details: [
+      "Comprehensive cardiac evaluations and diagnostics",
+      "ECG, echocardiography, and stress testing",
+      "Heart disease prevention and management programs"
+    ] 
+  }
 ];
 
 export default function ServicesPage() {
+  const [activeTab, setActiveTab] = useState<'medical' | 'clinical'>('medical');
+  const [openItems, setOpenItems] = useState(new Set<number>());
+
+  const toggleItem = (index: number) => {
+    // If clicking the currently open item, close it
+    if (openItems.has(index)) {
+      setOpenItems(new Set());
+    } else {
+      // Otherwise, close any open item and open the clicked one
+      setOpenItems(new Set([index]));
+    }
+  };
+
+  const handleTabChange = (tab: 'medical' | 'clinical') => {
+    setActiveTab(tab);
+    setOpenItems(new Set()); // Close all items when switching tabs
+  };
+
+  const currentServices = activeTab === 'medical' ? medicalServices : clinicalServices;
+
   return (
     <div className="flex flex-col mx-auto">
       <section className="bg-white py-12 md:py-20">
@@ -133,34 +367,73 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="py-12 md:py-24 bg-background">
-        <div className="container mx-auto px-4">
+      {/* What We Offer Section - FIXED CARD EXPANSION */}
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4 max-w-7xl">
+          {/* Header */}
           <div className="text-center mb-12">
-            <h2 className="font-extrabold text-4xl text-primary">Services</h2>
+            <h2 className="text-4xl font-bold text-primary mb-4">
+              What We Offer
+            </h2>
+            <div className="w-24 h-1 bg-primary mx-auto rounded-full mb-6"></div>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive healthcare services delivered by our expert medical professionals
+            </p>
           </div>
-          <div className="mx-auto max-w-6xl">
-            <Accordion type="single" collapsible className="w-full grid md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-              {serviceCategories.map((category, index) => (
-                <AccordionItem 
-                    value={`item-${index}`} 
-                    key={index} 
-                    className="bg-white p-4 rounded-lg shadow-md border-b-0"
-                >
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline text-left">
-                    <div className="flex items-center gap-4">
-                      <category.icon className="h-6 w-6 text-primary" />
-                      <span>{category.title}</span>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="pt-2 text-base text-muted-foreground">
-                    {category.details.map((detail, i) => <p key={i}>{detail}</p>)}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+
+          {/* Tab Navigation */}
+          <div className="flex justify-center mb-12">
+            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
+              <button
+                onClick={() => handleTabChange('medical')}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                  activeTab === 'medical'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-primary'
+                }`}
+              >
+                Our Services
+              </button>
+              <button
+                onClick={() => handleTabChange('clinical')}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                  activeTab === 'clinical'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-muted-foreground hover:text-primary'
+                }`}
+              >
+                Clinical Services
+              </button>
+            </div>
+          </div>
+
+          {/* Services Grid - FIXED LAYOUT WITH STABLE POSITIONS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-auto">
+            {currentServices.map((service, index) => (
+              <div 
+                key={`${activeTab}-${index}`} 
+                style={{ gridRow: `span ${openItems.has(index) ? 2 : 1}` }}
+              >
+                <ServiceCard
+                  service={service}
+                  isOpen={openItems.has(index)}
+                  onToggle={() => toggleItem(index)}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Tab Indicator for Mobile */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-semibold text-primary">
+                {activeTab === 'medical' ? 'Our Services' : 'Clinical Services'}
+              </span> • {currentServices.length} services available
+            </p>
           </div>
         </div>
       </section>
+
       {/* CTA Section */}
       <section id="appointment" className="bg-secondary py-12 md:py-24">
         <div className="container mx-auto px-4  ">
