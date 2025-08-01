@@ -251,3 +251,54 @@ export interface HistoryPage {
   heroSection: HistoryHeroSection
   historySections: HistorySection[]
 }
+
+export interface AdmissionSection {
+  sectionTitle: string;
+  sectionType: 'standard' | 'guidelines' | 'imageInfo' | 'emergency';
+  backgroundColor: 'white' | 'secondary'; // Removed 'primary'
+  description?: string[];
+  guidelines?: Array<{
+    text: string;
+  }>;
+  image?: {
+    asset: {
+      _id: string;
+      url: string;
+    };
+  };
+  imagePosition?: 'left' | 'right' | 'center';
+  isActive: boolean;
+  order: number;
+}
+
+export interface AdmissionData {
+  _id: string;
+  title: string;
+  heroSection?: {
+    title: string;
+    subtitle: string;
+  };
+  admissionInfo?: {
+    description?: string[];
+    guidelines?: Array<{
+      text: string;
+    }>;
+  };
+  sections?: AdmissionSection[];
+  dataPrivacySection?: {
+    title: string;
+    subtitle: string;
+    description: string;
+    isActive: boolean;
+  };
+  philhealthSection?: {
+    logo?: {
+      asset: {
+        _id: string;
+        url: string;
+      };
+    };
+    description: string;
+    isActive: boolean;
+  };
+}

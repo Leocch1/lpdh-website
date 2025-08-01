@@ -286,3 +286,53 @@ export const HISTORY_PAGE_QUERY = `*[_type == "historyPage"] | order(_updatedAt 
     content
   }
 }`
+
+// Admission page query
+export const ADMISSION_QUERY = `*[_type == "admission"][0] {
+  _id,
+  title,
+  heroSection {
+    title,
+    subtitle
+  },
+  admissionInfo {
+    description,
+    guidelines[] {
+      text
+    }
+  },
+  sections[] {
+    sectionTitle,
+    sectionType,
+    backgroundColor,
+    description,
+    guidelines[] {
+      text
+    },
+    image {
+      asset-> {
+        _id,
+        url
+      }
+    },
+    imagePosition,
+    isActive,
+    order
+  } | order(order asc),
+  dataPrivacySection {
+    title,
+    subtitle,
+    description,
+    isActive
+  },
+  philhealthSection {
+    logo {
+      asset-> {
+        _id,
+        url
+      }
+    },
+    description,
+    isActive
+  }
+}`;
