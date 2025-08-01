@@ -255,55 +255,54 @@ export default function AboutPage() {
         </div>
       </section>
 
-     <section className="text-primary-foreground py-6" style={{ backgroundColor: '#169A53' }}>
-  <div className="container px-4 md:px-6 mx-auto">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 max-w-6xl mx-auto">
+      <section className="text-primary-foreground py-6" style={{ backgroundColor: '#097747' }}>
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-2 max-w-full mx-auto">
 
-      {/* Vision */}
-      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:pr-4">
-        <div>
-          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Vision</h3>
-          <p className="text-primary-foreground/90 text-sm leading-relaxed">
-            {aboutData.vision}
-          </p>
-        </div>
-      </div>
-
-      {/* Mission */}
-      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:-mx-12">
-        <div>
-          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Mission</h3>
-          <ul className="space-y-3 text-primary-foreground/90 text-sm leading-relaxed">
-            {aboutData.mission.map((point, index) => (
-              <li key={index} className="flex items-start gap-3">
-                <CheckCircle className="h-4 w-4 mt-1 flex-shrink-0" />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-
-      {/* Core Values */}
-      <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:pl-4 mx-auto">
-        <div>
-          <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-            {aboutData.coreValues.map(item => (
-              <div key={item.value} className="flex items-center">
-                <span className="font-bold text-base">{item.letter}</span>
-                <span className="ml-2">- {item.value}</span>
-              </div>
-            ))}
+              {/* Vision */}
+        <div className="flex flex-col justify-center text-center mx-8 px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1">
+          <div className="px-8"> {/* inner padding to push content inward */}
+            <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Vision</h3>
+            <p className="text-primary-foreground/90 text-sm leading-relaxed">
+              {aboutData.vision}
+            </p>
           </div>
         </div>
-      </div>
 
-    </div>
-  </div>
-</section>
+        {/* Mission */}
+        <div className="flex flex-col justify-center text-center px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-2">
+          <div className="mx-20"> {/* inner content padding to push content right */}
+            <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Mission</h3>
+            <ul className="space-y-3 text-primary-foreground/90 text-sm leading-relaxed">
+              {aboutData.mission.map((point, index) => (
+                <li key={index} className="flex items-start gap-3">
+                  <CheckCircle className="h-4 w-4 mt-1 flex-shrink-0" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
 
+              {/* Core Values */}
+              <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:pl-4 mx-10">
+                <div>
+                  <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                    {aboutData.coreValues.map(item => (
+                      <div key={item.value} className="flex items-center">
+                        <span className="font-bold text-base">{item.letter}</span>
+                        <span className="ml-2">- {item.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </section>
 
       <section className="py-12 md:py-24 mx-auto px-4">
         <div className="container px-4 md:px-6">
