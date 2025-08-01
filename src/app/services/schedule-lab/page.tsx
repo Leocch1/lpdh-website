@@ -16,37 +16,37 @@ const labTests = [
   {
     category: "Blood Tests",
     tests: [
-      { name: "Complete Blood Count (CBC)", price: "₱800", duration: "2-4 hours" },
-      { name: "Blood Chemistry Panel", price: "₱1,200", duration: "4-6 hours" },
-      { name: "Lipid Profile", price: "₱900", duration: "2-4 hours" },
-      { name: "Thyroid Function Test", price: "₱1,500", duration: "1-2 days" },
-      { name: "Liver Function Test", price: "₱1,100", duration: "4-6 hours" }
+      { name: "Complete Blood Count (CBC)", duration: "2-4 hours" },
+      { name: "Blood Chemistry Panel", duration: "4-6 hours" },
+      { name: "Lipid Profile", duration: "2-4 hours" },
+      { name: "Thyroid Function Test", duration: "1-2 days" },
+      { name: "Liver Function Test", duration: "4-6 hours" }
     ]
   },
   {
     category: "Urine Tests",
     tests: [
-      { name: "Urinalysis", price: "₱300", duration: "1-2 hours" },
-      { name: "Urine Culture", price: "₱800", duration: "2-3 days" },
-      { name: "24-Hour Urine Collection", price: "₱1,000", duration: "1-2 days" }
+      { name: "Urinalysis", duration: "1-2 hours" },
+      { name: "Urine Culture", duration: "2-3 days" },
+      { name: "24-Hour Urine Collection", duration: "1-2 days" }
     ]
   },
   {
     category: "Imaging",
     tests: [
-      { name: "X-Ray", price: "₱1,500", duration: "30 minutes" },
-      { name: "Ultrasound", price: "₱2,500", duration: "1-2 hours" },
-      { name: "CT Scan", price: "₱8,000", duration: "2-4 hours" },
-      { name: "MRI", price: "₱15,000", duration: "1-2 days" }
+      { name: "X-Ray", duration: "30 minutes" },
+      { name: "Ultrasound", duration: "1-2 hours" },
+      { name: "CT Scan", duration: "2-4 hours" },
+      { name: "MRI", duration: "1-2 days" }
     ]
   },
   {
     category: "Special Tests",
     tests: [
-      { name: "ECG/EKG", price: "₱800", duration: "30 minutes" },
-      { name: "Stress Test", price: "₱3,500", duration: "2-3 hours" },
-      { name: "Endoscopy", price: "₱8,000", duration: "Same day" },
-      { name: "Colonoscopy", price: "₱12,000", duration: "Same day" }
+      { name: "ECG/EKG", duration: "30 minutes" },
+      { name: "Stress Test", duration: "2-3 hours" },
+      { name: "Endoscopy", duration: "Same day" },
+      { name: "Colonoscopy", duration: "Same day" }
     ]
   }
 ];
@@ -79,18 +79,6 @@ export default function ScheduleLabPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('Lab appointment request submitted! We will contact you shortly to confirm.');
-  };
-
-  const getTotalPrice = () => {
-    let total = 0;
-    labTests.forEach(category => {
-      category.tests.forEach(test => {
-        if (selectedTests.includes(test.name)) {
-          total += parseInt(test.price.replace('₱', '').replace(',', ''));
-        }
-      });
-    });
-    return total;
   };
 
   return (
@@ -155,7 +143,6 @@ export default function ScheduleLabPage() {
                                   <h4 className="font-medium">{test.name}</h4>
                                 </div>
                                 <div className="flex gap-4 mt-2 ml-7">
-                                  <Badge variant="secondary">{test.price}</Badge>
                                   <Badge variant="outline">{test.duration}</Badge>
                                 </div>
                               </div>
@@ -177,9 +164,6 @@ export default function ScheduleLabPage() {
                   {selectedTests.length > 0 && (
                     <div className="text-sm text-muted-foreground">
                       {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
-                      <div className="font-semibold text-primary text-lg mt-1">
-                        Total: ₱{getTotalPrice().toLocaleString()}
-                      </div>
                     </div>
                   )}
                 </CardHeader>
