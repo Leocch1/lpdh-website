@@ -2,17 +2,16 @@ import { createClient } from '@sanity/client'
 import imageUrlBuilder from '@sanity/image-url'
 
 export const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || 'your-project-id',
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  apiVersion: '2023-12-01',
-  useCdn: false, // Set to true in production for better performance
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+  useCdn: false,
+  apiVersion: '2024-01-01',
+  token: process.env.NEXT_PUBLIC_SANITY_TOKEN, // Use public env var for client-side
 })
 
 const builder = imageUrlBuilder(client)
 
-export function urlFor(source: any) {
-  return builder.image(source)
-}
+export const urlFor = (source: any) => builder.image(source)
 
 // GROQ queries
 export const HOMEPAGE_QUERY = `*[_type == "homepage"] | order(_updatedAt desc) [0]{

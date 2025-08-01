@@ -302,3 +302,40 @@ export interface AdmissionData {
     isActive: boolean;
   };
 }
+
+export interface LabTest {
+  _id: string;
+  name: string;
+  category: string;
+  duration: string;
+  isActive: boolean;
+  order: number;
+  availableDays: string[];
+  availableTimeSlots: string[];
+  preparationNotes?: string;
+  resultTime?: string;
+}
+
+export interface ScheduleLabPageData {
+  _id: string;
+  heroSection: {
+    title: string;
+    subtitle: string;
+    backgroundImage?: {
+      asset: any;
+    };
+  };
+  mainContent: {
+    sectionTitle: string;
+    description: string;
+  };
+  infoSection: {
+    title: string;
+    infoCards: Array<{
+      _key: string;
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
+}

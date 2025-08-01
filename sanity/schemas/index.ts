@@ -10,5 +10,8 @@ import aboutPage from './aboutPage'
 import historyPage from './historyPage'
 import healthAdvisory from './healthAdvisory'
 import newsUpdate from './newsUpdate'
+import { appointment } from './appointment'
+import { scheduleLabPage } from './scheduleLabPage'
+import { labTest } from './labTest'
 
-export const schemaTypes = [homepage, careers, jobOpening,jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate]
+export const schemaTypes = [homepage, careers, jobOpening, jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate, appointment, scheduleLabPage, labTest]
