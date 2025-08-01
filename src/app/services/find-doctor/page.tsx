@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Phone, Calendar, Star } from "lucide-react";
+import { Search, Phone, Calendar, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, DOCTORS_QUERY, DEPARTMENTS_QUERY, urlFor } from "@/lib/sanity";
@@ -17,6 +17,22 @@ export default function FindDoctorPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Dynamic doctors per page based on screen size
+  const doctorsPerPage = isMobile ? 6 : 9;
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,6 +53,11 @@ export default function FindDoctorPage() {
 
     fetchData();
   }, []);
+
+  // Reset to first page when filters change or screen size changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedSpecialty, isMobile]);
   
   const filteredDoctors = doctors.filter(doctor => {
     const matchesSearch = doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -48,7 +69,25 @@ export default function FindDoctorPage() {
     return matchesSearch && matchesSpecialty;
   });
 
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredDoctors.length / doctorsPerPage);
+  const startIndex = (currentPage - 1) * doctorsPerPage;
+  const endIndex = startIndex + doctorsPerPage;
+  const currentDoctors = filteredDoctors.slice(startIndex, endIndex);
+
   const specialties = ["All Specialties", ...departments.map(dept => dept.name)];
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top of results
+    document.getElementById('doctors-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setSelectedSpecialty("All Specialties");
+    setCurrentPage(1);
+  };
 
   if (loading) {
     return (
@@ -106,7 +145,7 @@ export default function FindDoctorPage() {
       </section>
 
       {/* Main Content Section */}
-      <section className="py-12 bg-gray-50 min-h-screen mx-auto px-4">
+      <section id="doctors-section" className="py-12 bg-gray-50 min-h-screen mx-auto px-4">
         <div className="container">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Left Sidebar - Search and Department Selection */}
@@ -166,118 +205,198 @@ export default function FindDoctorPage() {
 
             {/* Right Content - Doctor Cards */}
             <div className="lg:col-span-3">
-              {selectedSpecialty !== "All Specialties" && (
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-foreground lg:text-3xl">
-                    {filteredDoctors.length} Doctor{filteredDoctors.length !== 1 ? 's' : ''} Found
-                  </h2>
-                  <p className="text-muted-foreground lg:text-lg">
-                    Showing {selectedSpecialty} specialists
-                  </p>
-                </div>
-              )}
+              {/* Results Header */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-foreground lg:text-3xl">
+                  {filteredDoctors.length} Doctor{filteredDoctors.length !== 1 ? 's' : ''} Found
+                </h2>
+                <p className="text-muted-foreground lg:text-lg">
+                  {selectedSpecialty !== "All Specialties" 
+                    ? `Showing ${selectedSpecialty} specialists` 
+                    : "Showing all doctors"
+                  }
+                  {totalPages > 1 && (
+                    <span> - Page {currentPage} of {totalPages} ({isMobile ? '6' : '9'} per page)</span>
+                  )}
+                </p>
+              </div>
 
-              {filteredDoctors.length > 0 ? (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 xl:gap-8">
-                  {filteredDoctors.map((doctor) => (
-                    <Card key={doctor._id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white">
-                      <CardHeader className="pb-4">
-                        <div className="flex flex-col items-center text-center gap-4">
-                          <div className="relative w-16 h-16 rounded-full overflow-hidden bg-secondary lg:w-20 lg:h-20">
-                            {doctor.image ? (
-                              <Image
-                                src={urlFor(doctor.image).url()}
-                                alt={doctor.image.alt || doctor.name}
-                                fill
-                                className="object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full bg-green-600 flex items-center justify-center">
-                                <span className="text-white text-xl font-bold">
-                                  {doctor.name.split(' ')[1]?.[0] || doctor.name[0]}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-lg lg:text-xl">{doctor.name}</CardTitle>
-                            
-                            {/* Display multiple specialties */}
-                            <div className="mt-1 flex flex-wrap gap-1 justify-center">
-                              {doctor.medicalSpecialty && doctor.medicalSpecialty.length > 0 ? (
-                                doctor.medicalSpecialty.map((specialty) => (
-                                  <Badge key={specialty._id} variant="secondary" className="text-xs">
-                                    {specialty.name}
-                                  </Badge>
-                                ))
-                              ) : null}
+              {currentDoctors.length > 0 ? (
+                <>
+                  {/* Doctor Cards Grid - Responsive: 2 cols on mobile, 2 on md, 3 on xl */}
+                  <div className="grid grid-cols-2 gap-4 md:grid-cols-2 xl:grid-cols-3 xl:gap-8 mb-8">
+                    {currentDoctors.map((doctor) => (
+                      <Card key={doctor._id} className="overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-[1.02] bg-white">
+                        <CardHeader className="pb-3 md:pb-4">
+                          <div className="flex flex-col items-center text-center gap-2 md:gap-4">
+                            <div className="relative w-12 h-12 rounded-full overflow-hidden bg-secondary md:w-16 md:h-16 lg:w-20 lg:h-20">
+                              {doctor.image ? (
+                                <Image
+                                  src={urlFor(doctor.image).url()}
+                                  alt={doctor.image.alt || doctor.name}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-green-600 flex items-center justify-center">
+                                  <span className="text-white text-sm md:text-xl font-bold">
+                                    {doctor.name.split(' ')[1]?.[0] || doctor.name[0]}
+                                  </span>
+                                </div>
+                              )}
                             </div>
-                            
-                            {/* Strictly by Appointment Badge */}
-                            {doctor.strictlyByAppointment && (
-                              <div className="mt-2">
-                                <Badge className="bg-red-100 text-red-700 text-xs px-2 py-1">
-                                  Strictly by Appointment
-                                </Badge>
+                            <div className="flex-1">
+                              <CardTitle className="text-sm md:text-lg lg:text-xl leading-tight">
+                                {doctor.name}
+                              </CardTitle>
+                              
+                              {/* Display multiple specialties */}
+                              <div className="mt-1 flex flex-wrap gap-1 justify-center">
+                                {doctor.medicalSpecialty && doctor.medicalSpecialty.length > 0 ? (
+                                  doctor.medicalSpecialty.slice(0, isMobile ? 1 : 2).map((specialty) => (
+                                    <Badge key={specialty._id} variant="secondary" className="text-xs">
+                                      {specialty.name}
+                                    </Badge>
+                                  ))
+                                ) : null}
                               </div>
-                            )}
+                              
+                              {/* Strictly by Appointment Badge */}
+                              {doctor.strictlyByAppointment && (
+                                <div className="mt-1 md:mt-2">
+                                  <Badge className="bg-red-100 text-red-700 text-xs px-1 py-0.5 md:px-2 md:py-1">
+                                    By Appointment
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4 text-left">
-                        {/* Room Number */}
-                        {doctor.roomNumber && (
-                          <div>
-                            <p className="text-sm text-muted-foreground">Room No.</p>
-                            <p className="text-sm font-medium">{doctor.roomNumber}</p>
-                          </div>
-                        )}
-
-                        {/* Phone/Tel Local */}
-                        <div>
-                          <p className="text-sm text-muted-foreground">Tel. Local</p>
-                          <p className="text-sm font-medium">{doctor.phone}</p>
-                        </div>
-
-                        {/* Schedule */}
-                        <div>
-                          <p className="text-sm text-muted-foreground">Schedule</p>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {doctor.availableDays.map((day) => (
-                              <Badge key={day} variant="outline" className="text-xs">
-                                {day}
-                              </Badge>
-                            ))}
-                          </div>
-                          {doctor.availabilityTime && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {doctor.availabilityTime}
-                            </p>
+                        </CardHeader>
+                        <CardContent className="space-y-2 md:space-y-4 text-left p-3 md:p-6">
+                          {/* Room Number */}
+                          {doctor.roomNumber && (
+                            <div>
+                              <p className="text-xs md:text-sm text-muted-foreground">Room No.</p>
+                              <p className="text-xs md:text-sm font-medium">{doctor.roomNumber}</p>
+                            </div>
                           )}
-                        </div>
 
-                        {/* Secretary Info */}
-                        {doctor.secretary && (
+                          {/* Phone/Tel Local */}
                           <div>
-                            <p className="text-sm text-muted-foreground">Secretary</p>
-                            <p className="text-xs font-medium">{doctor.secretary}</p>
-                            {doctor.secretary2 && (
-                              <p className="text-xs font-medium mt-1">{doctor.secretary2}</p>
+                            <p className="text-xs md:text-sm text-muted-foreground">Tel. Local</p>
+                            <p className="text-xs md:text-sm font-medium">{doctor.phone}</p>
+                          </div>
+
+                          {/* Schedule */}
+                          <div>
+                            <p className="text-xs md:text-sm text-muted-foreground">Schedule</p>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {doctor.availableDays.slice(0, isMobile ? 3 : 7).map((day) => (
+                                <Badge key={day} variant="outline" className="text-xs">
+                                  {isMobile ? day.slice(0, 3) : day}
+                                </Badge>
+                              ))}
+                            </div>
+                            {doctor.availabilityTime && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {doctor.availabilityTime}
+                              </p>
                             )}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              ) : (
+
+                          {/* Secretary Info - Show only on larger screens */}
+                          {doctor.secretary && !isMobile && (
+                            <div>
+                              <p className="text-sm text-muted-foreground">Secretary</p>
+                              <p className="text-xs font-medium">{doctor.secretary}</p>
+                              {doctor.secretary2 && (
+                                <p className="text-xs font-medium mt-1">{doctor.secretary2}</p>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="flex items-center gap-2"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                          <span className="hidden sm:inline">Previous</span>
+                          <span className="sm:hidden">Prev</span>
+                        </Button>
+
+                        <div className="flex items-center gap-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                            // Show first page, last page, current page, and pages around current page
+                            const shouldShow = 
+                              page === 1 ||
+                              page === totalPages ||
+                              (page >= currentPage - 1 && page <= currentPage + 1);
+
+                            if (!shouldShow) {
+                              // Show ellipsis for gaps
+                              if (page === currentPage - 2 || page === currentPage + 2) {
+                                return (
+                                  <span key={page} className="px-2 text-muted-foreground">
+                                    ...
+                                  </span>
+                                );
+                              }
+                              return null;
+                            }
+
+                            return (
+                              <Button
+                                key={page}
+                                variant={currentPage === page ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => handlePageChange(page)}
+                                className={`w-8 h-8 md:w-10 md:h-10 ${
+                                  currentPage === page 
+                                    ? "bg-green-600 hover:bg-green-700 text-white" 
+                                    : ""
+                                }`}
+                              >
+                                {page}
+                              </Button>
+                            );
+                          })}
+                        </div>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="flex items-center gap-2"
+                        >
+                          <span className="hidden sm:inline">Next</span>
+                          <span className="sm:hidden">Next</span>
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <p className="text-sm text-muted-foreground">
+                        Showing {startIndex + 1}-{Math.min(endIndex, filteredDoctors.length)} of {filteredDoctors.length} doctors
+                      </p>
+                    </div>
+                  )}
+                </>
+              ) : ( 
                 <div className="text-center py-12">
                   <p className="text-lg text-muted-foreground">No doctors found matching your criteria.</p>
                   <Button 
-                    onClick={() => {
-                      setSearchTerm("");
-                      setSelectedSpecialty("All Specialties");
-                    }}
+                    onClick={clearFilters}
                     variant="outline"
                     className="mt-4"
                   >
@@ -292,7 +411,7 @@ export default function FindDoctorPage() {
 
       {/* CTA Section */}
       <section className="bg-secondary py-12 md:py-24">
-        <div className="container px-4 text-center md:px-6">
+        <div className="container mx-auto max-w-4xl px-4 text-center md:px-6">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Need Help Finding the Right Doctor?
           </h2>
