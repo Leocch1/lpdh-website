@@ -57,11 +57,30 @@ export function Header() {
   const [mobileServicesDropdownOpen, setMobileServicesDropdownOpen] = useState(false);
   const [isIsoImageOpen, setIsIsoImageOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const lastDirection = useRef<'up' | 'down' | null>(null);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      const offset = window.scrollY;
-      setIsScrolled(offset > 80); // 80px is the height of upper header (h-20)
+      const currentScroll = window.scrollY;
+      const threshold = 80; // height of upper header (h-20)
+      
+      // Determine scroll direction
+      const direction = currentScroll > lastScrollY.current ? 'down' : 'up';
+      
+      // Only update state if we've moved far enough in the same direction
+      if (direction !== lastDirection.current) {
+        // Direction changed, need to move at least 20px in new direction
+        if (Math.abs(currentScroll - lastScrollY.current) > 20) {
+          lastDirection.current = direction;
+          setIsScrolled(currentScroll > threshold);
+        }
+      } else {
+        // Same direction, update normally
+        setIsScrolled(currentScroll > threshold);
+      }
+      
+      lastScrollY.current = currentScroll;
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -132,7 +151,7 @@ export function Header() {
           
           {/* Desktop Dropdown */}
           {!isMobile && isDropdownOpen && (
-            <div className="hidden md:block absolute left-0 top-full pt-2 z-50">
+            <div className="hidden lg:block absolute left-0 top-full pt-2 z-50">
               <div className="bg-white rounded-lg shadow-xl border border-slate-200 min-w-[200px] py-2">
                 {dropdown.map((item) => (
                   <Link
@@ -172,7 +191,7 @@ export function Header() {
     <div className="sticky top-0 z-50 w-full bg-white shadow-md">
       {/* Upper Header - Contact Info */}
       <div className={cn(
-        "hidden bg-slate-50 border-b border-slate-200 text-sm md:block transition-all duration-300",
+        "hidden bg-slate-50 border-b border-slate-200 text-sm lg:block transition-all duration-300",
         isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-20 opacity-100"
       )}>
         <div className="w-full px-12 sm:px-16 lg:px-20 h-full">
@@ -258,7 +277,7 @@ export function Header() {
         <div className="w-full px-12 sm:px-16 lg:px-20">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile: Hamburger */}
-            <div className="flex-shrink-0 md:hidden">
+            <div className="flex-shrink-0 lg:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-slate-700 hover:text-primary hover:bg-slate-100">
@@ -346,17 +365,17 @@ export function Header() {
             </div>
             
              {/* Mobile: Logo in center (no buttons beside it) */}
-             <div className="flex justify-center md:hidden flex-1">
+             <div className="flex justify-center lg:hidden flex-1">
               <Link href="/" className="transition-opacity hover:opacity-80 scale-75">
                 <Logo />
               </Link>
             </div>
 
             {/* Mobile: Empty div to maintain flexbox layout */}
-            <div className="flex-shrink-0 md:hidden w-10"></div>
+            <div className="flex-shrink-0 lg:hidden w-10"></div>
 
             {/* Desktop Nav - Starts from left, with logo */}
-            <div className="hidden md:flex items-center gap-8 flex-1">
+            <div className="hidden lg:flex items-center gap-8 flex-1">
               <div className={cn(
                 "transition-all duration-300",
                 isScrolled ? "opacity-100 scale-75" : "opacity-0 scale-0 w-0"
@@ -373,7 +392,7 @@ export function Header() {
             </div>
 
             {/* Desktop: CTA Buttons */}
-            <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
+            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
               {isScrolled && (
                 <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
                   <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
