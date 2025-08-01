@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@sanity/client';
-import { v4 as uuidv4 } from 'uuid'; // Install uuid: npm install uuid @types/uuid
 
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
@@ -9,6 +8,12 @@ const writeClient = createClient({
   apiVersion: '2024-01-01',
   token: process.env.SANITY_API_TOKEN!,
 });
+
+// Phone number validation function
+const validatePhoneNumber = (phone: string) => {
+  const digitsOnly = phone.replace(/\D/g, '');
+  return digitsOnly.length === 11 && /^\d{11}$/.test(digitsOnly);
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,6 +29,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate phone number
+    if (!validatePhoneNumber(appointmentData.phone)) {
+      return NextResponse.json(
+        { error: 'Phone number must be exactly 11 digits' },
+        { status: 400 }
+      );
+    }
+
+    // Clean phone number (ensure only digits)
+    const cleanPhone = appointmentData.phone.replace(/\D/g, '');
+
     const appointment = {
       _type: 'appointment',
       appointmentNumber: `APT-${Date.now()}`,
@@ -31,12 +47,12 @@ export async function POST(request: NextRequest) {
         firstName: appointmentData.firstName,
         lastName: appointmentData.lastName,
         email: appointmentData.email,
-        phone: appointmentData.phone
+        phone: cleanPhone
       },
       appointmentDate: appointmentData.date,
       appointmentTime: appointmentData.time,
-      selectedTests: appointmentData.selectedTests.map((testId: string) => ({
-        _key: uuidv4(), // Generate unique key for each array item
+      selectedTests: appointmentData.selectedTests.map((testId: string, index: number) => ({
+        _key: `test-${Date.now()}-${index}`,
         test: {
           _type: 'reference',
           _ref: testId
