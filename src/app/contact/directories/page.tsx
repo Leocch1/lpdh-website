@@ -1,4 +1,4 @@
-
+'use client';
 import {
   Table,
   TableHeader,
@@ -8,6 +8,14 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+ // For icons in Get in Touch section
+
+// Define your custom colors using CSS variables or directly.
+// For demonstration, using inline styles with hex values and Tailwind's existing colors that approximate yours.
+// For a full production app, you would add these to your tailwind.config.js
+// primary: '#169a53'
+// accent-green: '#73bd92'
+// light-green-bg: '#c2d7c9'
 
 const directoryData = [
   { department: "ACCOUNTING", local: "117 / 198", direct: "8829-8164", cellphone: "09178369466" },
@@ -34,35 +42,39 @@ const directoryData = [
 
 export default function DirectoriesPage() {
   return (
-    <div className="bg-secondary">
-        <div className="container py-12 md:py-24 mx-auto px-4">
-            <div className="text-center mb-12">
-                <h1 className="font-headline text-5xl font-bold tracking-tight text-primary">LPDH Directory</h1>
-            </div>
-
-            <Card className="max-w-4xl mx-auto shadow-lg overflow-hidden">
-                <Table>
-                <TableHeader className="sticky top-0 bg-card">
-                    <TableRow>
-                    <TableHead className="w-[300px] font-semibold text-foreground">DEPARTMENT</TableHead>
-                    <TableHead className="font-semibold text-foreground">LOCAL</TableHead>
-                    <TableHead className="font-semibold text-foreground">DIRECT</TableHead>
-                    <TableHead className="text-right font-semibold text-foreground">CELLPHONE</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {directoryData.map((item) => (
-                    <TableRow key={item.department}>
-                        <TableCell className="font-medium">{item.department}</TableCell>
-                        <TableCell>{item.local || '-'}</TableCell>
-                        <TableCell>{item.direct || '-'}</TableCell>
-                        <TableCell className="text-right">{item.cellphone || '-'}</TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-                </Table>
-            </Card>
+    <div className="min-h-screen bg-gradient-to-br bg-[#faf9fa] py-12 md:py-24">
+      {/* Directory Section */}
+      <section className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h1 className="font-headline text-5xl font-bold tracking-tight text-[#169a53] md:text-6xl">LPDH Directory</h1>
         </div>
+
+        <Card className="max-w-4xl mx-auto shadow-2xl overflow-hidden rounded-xl bg-white/90 backdrop-blur-sm">
+          <Table>
+            <TableHeader style={{ backgroundColor: '#169a53' }}> {/* Using inline style for direct hex color */}
+              <TableRow className="hover:bg-transparent"> {/* Prevent hover effect on header row */}
+                <TableHead className="w-[200px] md:w-[300px] font-semibold text-white">DEPARTMENT</TableHead>
+                <TableHead className="font-semibold text-white">LOCAL</TableHead>
+                <TableHead className="font-semibold text-white">DIRECT</TableHead>
+                <TableHead className="text-right font-semibold text-white">CELLPHONE</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {directoryData.map((item, index) => (
+                <TableRow 
+                  key={item.department} 
+                  className={index % 2 === 0 ? "bg-white" : "bg-[#c2d7c9]/30"} // Alternating row colors
+                >
+                  <TableCell className="font-medium text-gray-800">{item.department}</TableCell>
+                  <TableCell className="text-gray-700">{item.local || '-'}</TableCell>
+                  <TableCell className="text-gray-700">{item.direct || '-'}</TableCell>
+                  <TableCell className="text-right text-gray-700">{item.cellphone || '-'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
+      </section>
     </div>
   );
 }
