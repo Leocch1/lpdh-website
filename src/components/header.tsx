@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Paperclip, MapPin, ChevronDown, Clock, Activity } from "lucide-react";
+import { Menu, Phone, Paperclip, MapPin, ChevronDown, Clock, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -19,6 +19,11 @@ import {
 } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import Image from "next/image";
+
+const EMERGENCY_NUMBER = {
+  display: "(02) 8820-9376",
+  tel: "+0288209376"
+};
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -51,6 +56,19 @@ export function Header() {
   const [mobileContactDropdownOpen, setMobileContactDropdownOpen] = useState(false);
   const [mobileServicesDropdownOpen, setMobileServicesDropdownOpen] = useState(false);
   const [isIsoImageOpen, setIsIsoImageOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setIsScrolled(offset > 80); // 80px is the height of upper header (h-20)
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   const contactDropdownRef = useRef<HTMLDivElement>(null);
   const servicesDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -153,9 +171,12 @@ export function Header() {
   return (
     <div className="sticky top-0 z-50 w-full bg-white shadow-md">
       {/* Upper Header - Contact Info */}
-      <div className="hidden bg-slate-50 border-b border-slate-200 py-3 text-sm md:block">
-        <div className="w-full px-12 sm:px-16 lg:px-20">
-          <div className="flex items-center justify-between">
+      <div className={cn(
+        "hidden bg-slate-50 border-b border-slate-200 text-sm md:block transition-all duration-300",
+        isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-20 opacity-100"
+      )}>
+        <div className="w-full px-12 sm:px-16 lg:px-20 h-full">
+          <div className="flex items-center justify-between h-full">
             <div className="flex-shrink-0">
               <Link href="/" className="transition-opacity hover:opacity-80">
                 <Logo />
@@ -163,12 +184,12 @@ export function Header() {
             </div>
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-red-100 rounded-full">
-                  <Paperclip className="h-5 w-5 text-red-600" />
+                <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
+                  <Phone className="h-4 w-4 text-red-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-red-600 text-xs uppercase tracking-wide">Emergency</p>
-                  <p className="text-slate-800 font-semibold">(09) 8820-9376</p>
+                  <p className="font-semibold text-red-600 text-xs uppercase tracking-wide leading-none">Emergency</p>
+                  <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -230,7 +251,10 @@ export function Header() {
       </div>
 
       {/* Lower Header - Navigation */}
-      <header className="bg-white border-b border-slate-200">
+      <header className={cn(
+        "bg-white border-b border-slate-200 transition-all duration-300",
+        isScrolled ? "shadow-md" : ""
+      )}>
         <div className="w-full px-12 sm:px-16 lg:px-20">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile: Hamburger */}
@@ -246,7 +270,7 @@ export function Header() {
                   <SheetTitle className="sr-only">Menu</SheetTitle>
                   <div className="p-4">
                     <div className="mb-8">
-                      <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="scale-75 block">
                         <Logo />
                       </Link>
                     </div>
@@ -302,10 +326,10 @@ export function Header() {
                     {/* Mobile contact info */}
                     <div className="mt-6 pt-6 border-t border-slate-200 space-y-4">
                       <div className="flex items-center gap-3">
-                        <Paperclip className="h-5 w-5 text-red-600" />
+                        <Phone className="h-5 w-5 text-red-600" />
                         <div>
                           <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Emergency</p>
-                          <p className="text-sm font-semibold text-slate-800">(09) 8820-9376</p>
+                          <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -323,7 +347,7 @@ export function Header() {
             
              {/* Mobile: Logo in center (no buttons beside it) */}
              <div className="flex justify-center md:hidden flex-1">
-              <Link href="/" className="transition-opacity hover:opacity-80">
+              <Link href="/" className="transition-opacity hover:opacity-80 scale-75">
                 <Logo />
               </Link>
             </div>
@@ -331,15 +355,33 @@ export function Header() {
             {/* Mobile: Empty div to maintain flexbox layout */}
             <div className="flex-shrink-0 md:hidden w-10"></div>
 
-            {/* Desktop Nav - Starts from left, aligning with logo above */}
-            <nav className="hidden flex-1 items-center justify-start gap-8 text-sm md:flex">
-              {navLinks.map((link) => (
-                <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} isMobile={false} />
-              ))}
-            </nav>
+            {/* Desktop Nav - Starts from left, with logo */}
+            <div className="hidden md:flex items-center gap-8 flex-1">
+              <div className={cn(
+                "transition-all duration-300",
+                isScrolled ? "opacity-100 scale-75" : "opacity-0 scale-0 w-0"
+              )}>
+                <Link href="/" className="transition-opacity hover:opacity-80">
+                  <Logo />
+                </Link>
+              </div>
+              <nav className="flex items-center gap-8 text-sm">
+                {navLinks.map((link) => (
+                  <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} isMobile={false} />
+                ))}
+              </nav>
+            </div>
 
             {/* Desktop: CTA Buttons */}
             <div className="hidden md:flex items-center justify-end gap-3 flex-shrink-0">
+              {isScrolled && (
+                <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
+                  <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    EMERGENCY
+                  </Link>
+                </Button>
+              )}
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
                 <Link href="/services/find-doctor">
                   <Activity className="h-4 w-4 mr-2" />
