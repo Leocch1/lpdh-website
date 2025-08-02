@@ -138,6 +138,8 @@ export default function ScheduleLabPage() {
     notes: ""
   });
 
+  const [phoneError, setPhoneError] = useState("");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -212,8 +214,46 @@ export default function ScheduleLabPage() {
     }
   };
 
+  // Phone number validation function
+  const validatePhoneNumber = (phone: string) => {
+    // Remove any non-digit characters for validation
+    const digitsOnly = phone.replace(/\D/g, '');
+    
+    if (digitsOnly.length === 0) {
+      return "Phone number is required";
+    } else if (digitsOnly.length !== 11) {
+      return "Phone number must be exactly 11 digits";
+    } else if (!/^\d+$/.test(digitsOnly)) {
+      return "Phone number can only contain digits";
+    }
+    return "";
+  };
+
+  // Handle phone input change with validation
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Allow only digits and common phone number formatting characters
+    const sanitized = value.replace(/[^\d\s\-\(\)\+]/g, '');
+    
+    // Update form data
+    setFormData({...formData, phone: sanitized});
+    
+    // Validate and set error
+    const error = validatePhoneNumber(sanitized);
+    setPhoneError(error);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate phone number before submission
+    const phoneValidationError = validatePhoneNumber(formData.phone);
+    if (phoneValidationError) {
+      setPhoneError(phoneValidationError);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -231,23 +271,26 @@ export default function ScheduleLabPage() {
         return;
       }
 
+      // Clean phone number (keep only digits) for submission
+      const cleanPhone = formData.phone.replace(/\D/g, '');
+
       const appointmentData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phone: formData.phone,
+        phone: cleanPhone, // Submit only digits
         date: formData.date,
         time: formData.time,
         notes: formData.notes,
         selectedTests: selectedTests
       };
 
-      // Create appointment in Sanity using writeClient
+      // Create appointment in Sanity using API route
       const newAppointment = await createAppointment(appointmentData);
       
       console.log('Appointment created successfully:', newAppointment);
       
-      // Reset form
+      // Reset form and clear errors
       setFormData({
         firstName: "",
         lastName: "",
@@ -258,6 +301,7 @@ export default function ScheduleLabPage() {
         notes: ""
       });
       setSelectedTests([]);
+      setPhoneError("");
       
       alert(`Lab appointment scheduled successfully! Your appointment number is: ${newAppointment.appointmentNumber}. We will contact you shortly to confirm.`);
       
@@ -519,8 +563,18 @@ export default function ScheduleLabPage() {
                         type="tel"
                         required
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        onChange={handlePhoneChange}
+                        placeholder="09xxxxxxxxx (11 digits)"
+                        className={phoneError ? "border-red-500 focus:border-red-500" : ""}
                       />
+                      {phoneError && (
+                        <p className="text-xs text-red-500 mt-1">
+                          {phoneError}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Enter 11-digit phone number (e.g., 09123456789)
+                      </p>
                     </div>
 
                     <div>
@@ -560,7 +614,7 @@ export default function ScheduleLabPage() {
                       )}
                       {bookedTimes.length > 0 && formData.date && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          Booked times: {bookedTimes.join(', ')}
+                          Booked hours: {bookedTimes.join(', ')}
                         </p>
                       )}
                     </div>
@@ -579,7 +633,7 @@ export default function ScheduleLabPage() {
                     <Button 
                       type="submit" 
                       className="w-full" 
-                      disabled={selectedTests.length === 0 || !formData.time || submitting}
+                      disabled={selectedTests.length === 0 || !formData.time || submitting || phoneError !== ""}
                     >
                       <Calendar className="h-4 w-4 mr-2" />
                       {submitting ? 'Scheduling...' : 'Schedule Appointment'}
@@ -588,26 +642,7 @@ export default function ScheduleLabPage() {
                 </CardContent>
               </Card>
 
-              {/* Contact Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="h-4 w-4 text-primary" />
-                    <span>(02) 8825-5236</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    <span>#8009 CAA Road, Pulanglupa II, Las Pinas City</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-primary" />
-                    <span>Mon-Sat: 8:00 AM - 5:00 PM</span>
-                  </div>
-                </CardContent>
-              </Card>
+             
             </div>
           </div>
         </div>

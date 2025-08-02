@@ -6,8 +6,14 @@ const writeClient = createClient({
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
   useCdn: false,
   apiVersion: '2024-01-01',
-  token: process.env.SANITY_API_TOKEN!, // Server-side token
+  token: process.env.SANITY_API_TOKEN!,
 });
+
+// Phone number validation function
+const validatePhoneNumber = (phone: string) => {
+  const digitsOnly = phone.replace(/\D/g, '');
+  return digitsOnly.length === 11 && /^\d{11}$/.test(digitsOnly);
+};
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,6 +29,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate phone number
+    if (!validatePhoneNumber(appointmentData.phone)) {
+      return NextResponse.json(
+        { error: 'Phone number must be exactly 11 digits' },
+        { status: 400 }
+      );
+    }
+
+    // Clean phone number (ensure only digits)
+    const cleanPhone = appointmentData.phone.replace(/\D/g, '');
+
     const appointment = {
       _type: 'appointment',
       appointmentNumber: `APT-${Date.now()}`,
@@ -30,13 +47,16 @@ export async function POST(request: NextRequest) {
         firstName: appointmentData.firstName,
         lastName: appointmentData.lastName,
         email: appointmentData.email,
-        phone: appointmentData.phone
+        phone: cleanPhone
       },
       appointmentDate: appointmentData.date,
       appointmentTime: appointmentData.time,
-      selectedTests: appointmentData.selectedTests.map((testId: string) => ({
-        _type: 'reference',
-        _ref: testId
+      selectedTests: appointmentData.selectedTests.map((testId: string, index: number) => ({
+        _key: `test-${Date.now()}-${index}`,
+        test: {
+          _type: 'reference',
+          _ref: testId
+        }
       })),
       notes: appointmentData.notes || '',
       status: 'pending',
@@ -52,7 +72,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating appointment:', error);
     
-    // More detailed error handling
     if (error instanceof Error) {
       if (error.message.includes('Insufficient permissions')) {
         return NextResponse.json(
@@ -74,7 +93,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET method to fetch appointments (optional)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -92,7 +110,7 @@ export async function GET(request: NextRequest) {
       
       return NextResponse.json(appointments);
     } else {
-      // Fetch all appointments
+      // Fetch all appointments with populated test references
       const appointments = await writeClient.fetch(
         `*[_type == "appointment"] | order(appointmentDate desc, appointmentTime asc) {
           _id,
@@ -100,6 +118,15 @@ export async function GET(request: NextRequest) {
           patientInfo,
           appointmentDate,
           appointmentTime,
+          selectedTests[] {
+            _key,
+            test-> {
+              _id,
+              name,
+              category
+            }
+          },
+          notes,
           status,
           createdAt
         }`
