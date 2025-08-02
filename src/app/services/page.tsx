@@ -3,102 +3,49 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, Plus, Minus } from "lucide-react";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { ServiceCard } from "@/components/ServiceCard"; // Import the updated ServiceCard
 
+// Custom Icon Components (unchanged from previous versions)
 const OtorhinolaryngologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M6 12c0-2.209 1.791-4 4-4s4 1.791 4 4c0 1.503-.824 2.805-2 3.465V18h-4v-2.535c-1.176-.66-2-1.962-2-3.465z" />
-        <path d="M10 4a2 2 0 1 1 4 0" />
-        <path d="M12 18v2" />
-        <path d="M8 10V8a4 4 0 0 1 4-4" />
-        <path d="M16 10V8a4 4 0 0 0-4-4" />
-    </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M6 12c0-2.209 1.791-4 4-4s4 1.791 4 4c0 1.503-.824 2.805-2 3.465V18h-4v-2.535c-1.176-.66-2-1.962-2-3.465z" />
+    <path d="M10 4a2 2 0 1 1 4 0" />
+    <path d="M12 18v2" />
+    <path d="M8 10V8a4 4 0 0 1 4-4" />
+    <path d="M16 10V8a4 4 0 0 0-4-4" />
+  </svg>
 );
 
 const ObGyneIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M12 2C8.686 2 6 4.686 6 8c0 3.866 4.314 12 6 12s6-8.134 6-12c0-3.314-2.686-6-6-6z" />
-        <circle cx="12" cy="8" r="2" />
-    </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 2C8.686 2 6 4.686 6 8c0 3.866 4.314 12 6 12s6-8.134 6-12c0-3.314-2.686-6-6-6z" />
+    <circle cx="12" cy="8" r="2" />
+  </svg>
 );
 
 const DentistryIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-        <path d="M12.5 5.5c-1-2.5-3-3-4.5-3-2.5 0-4.5 2-4.5 4.5 0 2.43 1.97 4.5 4.5 4.5h4.5c2.5 0 4.5-2.07 4.5-4.5 0-2.5-2-4.5-4.5-4.5-1.5 0-3.5.5-4.5 3Z" />
-        <path d="m18.5 11 .5 2.5" />
-        <path d="m5 11-.5 2.5" />
-        <path d="m17 16-1-1" />
-        <path d="m7 16 1-1" />
-        <path d="M15 19.5a2.5 2.5 0 0 1-5 0" />
-    </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12.5 5.5c-1-2.5-3-3-4.5-3-2.5 0-4.5 2-4.5 4.5 0 2.43 1.97 4.5 4.5 4.5h4.5c2.5 0 4.5-2.07 4.5-4.5 0-2.5-2-4.5-4.5-4.5-1.5 0-3.5.5-4.5 3Z" />
+    <path d="m18.5 11 .5 2.5" />
+    <path d="m5 11-.5 2.5" />
+    <path d="m17 16-1-1" />
+    <path d="m7 16 1-1" />
+    <path d="M15 19.5a2.5 2.5 0 0 1-5 0" />
+  </svg>
 );
 
 const LungIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 20a4 4 0 0 0-4-4H6a2 2 0 0 0-2 2v2" />
-      <path d="M12 20a4 4 0 0 1 4-4h2a2 2 0 0 1 2 2v2" />
-      <path d="M12 4v5" />
-      <path d="M10 9a2 2 0 0 1-2-2V5.5a2.5 2.5 0 0 1 5 0V7a2 2 0 0 1-2 2Z" />
-      <path d="M18 10a2 2 0 0 1-2-2V5.5a2.5 2.5 0 0 1 5 0V7a2 2 0 0 1-2 2Z" />
-    </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M12 20a4 4 0 0 0-4-4H6a2 2 0 0 0-2 2v2" />
+    <path d="M12 20a4 4 0 0 1 4-4h2a2 2 0 0 1 2 2v2" />
+    <path d="M12 4v5" />
+    <path d="M10 9a2 2 0 0 1-2-2V5.5a2.5 2.5 0 0 1 5 0V7a2 2 0 0 1-2 2Z" />
+    <path d="M18 10a2 2 0 0 1-2-2V5.5a2.5 2.5 0 0 1 5 0V7a2 2 0 0 1-2 2Z" />
+  </svg>
 );
 
-// Service Card Component - FIXED for proper expansion
-const ServiceCard = ({ service, isOpen, onToggle }: { service: any, isOpen: boolean, onToggle: () => void }) => {
-  const IconComponent = service.icon;
-  
-  return (
-    <div className="w-full bg-white rounded-lg shadow-md border border-gray-100 hover:shadow-lg hover:border-primary/50 transition-all duration-300">
-      <button
-        onClick={onToggle}
-        className="w-full p-4 text-left focus:outline-none focus:ring-2 focus:ring-primary focus:ring-inset rounded-lg"
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4 min-w-0 flex-1">
-            <div className="flex-shrink-0">
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                isOpen ? 'bg-primary text-white' : 'bg-secondary text-primary hover:bg-secondary/80'
-              }`}>
-                <IconComponent className="h-6 w-6" />
-              </div>
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className={`text-lg font-semibold transition-colors duration-200 ${
-                isOpen ? 'text-primary' : 'text-foreground hover:text-primary'
-              }`}>
-                {service.title}
-              </h3>
-              <p className="text-sm text-muted-foreground mt-1 truncate">
-                {service.subtitle || "Professional healthcare services"}
-              </p>
-            </div>
-          </div>
-          <div className="flex-shrink-0 ml-4">
-            {isOpen ? (
-              <Minus className="h-5 w-5 text-primary transition-colors duration-200" />
-            ) : (
-              <Plus className="h-5 w-5 text-muted-foreground hover:text-primary transition-colors duration-200" />
-            )}
-          </div>
-        </div>
-      </button>
-      
-      {isOpen && (
-        <div className="px-4 pb-4 pt-2 border-t border-gray-100">
-          <div className="border-l-4 border-primary/30 pl-4 mt-2">
-            {service.details.map((detail: string, index: number) => (
-              <p key={index} className="text-muted-foreground leading-relaxed mb-2 last:mb-0 text-sm">
-                {detail}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Updated service data with better descriptions
+// Service Categories Data (unchanged)
 const medicalServices = [
   { 
     title: "Internal Medicine", 
@@ -275,18 +222,86 @@ const clinicalServices = [
   }
 ];
 
+// ResponsiveServices Component
+const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab }: {
+  currentServices: typeof medicalServices; // Use a common type or union if service data differs significantly
+  openItems: Set<number>;
+  toggleItem: (index: number) => void;
+  activeTab: 'medical' | 'clinical';
+}) => {
+  const [columns, setColumns] = useState(1);
+
+  useEffect(() => {
+    const updateColumns = () => {
+      if (window.innerWidth >= 1024) setColumns(3);
+      else if (window.innerWidth >= 768) setColumns(2);
+      else setColumns(1);
+    };
+
+    updateColumns(); // set initial
+    window.addEventListener("resize", updateColumns);
+    return () => window.removeEventListener("resize", updateColumns);
+  }, []);
+
+  const columnsArray = Array.from({ length: columns });
+
+  return (
+    // The main container for the responsive columns
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
+      {columnsArray.map((_, colIndex) => (
+        <div
+          key={colIndex}
+          className="flex-1 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
+        >
+          {currentServices
+            .filter((_, index) => index % columns === colIndex)
+            .map((service, serviceIndex) => {
+              // Find the original index of the service in the full list
+              const originalIndex = currentServices.findIndex(s => s.title === service.title); // Assuming titles are unique for finding original index
+              const isOpen = openItems.has(originalIndex);
+
+              return (
+                <div
+                  key={`${activeTab}-${originalIndex}`}
+                  className={`relative transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
+                              ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-[0.98] opacity-90 translate-y-1'}
+                             `}
+                  style={{
+                    // When a card is open, give it a higher z-index to ensure it overlaps.
+                    // The ServiceCard itself will handle the absolute positioning of its expanded content.
+                    zIndex: isOpen ? 20 : 1, // Higher z-index for the open card
+                  }}
+                >
+                  <ServiceCard
+                    service={service}
+                    isOpen={isOpen}
+                    onToggle={() => toggleItem(originalIndex)}
+                  />
+                </div>
+              );
+            })}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
 export default function ServicesPage() {
   const [activeTab, setActiveTab] = useState<'medical' | 'clinical'>('medical');
-  const [openItems, setOpenItems] = useState(new Set<number>());
+  const [openItems, setOpenItems] = useState(new Set<number>()); // Use Set to track open items
 
   const toggleItem = (index: number) => {
-    // If clicking the currently open item, close it
-    if (openItems.has(index)) {
-      setOpenItems(new Set());
-    } else {
-      // Otherwise, close any open item and open the clicked one
-      setOpenItems(new Set([index]));
-    }
+    setOpenItems(prevOpenItems => {
+      const newOpenItems = new Set(prevOpenItems);
+      if (newOpenItems.has(index)) {
+        newOpenItems.delete(index); // Close if already open
+      } else {
+        newOpenItems.clear(); // Close all other items for single-open behavior
+        newOpenItems.add(index); // Open the clicked one
+      }
+      return newOpenItems;
+    });
   };
 
   const handleTabChange = (tab: 'medical' | 'clinical') => {
@@ -308,7 +323,7 @@ export default function ServicesPage() {
             <p className="mt-4 text-muted-foreground max-w-lg mx-auto md:mx-24 md:text-left">
             Las Piñas Doctors Hospital offers a wide range of medical services from checkups and 
             diagnostics to emergency and specialized care. With expert doctors and modern facilities,
-             we're here to provide safe,fast, and compassionate healthcare for you and your family.
+              we're here to provide safe,fast, and compassionate healthcare for you and your family.
             </p>
             </div>
             <div className="relative flex justify-center items-center h-64 md:h-[500px]">
@@ -367,7 +382,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* What We Offer Section - FIXED CARD EXPANSION */}
+      {/* What We Offer Section - Using ResponsiveServices */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
@@ -382,7 +397,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-12">
+          <div className="flex justify-center mb-12 transition-all duration-300 ease-in-out">
             <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
               <button
                 onClick={() => handleTabChange('medical')}
@@ -407,22 +422,14 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          {/* Services Grid - FIXED LAYOUT WITH STABLE POSITIONS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 auto-rows-auto">
-            {currentServices.map((service, index) => (
-              <div 
-                key={`${activeTab}-${index}`} 
-                style={{ gridRow: `span ${openItems.has(index) ? 2 : 1}` }}
-              >
-                <ServiceCard
-                  service={service}
-                  isOpen={openItems.has(index)}
-                  onToggle={() => toggleItem(index)}
-                />
-              </div>
-            ))}
-          </div>
-
+          {/* Services Grid - Using ResponsiveServices component */}
+          <ResponsiveServices
+            currentServices={currentServices}
+            openItems={openItems}
+            toggleItem={toggleItem}
+            activeTab={activeTab}
+          />
+          
           {/* Tab Indicator for Mobile */}
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
@@ -436,7 +443,7 @@ export default function ServicesPage() {
 
       {/* CTA Section */}
       <section id="appointment" className="bg-secondary py-12 md:py-24">
-        <div className="container mx-auto px-4  ">
+        <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
               Ready to Schedule Your Appointment?
