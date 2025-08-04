@@ -8,14 +8,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
- // For icons in Get in Touch section
-
-// Define your custom colors using CSS variables or directly.
-// For demonstration, using inline styles with hex values and Tailwind's existing colors that approximate yours.
-// For a full production app, you would add these to your tailwind.config.js
-// primary: '#169a53'
-// accent-green: '#73bd92'
-// light-green-bg: '#c2d7c9'
 
 const directoryData = [
   { department: "ACCOUNTING", local: "117 / 198", direct: "8829-8164", cellphone: "09178369466" },
@@ -43,16 +35,17 @@ const directoryData = [
 export default function DirectoriesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br bg-[#faf9fa] py-12 md:py-24">
-      {/* Directory Section */}
       <section className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="font-headline text-5xl font-bold tracking-tight text-[#169a53] md:text-6xl">LPDH Directory</h1>
+          <h1 className="font-headline text-5xl font-bold tracking-tight text-[#169a53] md:text-6xl">
+            LPDH Directory
+          </h1>
         </div>
 
         <Card className="max-w-4xl mx-auto shadow-2xl overflow-hidden rounded-xl bg-white/90 backdrop-blur-sm">
           <Table>
-            <TableHeader style={{ backgroundColor: '#169a53' }}> {/* Using inline style for direct hex color */}
-              <TableRow className="hover:bg-transparent"> {/* Prevent hover effect on header row */}
+            <TableHeader>
+              <TableRow className="hover:bg-transparent" style={{ backgroundColor: "#169a53" }}>
                 <TableHead className="w-[200px] md:w-[300px] font-semibold text-white">DEPARTMENT</TableHead>
                 <TableHead className="font-semibold text-white">LOCAL</TableHead>
                 <TableHead className="font-semibold text-white">DIRECT</TableHead>
@@ -61,9 +54,9 @@ export default function DirectoriesPage() {
             </TableHeader>
             <TableBody>
               {directoryData.map((item, index) => (
-                <TableRow 
-                  key={item.department} 
-                  className={index % 2 === 0 ? "bg-white" : "bg-[#c2d7c9]/30"} // Alternating row colors
+                <TableRow
+                  key={item.department}
+                  className={index % 2 === 0 ? "bg-white" : "bg-[#c2d7c9]/30"}
                 >
                   <TableCell className="font-medium text-gray-800">{item.department}</TableCell>
                   <TableCell className="text-gray-700">{item.local || '-'}</TableCell>
