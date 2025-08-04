@@ -260,7 +260,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-2 max-w-full mx-auto">
 
               {/* Vision */}
-        <div className="flex flex-col justify-center text-center mx-8 px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1">
+        <div className="flex flex-col text-center mx-8 px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1">
           <div className="px-8"> {/* inner padding to push content inward */}
             <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Vision</h3>
             <p className="text-primary-foreground/90 text-sm leading-relaxed">
@@ -270,23 +270,24 @@ export default function AboutPage() {
         </div>
 
         {/* Mission */}
-        <div className="flex flex-col justify-center text-center px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-2">
-          <div className="mx-20"> {/* inner content padding to push content right */}
-            <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Mission</h3>
-            <ul className="space-y-3 text-primary-foreground/90 text-sm leading-relaxed">
+        <div className="flex flex-col justify-center text-center px-0 py-1 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-1">
+          <div className="mx-4 md:mx-8">
+            <h3 className="font-headline text-base font-semibold mb-2 flex justify-center md:justify-start items-center">
+              Mission
+            </h3>
+
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-primary-foreground/80 text-xs leading-snug">
               {aboutData.mission.map((point, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <CheckCircle className="h-4 w-4 mt-1 flex-shrink-0" />
+                <li key={index} className="flex items-start gap-2">
+                  <CheckCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
                   <span>{point}</span>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-
-
               {/* Core Values */}
-              <div className="flex flex-col justify-center text-center px-3 py-4 md:text-left md:pl-4 mx-10">
+              <div className="flex flex-col  text-center px-3 py-4 md:text-left md:pl-4 mx-10">
                 <div>
                   <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
