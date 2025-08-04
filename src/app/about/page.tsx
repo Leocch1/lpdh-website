@@ -272,11 +272,11 @@ export default function AboutPage() {
         {/* Mission */}
         <div className="flex flex-col justify-center text-center px-0 py-1 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-1">
           <div className="mx-4 md:mx-8">
-            <h3 className="font-headline text-base font-semibold mb-2 flex justify-center md:justify-start items-center">
+            <h3 className="font-headline text-x1 font-semibold mb-2 flex justify-center md:justify-start items-center">
               Mission
             </h3>
 
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-primary-foreground/80 text-xs leading-snug">
+            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-primary-foreground/90 text-sm leading-snug">
               {aboutData.mission.map((point, index) => (
                 <li key={index} className="flex items-start gap-2">
                   <CheckCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
