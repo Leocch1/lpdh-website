@@ -19,6 +19,7 @@ export function Footer() {
     { href: "/", label: "Home" },
     { href: "/about", label: "About Us" },
     { href: "/services", label: "Our Services" },
+    { href: "/careers", label: "Careers" },
     { href: "/contact", label: "Contact Us" },
   ];
 
@@ -81,7 +82,7 @@ export function Footer() {
               <div>
                 <p className="font-semibold text-white">Contact Information</p>
                 <div className="mt-4 space-y-2 text-sm text-white/80">
-                  <p>#8009 CAA Road, Pulanglupa II, Las Pinas City</p>
+                  <p>#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
                   <p>(02) 8825 - 5236</p>
                 </div>
               </div>

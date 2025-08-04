@@ -19,7 +19,7 @@ interface TermsModalProps {
 export function TermsModal({ isOpen, onClose }: TermsModalProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] p-0">
+      <DialogContent className="max-w-4xl max-h-[80vh] p-0 [&>button]:hidden">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-2xl font-bold text-primary">
             Terms of Service
