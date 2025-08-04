@@ -28,8 +28,8 @@ const EMERGENCY_NUMBER = {
 const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About Us" },
-  { 
-    href: "/services", 
+  {
+    href: "/services",
     label: "Our Services",
     dropdown: [
       { href: "/services", label: "Services" },
@@ -38,8 +38,8 @@ const navLinks = [
     ]
   },
   { href: "/careers", label: "Careers" },
-  { 
-    href: "/contact", 
+  {
+    href: "/contact",
     label: "Contact Us",
     dropdown: [
       { href: "/contact", label: "Message Us" },
@@ -64,10 +64,10 @@ export function Header() {
     const handleScroll = () => {
       const currentScroll = window.scrollY;
       const threshold = 80; // height of upper header (h-20)
-      
+
       // Determine scroll direction
       const direction = currentScroll > lastScrollY.current ? 'down' : 'up';
-      
+
       // Only update state if we've moved far enough in the same direction
       if (direction !== lastDirection.current) {
         // Direction changed, need to move at least 20px in new direction
@@ -79,7 +79,7 @@ export function Header() {
         // Same direction, update normally
         setIsScrolled(currentScroll > threshold);
       }
-      
+
       lastScrollY.current = currentScroll;
     };
 
@@ -108,30 +108,30 @@ export function Header() {
     };
   }, []);
 
-  const NavLinkItem = ({ href, label, dropdown, isMobile = false }: { href: string; label: string; dropdown?: Array<{href: string, label: string}>; isMobile?: boolean }) => {
+  const NavLinkItem = ({ href, label, dropdown, isMobile = false }: { href: string; label: string; dropdown?: Array<{ href: string, label: string }>; isMobile?: boolean }) => {
     if (dropdown) {
       const isContactDropdown = label === "Contact Us";
       const isServicesDropdown = label === "Our Services";
-      
+
       // Use different state for mobile vs desktop
-      const isDropdownOpen = isMobile 
+      const isDropdownOpen = isMobile
         ? (isContactDropdown ? mobileContactDropdownOpen : mobileServicesDropdownOpen)
         : (isContactDropdown ? isContactDropdownOpen : isServicesDropdownOpen);
-      
+
       const setDropdownOpen = isMobile
         ? (isContactDropdown ? setMobileContactDropdownOpen : setMobileServicesDropdownOpen)
         : (isContactDropdown ? setIsContactDropdownOpen : setIsServicesDropdownOpen);
-      
+
       const dropdownRef = isContactDropdown ? contactDropdownRef : servicesDropdownRef;
 
       return (
-        <div 
-          className="relative" 
+        <div
+          className="relative"
           ref={!isMobile ? dropdownRef : undefined}
           onMouseEnter={!isMobile ? () => setDropdownOpen(true) : undefined}
           onMouseLeave={!isMobile ? () => setDropdownOpen(false) : undefined}
         >
-          <div 
+          <div
             className="flex items-center gap-1 cursor-pointer"
             onClick={() => setDropdownOpen(!isDropdownOpen)}
           >
@@ -141,14 +141,14 @@ export function Header() {
                 (pathname === href || dropdown.some(item => pathname === item.href)) ? "text-primary font-semibold" : ""
               )}
             >
-              {label}   
+              {label}
             </span>
             <ChevronDown className={cn(
               "h-4 w-4 text-slate-600 hover:text-primary transition-transform",
               isDropdownOpen && "rotate-180"
             )} />
           </div>
-          
+
           {/* Desktop Dropdown */}
           {!isMobile && isDropdownOpen && (
             <div className="hidden lg:block absolute left-0 top-full pt-2 z-50">
@@ -216,8 +216,8 @@ export function Header() {
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                   <p className="font-semibold text-primary text-xs uppercase tracking-wide">Location</p>
-                   <p className="text-slate-800 font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
+                  <p className="font-semibold text-primary text-xs uppercase tracking-wide">Location</p>
+                  <p className="text-slate-800 font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -225,12 +225,12 @@ export function Header() {
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                   <p className="font-semibold text-primary text-xs uppercase tracking-wide">Hours</p>
-                   <p className="text-slate-800 font-semibold">24/7 Emergency Care</p>
+                  <p className="font-semibold text-primary text-xs uppercase tracking-wide">Hours</p>
+                  <p className="text-slate-800 font-semibold">24/7 Emergency Care</p>
                 </div>
               </div>
               <div className="border-l border-slate-300 pl-6">
-                <button 
+                <button
                   onClick={() => setIsIsoImageOpen(true)}
                   className="cursor-pointer transition-opacity hover:opacity-100"
                 >
@@ -245,20 +245,26 @@ export function Header() {
                 </button>
 
                 <Dialog open={isIsoImageOpen} onOpenChange={setIsIsoImageOpen}>
-                  <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
-                    <div className="relative">
-                      <DialogClose className="absolute right-4 top-4 z-10 rounded-full bg-black/40 p-2 hover:bg-black/60 transition-colors">
-                        <X className="h-6 w-6 text-white" />
+                  <DialogContent className="max-w-xl p-6">
+                    <div className="relative bg-white rounded-lg overflow-hidden">
+                      <DialogClose className="absolute -right-2 -top-2 z-20 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md">
                       </DialogClose>
-                      <div className="w-full h-full flex items-center justify-center">
+                      <div className="flex flex-col">
                         <Image
                           src="/iso.jpg"
-                          alt="ISO 9001:2015 Certified"
-                          className="w-auto h-auto max-w-full max-h-[85vh] object-contain"
-                          width={1000}
-                          height={800}
-                          priority
+                          alt="ISO Certification"
+                          width={800}
+                          height={600}
+                          className="w-full h-auto"
                         />
+                        <a
+                          href="https://www.certipedia.com/quality_marks/9108656567?locale=en"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-4 bg-white text-primary hover:text-primary/80 font-medium transition-colors border-t"
+                        >
+                          View Information
+                        </a>
                       </div>
                     </div>
                   </DialogContent>
@@ -302,30 +308,30 @@ export function Header() {
                             (link.label === "Contact Us" && mobileContactDropdownOpen) ||
                             (link.label === "Our Services" && mobileServicesDropdownOpen)
                           ) && (
-                            <div className="ml-4 mt-2 space-y-2">
-                              {link.dropdown.map((item) => (
-                                <Link 
-                                  key={item.href}
-                                  href={item.href}
-                                  onClick={() => {
-                                    setIsMobileMenuOpen(false);
-                                    setMobileContactDropdownOpen(false);
-                                    setMobileServicesDropdownOpen(false);
-                                  }}          
-                                  className={cn(
-                                    "block text-base font-medium text-slate-600 transition-colors hover:text-primary py-1",
-                                    pathname === item.href && "text-primary font-semibold"
-                                  )}
-                                >
-                                  {item.label}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
+                              <div className="ml-4 mt-2 space-y-2">
+                                {link.dropdown.map((item) => (
+                                  <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => {
+                                      setIsMobileMenuOpen(false);
+                                      setMobileContactDropdownOpen(false);
+                                      setMobileServicesDropdownOpen(false);
+                                    }}
+                                    className={cn(
+                                      "block text-base font-medium text-slate-600 transition-colors hover:text-primary py-1",
+                                      pathname === item.href && "text-primary font-semibold"
+                                    )}
+                                  >
+                                    {item.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
                         </div>
                       ))}
                     </nav>
-                    
+
                     {/* Mobile CTA Buttons */}
                     <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
                       <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
@@ -341,7 +347,7 @@ export function Header() {
                         </Link>
                       </Button>
                     </div>
-                    
+
                     {/* Mobile contact info */}
                     <div className="mt-6 pt-6 border-t border-slate-200 space-y-4">
                       <div className="flex items-center gap-3">
@@ -358,14 +364,32 @@ export function Header() {
                           <p className="text-sm font-semibold text-slate-800">24/7 Emergency Care</p>
                         </div>
                       </div>
+                      {/* Add the ISO section here */}
+                      <div className="mt-6 pt-6 border-t border-slate-300">
+                        <button
+                          onClick={() => {
+                            setIsIsoImageOpen(true);
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="cursor-pointer transition-opacity hover:opacity-100"
+                        >
+                          <Image
+                            src="/iso.jpg"
+                            alt="ISO 9001:2015 Certified"
+                            width={100}
+                            height={40}
+                            className="opacity-80 hover:opacity-100 transition-opacity"
+                          />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </SheetContent>
               </Sheet>
             </div>
-            
-             {/* Mobile: Logo in center (no buttons beside it) */}
-             <div className="flex justify-center lg:hidden flex-1">
+
+            {/* Mobile: Logo in center (no buttons beside it) */}
+            <div className="flex justify-center lg:hidden flex-1">
               <Link href="/" className="transition-opacity hover:opacity-80 scale-75">
                 <Logo />
               </Link>
