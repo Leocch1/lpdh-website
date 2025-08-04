@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Phone, Paperclip, MapPin, ChevronDown, Clock, Activity } from "lucide-react";
@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
+
 import {
   Sheet,
   SheetContent,
@@ -47,6 +48,10 @@ const navLinks = [
     ]
   },
 ];
+
+const PRIMARY_GREEN_HEX = '#169a53';
+const MEDIUM_GREEN_HEX = '#73bd92';
+const LIGHT_GREEN_HEX = '#c2d7c9';
 
 export function Header() {
   const pathname = usePathname();
@@ -392,7 +397,7 @@ export function Header() {
             </div>
 
             {/* Desktop: CTA Buttons */}
-            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
+      <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
               {isScrolled && (
                 <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
                   <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
