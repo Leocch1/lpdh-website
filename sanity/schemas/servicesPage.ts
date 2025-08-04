@@ -70,10 +70,12 @@ export const servicesPage = defineType({
           type: 'text',
           validation: Rule => Rule.required()
         },
+        // Legacy fields for backward compatibility
         {
           name: 'ourServicesTab',
-          title: 'Our Services Tab',
+          title: 'Our Services Tab (Legacy)',
           type: 'object',
+          description: '⚠️ Legacy field - Please migrate to Service Tabs below',
           fields: [
             {
               name: 'tabTitle',
@@ -116,7 +118,12 @@ export const servicesPage = defineType({
                           { title: 'ENT', value: 'ent' },
                           { title: 'Lung', value: 'lung' },
                           { title: 'OB Gyne', value: 'obgyne' },
-                          { title: 'Dentistry', value: 'dentistry' }
+                          { title: 'Dentistry', value: 'dentistry' },
+                          { title: 'Test Tube', value: 'testtube' },
+                          { title: 'Heart', value: 'heart' },
+                          { title: 'Brain', value: 'brain' },
+                          { title: 'Shield', value: 'shield' },
+                          { title: 'Activity', value: 'activity' }
                         ]
                       },
                       validation: Rule => Rule.required()
@@ -126,7 +133,7 @@ export const servicesPage = defineType({
                       title: 'Service Details',
                       type: 'array',
                       of: [{ type: 'string' }],
-                      validation: Rule => Rule.min(1).max(5)
+                      validation: Rule => Rule.min(1).max(8)
                     },
                     {
                       name: 'order',
@@ -134,20 +141,7 @@ export const servicesPage = defineType({
                       type: 'number',
                       validation: Rule => Rule.min(0)
                     }
-                  ],
-                  preview: {
-                    select: {
-                      title: 'title',
-                      subtitle: 'subtitle',
-                      order: 'order'
-                    },
-                    prepare({ title, subtitle, order }) {
-                      return {
-                        title: title,
-                        subtitle: `${subtitle} (Order: ${order || 0})`
-                      }
-                    }
-                  }
+                  ]
                 }
               ]
             }
@@ -155,8 +149,9 @@ export const servicesPage = defineType({
         },
         {
           name: 'clinicalServicesTab',
-          title: 'Clinical Services Tab',
+          title: 'Clinical Services Tab (Legacy)',
           type: 'object',
+          description: '⚠️ Legacy field - Please migrate to Service Tabs below',
           fields: [
             {
               name: 'tabTitle',
@@ -194,7 +189,11 @@ export const servicesPage = defineType({
                           { title: 'Eye', value: 'eye' },
                           { title: 'Bone', value: 'bone' },
                           { title: 'Pill', value: 'pill' },
-                          { title: 'Test Tube', value: 'testtube' }
+                          { title: 'Test Tube', value: 'testtube' },
+                          { title: 'Heart', value: 'heart' },
+                          { title: 'Brain', value: 'brain' },
+                          { title: 'Shield', value: 'shield' },
+                          { title: 'Activity', value: 'activity' }
                         ]
                       },
                       validation: Rule => Rule.required()
@@ -204,7 +203,7 @@ export const servicesPage = defineType({
                       title: 'Service Details',
                       type: 'array',
                       of: [{ type: 'string' }],
-                      validation: Rule => Rule.min(1).max(5)
+                      validation: Rule => Rule.min(1).max(8)
                     },
                     {
                       name: 'order',
@@ -212,24 +211,148 @@ export const servicesPage = defineType({
                       type: 'number',
                       validation: Rule => Rule.min(0)
                     }
-                  ],
-                  preview: {
-                    select: {
-                      title: 'title',
-                      subtitle: 'subtitle',
-                      order: 'order'
-                    },
-                    prepare({ title, subtitle, order }) {
-                      return {
-                        title: title,
-                        subtitle: `${subtitle} (Order: ${order || 0})`
-                      }
-                    }
-                  }
+                  ]
                 }
               ]
             }
           ]
+        },
+        // New flexible tabs system
+        {
+          name: 'serviceTabs',
+          title: 'Service Tabs (New System)',
+          type: 'array',
+          description: '✅ Use this new flexible system for adding multiple service tabs',
+          of: [
+            {
+              type: 'object',
+              name: 'serviceTab',
+              title: 'Service Tab',
+              fields: [
+                {
+                  name: 'tabTitle',
+                  title: 'Tab Title',
+                  type: 'string',
+                  validation: Rule => Rule.required()
+                },
+                {
+                  name: 'tabKey',
+                  title: 'Tab Key',
+                  type: 'string',
+                  description: 'Unique identifier for this tab (used in URLs, no spaces or special characters)',
+                  validation: Rule => Rule.required().regex(/^[a-z0-9-]+$/, 'Must be lowercase letters, numbers, and hyphens only')
+                },
+                {
+                  name: 'tabDescription',
+                  title: 'Tab Description',
+                  type: 'text',
+                  description: 'Optional description for this tab'
+                },
+                {
+                  name: 'services',
+                  title: 'Services',
+                  type: 'array',
+                  of: [
+                    {
+                      type: 'object',
+                      name: 'service',
+                      title: 'Service',
+                      fields: [
+                        {
+                          name: 'title',
+                          title: 'Service Title',
+                          type: 'string',
+                          validation: Rule => Rule.required()
+                        },
+                        {
+                          name: 'subtitle',
+                          title: 'Subtitle',
+                          type: 'string',
+                          validation: Rule => Rule.required()
+                        },
+                        {
+                          name: 'icon',
+                          title: 'Icon',
+                          type: 'string',
+                          options: {
+                            list: [
+                              { title: 'Stethoscope', value: 'stethoscope' },
+                              { title: 'Eye', value: 'eye' },
+                              { title: 'Bone', value: 'bone' },
+                              { title: 'Smile', value: 'smile' },
+                              { title: 'Pill', value: 'pill' },
+                              { title: 'Syringe', value: 'syringe' },
+                              { title: 'ENT', value: 'ent' },
+                              { title: 'Lung', value: 'lung' },
+                              { title: 'OB Gyne', value: 'obgyne' },
+                              { title: 'Dentistry', value: 'dentistry' },
+                              { title: 'Test Tube', value: 'testtube' },
+                              { title: 'Heart', value: 'heart' },
+                              { title: 'Brain', value: 'brain' },
+                              { title: 'Shield', value: 'shield' },
+                              { title: 'Activity', value: 'activity' }
+                            ]
+                          },
+                          validation: Rule => Rule.required()
+                        },
+                        {
+                          name: 'details',
+                          title: 'Service Details',
+                          type: 'array',
+                          of: [{ type: 'string' }],
+                          validation: Rule => Rule.min(1).max(8)
+                        },
+                        {
+                          name: 'order',
+                          title: 'Display Order',
+                          type: 'number',
+                          validation: Rule => Rule.min(0)
+                        }
+                      ],
+                      preview: {
+                        select: {
+                          title: 'title',
+                          subtitle: 'subtitle',
+                          order: 'order',
+                          icon: 'icon'
+                        },
+                        prepare({ title, subtitle, order, icon }) {
+                          return {
+                            title: title,
+                            subtitle: `${subtitle} (Order: ${order || 0})`,
+                            media: icon ? `🔧` : undefined
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  validation: Rule => Rule.min(1).error('Each tab must have at least one service')
+                },
+                {
+                  name: 'order',
+                  title: 'Tab Order',
+                  type: 'number',
+                  description: 'Order in which this tab appears',
+                  validation: Rule => Rule.min(0)
+                }
+              ],
+              preview: {
+                select: {
+                  title: 'tabTitle',
+                  tabKey: 'tabKey',
+                  serviceCount: 'services.length',
+                  order: 'order'
+                },
+                prepare({ title, tabKey, serviceCount, order }) {
+                  return {
+                    title: title,
+                    subtitle: `${tabKey} • ${serviceCount || 0} service${serviceCount !== 1 ? 's' : ''} • Order: ${order || 0}`
+                  }
+                }
+              }
+            }
+          ],
+          validation: Rule => Rule.max(6).error('Maximum 6 tabs allowed')
         }
       ]
     }),

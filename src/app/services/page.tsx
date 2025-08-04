@@ -1,7 +1,7 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, TestTube } from "lucide-react";
+import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, TestTube, Heart, Brain, Shield, Activity } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { ServiceCard } from "@/components/ServiceCard";
@@ -56,6 +56,10 @@ const getIcon = (iconName: string) => {
     pill: Pill,
     syringe: Syringe,
     testtube: TestTube,
+    heart: Heart,
+    brain: Brain,
+    shield: Shield,
+    activity: Activity,
     ent: OtorhinolaryngologyIcon,
     lung: LungIcon,
     obgyne: ObGyneIcon,
@@ -64,7 +68,7 @@ const getIcon = (iconName: string) => {
   return icons[iconName as keyof typeof icons] || Stethoscope;
 };
 
-// Sanity query
+// Updated Sanity query to include both legacy and new fields
 const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0] {
   _id,
   heroSection {
@@ -83,6 +87,7 @@ const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0] {
   whatWeOfferSection {
     title,
     description,
+    // Legacy fields
     ourServicesTab {
       tabTitle,
       services[] {
@@ -102,6 +107,20 @@ const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0] {
         details,
         order
       }
+    },
+    // New flexible tabs
+    serviceTabs[] {
+      tabTitle,
+      tabKey,
+      tabDescription,
+      services[] {
+        title,
+        subtitle,
+        icon,
+        details,
+        order
+      },
+      order
     }
   },
   ctaSection {
@@ -118,13 +137,26 @@ const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0] {
   }
 }`;
 
-// Types
+// Types - Updated for backward compatibility
 interface Service {
   title: string;
   subtitle: string;
   icon: string;
   details: string[];
   order?: number;
+}
+
+interface ServiceTab {
+  tabTitle: string;
+  tabKey: string;
+  tabDescription?: string;
+  services: Service[];
+  order?: number;
+}
+
+interface LegacyTab {
+  tabTitle: string;
+  services: Service[];
 }
 
 interface ServicesPageData {
@@ -145,14 +177,11 @@ interface ServicesPageData {
   whatWeOfferSection: {
     title: string;
     description: string;
-    ourServicesTab: {
-      tabTitle: string;
-      services: Service[];
-    };
-    clinicalServicesTab: {
-      tabTitle: string;
-      services: Service[];
-    };
+    // Legacy fields
+    ourServicesTab?: LegacyTab;
+    clinicalServicesTab?: LegacyTab;
+    // New flexible tabs
+    serviceTabs?: ServiceTab[];
   };
   ctaSection: {
     title: string;
@@ -169,11 +198,11 @@ interface ServicesPageData {
 }
 
 // ResponsiveServices Component
-const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab }: {
+const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTabKey }: {
   currentServices: Service[];
   openItems: Set<number>;
   toggleItem: (index: number) => void;
-  activeTab: 'medical' | 'clinical';
+  activeTabKey: string;
 }) => {
   const [columns, setColumns] = useState(1);
 
@@ -215,7 +244,7 @@ const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab 
 
               return (
                 <div
-                  key={`${activeTab}-${originalIndex}`}
+                  key={`${activeTabKey}-${originalIndex}`}
                   className={`relative transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
                               ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-[0.98] opacity-90 translate-y-1'}
                              `}
@@ -239,18 +268,53 @@ const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab 
 
 export default function ServicesPage() {
   const [pageData, setPageData] = useState<ServicesPageData | null>(null);
-  const [activeTab, setActiveTab] = useState<'medical' | 'clinical'>('medical');
+  const [activeTabKey, setActiveTabKey] = useState<string>('');
   const [openItems, setOpenItems] = useState(new Set<number>());
   const [loading, setLoading] = useState(true);
+
+  // Function to get all tabs (combine legacy and new)
+  const getAllTabs = (): ServiceTab[] => {
+    if (!pageData?.whatWeOfferSection) return [];
+    
+    // Use new system if available and has data
+    if (pageData.whatWeOfferSection.serviceTabs && pageData.whatWeOfferSection.serviceTabs.length > 0) {
+      return pageData.whatWeOfferSection.serviceTabs;
+    }
+    
+    // Fallback to legacy system
+    const legacyTabs: ServiceTab[] = [];
+    
+    if (pageData.whatWeOfferSection.ourServicesTab?.services && pageData.whatWeOfferSection.ourServicesTab.services.length > 0) {
+      legacyTabs.push({
+        tabTitle: pageData.whatWeOfferSection.ourServicesTab.tabTitle || 'Our Services',
+        tabKey: 'our-services',
+        services: pageData.whatWeOfferSection.ourServicesTab.services,
+        order: 0
+      });
+    }
+    
+    if (pageData.whatWeOfferSection.clinicalServicesTab?.services && pageData.whatWeOfferSection.clinicalServicesTab.services.length > 0) {
+      legacyTabs.push({
+        tabTitle: pageData.whatWeOfferSection.clinicalServicesTab.tabTitle || 'Clinical Services',
+        tabKey: 'clinical-services',
+        services: pageData.whatWeOfferSection.clinicalServicesTab.services,
+        order: 1
+      });
+    }
+    
+    return legacyTabs;
+  };
 
   // Handle hash navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.substring(1);
-      if (hash === "clinical-services") {
-        setActiveTab('clinical');
-      } else if (hash === "our-services") {
-        setActiveTab('medical');
+      if (hash && pageData?.whatWeOfferSection) {
+        const allTabs = getAllTabs();
+        const foundTab = allTabs.find(tab => tab.tabKey === hash);
+        if (foundTab) {
+          setActiveTabKey(hash);
+        }
       }
     };
 
@@ -260,13 +324,34 @@ export default function ServicesPage() {
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, []);
+  }, [pageData]);
 
   useEffect(() => {
     const fetchPageData = async () => {
       try {
         const data = await client.fetch(SERVICES_PAGE_QUERY);
         setPageData(data);
+        
+        // Set initial active tab
+        if (data?.whatWeOfferSection) {
+          // Check for new system first
+          if (data.whatWeOfferSection.serviceTabs?.length > 0) {
+            const sortedTabs = [...data.whatWeOfferSection.serviceTabs].sort((a, b) => (a.order || 0) - (b.order || 0));
+            const hash = window.location.hash.substring(1);
+            const foundTab = sortedTabs.find(tab => tab.tabKey === hash);
+            setActiveTabKey(foundTab ? hash : sortedTabs[0].tabKey);
+          } else {
+            // Fallback to legacy system
+            const hash = window.location.hash.substring(1);
+            if (hash === 'clinical-services' && data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
+              setActiveTabKey('clinical-services');
+            } else if (data.whatWeOfferSection.ourServicesTab?.services?.length > 0) {
+              setActiveTabKey('our-services');
+            } else if (data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
+              setActiveTabKey('clinical-services');
+            }
+          }
+        }
       } catch (error) {
         console.error('Error fetching services page data:', error);
       } finally {
@@ -290,12 +375,11 @@ export default function ServicesPage() {
     });
   };
 
-  const handleTabChange = (tab: 'medical' | 'clinical') => {
-    setActiveTab(tab);
+  const handleTabChange = (tabKey: string) => {
+    setActiveTabKey(tabKey);
     setOpenItems(new Set());
     // Update URL hash
-    const hashMap = { medical: 'our-services', clinical: 'clinical-services' };
-    window.history.replaceState(null, '', `#${hashMap[tab]}`);
+    window.history.replaceState(null, '', `#${tabKey}`);
   };
 
   if (loading) {
@@ -309,25 +393,40 @@ export default function ServicesPage() {
     );
   }
 
-  if (!pageData) {
+  if (!pageData?.whatWeOfferSection) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-lg text-muted-foreground">Failed to load page content.</p>
+          <p className="text-lg text-muted-foreground">No page data found.</p>
+          <p className="text-sm text-muted-foreground mt-2">Please check your Sanity Studio configuration.</p>
         </div>
       </div>
     );
   }
 
-  const currentServices = activeTab === 'medical' 
-    ? pageData.whatWeOfferSection.ourServicesTab.services 
-    : pageData.whatWeOfferSection.clinicalServicesTab.services;
+  const allTabs = getAllTabs();
 
-  const heroImageSrc = pageData.heroSection.heroImage 
+  if (allTabs.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">No services available.</p>
+          <p className="text-sm text-muted-foreground mt-2">Please add services in your Sanity Studio.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sort tabs by order
+  const sortedTabs = [...allTabs].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const activeTab = sortedTabs.find(tab => tab.tabKey === activeTabKey) || sortedTabs[0];
+  const currentServices = activeTab?.services || [];
+
+  const heroImageSrc = pageData.heroSection?.heroImage 
     ? urlFor(pageData.heroSection.heroImage.asset).width(700).height(500).url()
     : "/contact.jpg";
 
-  const experienceBackgroundSrc = pageData.experienceSection.backgroundImage 
+  const experienceBackgroundSrc = pageData.experienceSection?.backgroundImage 
     ? urlFor(pageData.experienceSection.backgroundImage.asset).width(1600).height(600).url()
     : "/contact.jpg";
 
@@ -339,10 +438,10 @@ export default function ServicesPage() {
           <div className="grid md:grid-cols-2 items-center">
             <div className="items-center">
               <h1 className="font-headline text-5xl md:text-7xl text-primary md:mx-24 md:text-left">
-                {pageData.heroSection.title}
+                {pageData.heroSection?.title || 'Our Services'}
               </h1>
               <p className="mt-4 text-muted-foreground max-w-lg mx-auto md:mx-24 md:text-left">
-                {pageData.heroSection.description}
+                {pageData.heroSection?.description || 'Comprehensive healthcare services for your wellbeing.'}
               </p>
             </div>
             <div className="relative flex justify-center items-center h-64 md:h-[500px]">
@@ -395,68 +494,67 @@ export default function ServicesPage() {
         ></div>
         <div className="relative container mx-auto px-4 text-center">
           <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-wider">
-            {pageData.experienceSection.title}
+            {pageData.experienceSection?.title || 'Experience Excellence'}
           </h2>
         </div>
       </section>
 
       {/* What We Offer Section */}
-      <section className="py-16 bg-background" id="clinical-services">
+      <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-primary mb-4">
-              {pageData.whatWeOfferSection.title}
+              {pageData.whatWeOfferSection?.title || 'What We Offer'}
             </h2>
             <div className="w-24 h-1 bg-primary mx-auto rounded-full mb-6"></div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {pageData.whatWeOfferSection.description}
+              {pageData.whatWeOfferSection?.description || 'Comprehensive healthcare services tailored to your needs.'}
             </p>
           </div>
 
-          {/* Tab Navigation */}
+          {/* Dynamic Tab Navigation */}
           <div className="flex justify-center mb-12 transition-all duration-300 ease-in-out">
-            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
-              <button
-                onClick={() => handleTabChange('medical')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'medical'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                {pageData.whatWeOfferSection.ourServicesTab.tabTitle}
-              </button>
-              <button
-                onClick={() => handleTabChange('clinical')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'clinical'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                {pageData.whatWeOfferSection.clinicalServicesTab.tabTitle}
-              </button>
+            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex flex-wrap gap-1">
+              {sortedTabs.map((tab) => (
+                <button
+                  key={tab.tabKey}
+                  onClick={() => handleTabChange(tab.tabKey)}
+                  className={`px-4 py-3 rounded-lg font-semibold transition-all duration-200 text-sm lg:text-base ${
+                    activeTabKey === tab.tabKey
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  {tab.tabTitle}
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Active Tab Description */}
+          {activeTab?.tabDescription && (
+            <div className="text-center mb-8">
+              <p className="text-muted-foreground max-w-3xl mx-auto">
+                {activeTab.tabDescription}
+              </p>
+            </div>
+          )}
 
           {/* Services Grid */}
           <ResponsiveServices
             currentServices={currentServices}
             openItems={openItems}
             toggleItem={toggleItem}
-            activeTab={activeTab}
+            activeTabKey={activeTabKey}
           />
           
           {/* Tab Indicator for Mobile */}
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               Showing <span className="font-semibold text-primary">
-                {activeTab === 'medical' 
-                  ? pageData.whatWeOfferSection.ourServicesTab.tabTitle 
-                  : pageData.whatWeOfferSection.clinicalServicesTab.tabTitle
-                }
-              </span> • {currentServices.length} services available
+                {activeTab?.tabTitle}
+              </span> • {currentServices.length} service{currentServices.length !== 1 ? 's' : ''} available
             </p>
           </div>
         </div>
@@ -467,20 +565,20 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              {pageData.ctaSection.title}
+              {pageData.ctaSection?.title || 'Ready to Get Started?'}
             </h2>
             <p className="mx-auto mt-4 max-w-4xl text-lg text-muted-foreground lg:text-xl">
-              {pageData.ctaSection.description}
+              {pageData.ctaSection?.description || 'Contact us today to schedule your appointment.'}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:gap-6">
               <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
-                <Link href={pageData.ctaSection.primaryButton.link}>
-                  {pageData.ctaSection.primaryButton.text}
+                <Link href={pageData.ctaSection?.primaryButton?.link || '/appointments'}>
+                  {pageData.ctaSection?.primaryButton?.text || 'Book Appointment'}
                 </Link>
               </Button>
               <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8 hover:bg-transparent hover:text-primary transition-colors">
-                <Link href={pageData.ctaSection.secondaryButton.link}>
-                  {pageData.ctaSection.secondaryButton.text}
+                <Link href={pageData.ctaSection?.secondaryButton?.link || '/contact'}>
+                  {pageData.ctaSection?.secondaryButton?.text || 'Contact Us'}
                 </Link>
               </Button>
             </div>
