@@ -108,8 +108,16 @@ export default defineConfig({
                       .child(S.documentTypeList('appointment').title('Lab Appointments')),
                   ])
               ),
+            S.listItem()
+              .title('Services')
+              .id('services')
+              .child(
+                S.document()
+                  .schemaType('servicesPage')
+                  .documentId('servicesPage')
+              ),
             ...S.documentTypeListItems().filter(
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment'].includes(listItem.getId() || '')
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'servicesPage'].includes(listItem.getId() || '')
             ),
           ]),
     }),
