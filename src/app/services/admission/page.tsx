@@ -13,7 +13,7 @@ export default function AdmissionPage() {
     const fetchData = async () => {
       try {
         const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
-        
+
         if (projectId && projectId !== 'your-project-id-here') {
           const data = await client.fetch(ADMISSION_QUERY);
           setAdmissionData(data);
@@ -26,20 +26,20 @@ export default function AdmissionPage() {
         setLoading(false);
       }
     };
-    
-    fetchData();  
+
+    fetchData();
   }, []);
 
   // Function to render different section types
   const renderSection = (section: AdmissionSection, index: number) => {
     if (!section.isActive) return null;
 
-    const backgroundClass = section.backgroundColor === 'secondary' 
-      ? 'bg-secondary' 
-      : section.backgroundColor === 'white' 
-        ? 'bg-white' 
+    const backgroundClass = section.backgroundColor === 'secondary'
+      ? 'bg-secondary'
+      : section.backgroundColor === 'white'
+        ? 'bg-white'
         : 'bg-background';
-    
+
     return (
       <section key={index} className={`py-12 md:py-20 ${backgroundClass}`}>
         <div className="container mx-auto px-4 max-w-4xl">
@@ -50,13 +50,12 @@ export default function AdmissionPage() {
           </div>
 
           {section.sectionType === 'imageInfo' && section.image ? (
-            <div className={`flex flex-col ${
-              section.imagePosition === 'left' ? 'md:flex-row' : 
-              section.imagePosition === 'right' ? 'md:flex-row-reverse' : 
-              'items-center'
-            } gap-8 items-center`}>
+            <div className={`flex flex-col ${section.imagePosition === 'left' ? 'md:flex-row' :
+                section.imagePosition === 'right' ? 'md:flex-row-reverse' :
+                  'items-center'
+              } gap-8 items-center`}>
               <div className="flex-shrink-0">
-                <Image 
+                <Image
                   src={urlFor(section.image.asset).width(400).height(300).url()}
                   alt={section.sectionTitle}
                   width={400}
@@ -116,7 +115,7 @@ export default function AdmissionPage() {
         <section className="py-12 md:py-20">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-              <span className="text-primary">Las Piñas Doctors Hospital</span>
+              <span className="text-primary font-headline">Las Piñas Doctors Hospital</span>
               <br />
               Direct Admission
             </h1>
@@ -128,9 +127,9 @@ export default function AdmissionPage() {
   }
 
   const { heroSection, admissionInfo, sections, dataPrivacySection, philhealthSection } = admissionData;
-  
+
   // Filter and sort active sections with null checks
-  const activeSections = sections?.filter(section => 
+  const activeSections = sections?.filter(section =>
     section && section.isActive === true
   ).sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
 
@@ -139,10 +138,12 @@ export default function AdmissionPage() {
       {/* Hero Section */}
       <section className="py-12 md:py-20">
         <div className="container mx-auto px-4 max-w-4xl text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            <span className="text-primary">{heroSection?.title || 'Las Piñas Doctors Hospital'}</span>
+          <h1 className="text-4xl md:text-5xl tracking-tight">
+            <span className="text-primary font-headline">{heroSection?.title || 'Las Piñas Doctors Hospital'}</span>
             <br />
-            {heroSection?.subtitle || 'Direct Admission'}
+            <span className="font-bold">
+              {heroSection?.subtitle || 'Direct Admission'}
+            </span>
           </h1>
         </div>
       </section>
@@ -166,7 +167,7 @@ export default function AdmissionPage() {
           </div>
         </section>
       )}
-      
+
       {/* Dynamic Sections */}
       {activeSections.map((section, index) => renderSection(section, index))}
 
@@ -174,7 +175,7 @@ export default function AdmissionPage() {
       {dataPrivacySection?.isActive && (
         <section className="py-12 md:py-20">
           <div className="container mx-auto px-4 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-primary mb-4">
+            <h2 className="text-3xl md:text-4xl font-headline text-primary mb-4">
               {dataPrivacySection.title}
             </h2>
             <h3 className="text-2xl md:text-3xl font-extrabold text-foreground mb-8">
@@ -186,14 +187,14 @@ export default function AdmissionPage() {
           </div>
         </section>
       )}
-      
+
       {/* PhilHealth Section */}
       {philhealthSection?.isActive && (
         <section className="py-12 md:py-20 bg-secondary">
           <div className="container mx-auto px-4 max-w-4xl text-center">
             <div className="flex flex-col items-center gap-6">
               {philhealthSection.logo?.asset && (
-                <Image 
+                <Image
                   src={urlFor(philhealthSection.logo.asset).width(500).height(300).url()}
                   alt="PhilHealth Logo"
                   width={500}
