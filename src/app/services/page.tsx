@@ -1,12 +1,13 @@
 'use client';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, Plus, Minus } from "lucide-react";
+import { Stethoscope, Eye, Bone, Smile, Pill, Syringe, TestTube, Heart, Brain, Shield, Activity } from "lucide-react";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
-import { ServiceCard } from "@/components/ServiceCard"; // Import the updated ServiceCard
+import { ServiceCard } from "@/components/ServiceCard";
+import { client, urlFor } from "@/lib/sanity";
 
-// Custom Icon Components (unchanged from previous versions)
+// Custom Icon Components
 const OtorhinolaryngologyIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
     <path d="M6 12c0-2.209 1.791-4 4-4s4 1.791 4 4c0 1.503-.824 2.805-2 3.465V18h-4v-2.535c-1.176-.66-2-1.962-2-3.465z" />
@@ -45,189 +46,163 @@ const LungIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
-// Service Categories Data (unchanged)
-const medicalServices = [
-  { 
-    title: "Internal Medicine", 
-    icon: Stethoscope, 
-    subtitle: "Primary Care",
-    details: [
-      "Comprehensive primary care consultations and regular health check-ups",
-      "Preventive medicine and health screenings",
-      "Management of chronic conditions and adult diseases"
-    ] 
-  },
-  { 
-    title: "Ophthalmology", 
-    icon: Eye, 
-    subtitle: "Eye Care",
-    details: [
-      "Complete eye examinations and vision assessments",
-      "Advanced diagnostic imaging and retinal analysis",
-      "Treatment of eye diseases and vision correction"
-    ] 
-  },
-  { 
-    title: "Anesthesiology", 
-    icon: Bone, 
-    subtitle: "Surgical Support",
-    details: [
-      "Pre-operative assessment and consultation",
-      "Safe anesthesia administration for all surgical procedures",
-      "Post-operative pain management and recovery monitoring"
-    ] 
-  },
-  { 
-    title: "Pediatrics", 
-    icon: Smile, 
-    subtitle: "Child Healthcare",
-    details: [
-      "Comprehensive pediatric care from infancy to adolescence",
-      "Childhood immunizations and developmental assessments",
-      "Treatment of childhood illnesses and growth monitoring"
-    ] 
-  },
-  { 
-    title: "Otorhinolaryngology", 
-    icon: OtorhinolaryngologyIcon, 
-    subtitle: "ENT Services",
-    details: [
-      "Diagnosis and treatment of ear, nose, and throat conditions",
-      "Hearing assessments and audiology services",
-      "Surgical and non-surgical ENT procedures"
-    ] 
-  },
-  { 
-    title: "Pulmonary Dept.", 
-    icon: LungIcon, 
-    subtitle: "Lung Care",
-    details: [
-      "Comprehensive respiratory system evaluation and treatment",
-      "Pulmonary function testing and sleep studies",
-      "Management of asthma, COPD, and other lung conditions"
-    ] 
-  },
-  { 
-    title: "OB Gyne", 
-    icon: ObGyneIcon, 
-    subtitle: "Women's Health",
-    details: [
-      "Comprehensive women's healthcare and reproductive services",
-      "Prenatal care, delivery, and postpartum support",
-      "Gynecological examinations and women's wellness programs"
-    ] 
-  },
-  { 
-    title: "Dentistry", 
-    icon: DentistryIcon, 
-    subtitle: "Oral Health",
-    details: [
-      "Complete dental examinations and oral health assessments",
-      "Preventive dentistry and professional cleanings",
-      "Restorative and cosmetic dental procedures"
-    ] 
-  },
-  { 
-    title: "Surgery", 
-    icon: Syringe, 
-    subtitle: "Surgical Care",
-    details: [
-      "Wide range of inpatient and outpatient surgical procedures",
-      "Minimally invasive laparoscopic surgery options",
-      "Expert surgical care with modern techniques and equipment"
-    ] 
-  },
-  { 
-    title: "Dermatology", 
-    icon: Stethoscope, 
-    subtitle: "Skin Care",
-    details: [
-      "Comprehensive skin health evaluations and treatments",
-      "Dermatological procedures and cosmetic services",
-      "Treatment of skin conditions and preventive care"
-    ] 
-  },
-  { 
-    title: "Others", 
-    icon: Pill, 
-    subtitle: "Additional Services",
-    details: [
-      "Specialized medical services and consultations",
-      "Multidisciplinary care and treatment options",
-      "Additional healthcare services as needed"
-    ] 
-  }
-];
+// Icon mapping function
+const getIcon = (iconName: string) => {
+  const icons = {
+    stethoscope: Stethoscope,
+    eye: Eye,
+    bone: Bone,
+    smile: Smile,
+    pill: Pill,
+    syringe: Syringe,
+    testtube: TestTube,
+    heart: Heart,
+    brain: Brain,
+    shield: Shield,
+    activity: Activity,
+    ent: OtorhinolaryngologyIcon,
+    lung: LungIcon,
+    obgyne: ObGyneIcon,
+    dentistry: DentistryIcon,
+  };
+  return icons[iconName as keyof typeof icons] || Stethoscope;
+};
 
-const clinicalServices = [
-  { 
-    title: "Laboratory Services", 
-    icon: Pill, 
-    subtitle: "Diagnostic Testing",
-    details: [
-      "Complete blood chemistry panels and hematology testing",
-      "Microbiology and infectious disease diagnostics",
-      "Specialized laboratory tests and rapid result processing"
-    ] 
+// Updated Sanity query to include both legacy and new fields
+const SERVICES_PAGE_QUERY = `*[_type == "servicesPage"][0] {
+  _id,
+  heroSection {
+    title,
+    description,
+    heroImage {
+      asset
+    }
   },
-  { 
-    title: "Radiology & Imaging", 
-    icon: Eye, 
-    subtitle: "Medical Imaging",
-    details: [
-      "Digital X-rays, CT scans, and MRI imaging services",
-      "Ultrasound and Doppler studies",
-      "Advanced imaging interpretation by certified radiologists"
-    ] 
+  experienceSection {
+    title,
+    backgroundImage {
+      asset
+    }
   },
-  { 
-    title: "Emergency Services", 
-    icon: Stethoscope, 
-    subtitle: "24/7 Emergency Care",
-    details: [
-      "Round-the-clock emergency medical services",
-      "Trauma care and critical patient stabilization",
-      "Emergency diagnostic and treatment capabilities"
-    ] 
+  whatWeOfferSection {
+    title,
+    description,
+    // Legacy fields
+    ourServicesTab {
+      tabTitle,
+      services[] {
+        title,
+        subtitle,
+        icon,
+        details,
+        order
+      }
+    },
+    clinicalServicesTab {
+      tabTitle,
+      services[] {
+        title,
+        subtitle,
+        icon,
+        details,
+        order
+      }
+    },
+    // New flexible tabs
+    serviceTabs[] {
+      tabTitle,
+      tabKey,
+      tabDescription,
+      services[] {
+        title,
+        subtitle,
+        icon,
+        details,
+        order
+      },
+      order
+    }
   },
-  { 
-    title: "Pharmacy Services", 
-    icon: Pill, 
-    subtitle: "Medication Management",
-    details: [
-      "In-house pharmacy with comprehensive medication dispensing",
-      "Medication counseling and drug interaction screening",
-      "Specialized pharmaceutical compounding services"
-    ] 
-  },
-  { 
-    title: "Physical Therapy", 
-    icon: Bone, 
-    subtitle: "Rehabilitation",
-    details: [
-      "Comprehensive rehabilitation and physical therapy programs",
-      "Post-surgical recovery and mobility restoration",
-      "Pain management and therapeutic exercise programs"
-    ] 
-  },
-  { 
-    title: "Cardiology Services", 
-    icon: Stethoscope, 
-    subtitle: "Heart Care",
-    details: [
-      "Comprehensive cardiac evaluations and diagnostics",
-      "ECG, echocardiography, and stress testing",
-      "Heart disease prevention and management programs"
-    ] 
+  ctaSection {
+    title,
+    description,
+    primaryButton {
+      text,
+      link
+    },
+    secondaryButton {
+      text,
+      link
+    }
   }
-];
+}`;
+
+// Types - Updated for backward compatibility
+interface Service {
+  title: string;
+  subtitle: string;
+  icon: string;
+  details: string[];
+  order?: number;
+}
+
+interface ServiceTab {
+  tabTitle: string;
+  tabKey: string;
+  tabDescription?: string;
+  services: Service[];
+  order?: number;
+}
+
+interface LegacyTab {
+  tabTitle: string;
+  services: Service[];
+}
+
+interface ServicesPageData {
+  _id: string;
+  heroSection: {
+    title: string;
+    description: string;
+    heroImage?: {
+      asset: any;
+    };
+  };
+  experienceSection: {
+    title: string;
+    backgroundImage?: {
+      asset: any;
+    };
+  };
+  whatWeOfferSection: {
+    title: string;
+    description: string;
+    // Legacy fields
+    ourServicesTab?: LegacyTab;
+    clinicalServicesTab?: LegacyTab;
+    // New flexible tabs
+    serviceTabs?: ServiceTab[];
+  };
+  ctaSection: {
+    title: string;
+    description: string;
+    primaryButton: {
+      text: string;
+      link: string;
+    };
+    secondaryButton: {
+      text: string;
+      link: string;
+    };
+  };
+}
 
 // ResponsiveServices Component
-const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab }: {
-  currentServices: typeof medicalServices; // Use a common type or union if service data differs significantly
+const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTabKey }: {
+  currentServices: Service[];
   openItems: Set<number>;
   toggleItem: (index: number) => void;
-  activeTab: 'medical' | 'clinical';
+  activeTabKey: string;
 }) => {
   const [columns, setColumns] = useState(1);
 
@@ -238,42 +213,47 @@ const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab 
       else setColumns(1);
     };
 
-    updateColumns(); // set initial
+    updateColumns();
     window.addEventListener("resize", updateColumns);
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
 
   const columnsArray = Array.from({ length: columns });
 
+  // Sort services by order
+  const sortedServices = [...currentServices].sort((a, b) => (a.order || 0) - (b.order || 0));
+
   return (
-    // The main container for the responsive columns
     <div className="flex flex-col md:flex-row gap-4 md:gap-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
       {columnsArray.map((_, colIndex) => (
         <div
           key={colIndex}
           className="flex-1 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
         >
-          {currentServices
+          {sortedServices
             .filter((_, index) => index % columns === colIndex)
             .map((service, serviceIndex) => {
-              // Find the original index of the service in the full list
-              const originalIndex = currentServices.findIndex(s => s.title === service.title); // Assuming titles are unique for finding original index
+              const originalIndex = sortedServices.findIndex(s => s.title === service.title);
               const isOpen = openItems.has(originalIndex);
+
+              // Convert service to format expected by ServiceCard
+              const serviceForCard = {
+                ...service,
+                icon: getIcon(service.icon)
+              };
 
               return (
                 <div
-                  key={`${activeTab}-${originalIndex}`}
+                  key={`${activeTabKey}-${originalIndex}`}
                   className={`relative transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
                               ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-[0.98] opacity-90 translate-y-1'}
                              `}
                   style={{
-                    // When a card is open, give it a higher z-index to ensure it overlaps.
-                    // The ServiceCard itself will handle the absolute positioning of its expanded content.
-                    zIndex: isOpen ? 20 : 1, // Higher z-index for the open card
+                    zIndex: isOpen ? 20 : 1,
                   }}
                 >
                   <ServiceCard
-                    service={service}
+                    service={serviceForCard}
                     isOpen={isOpen}
                     onToggle={() => toggleItem(originalIndex)}
                   />
@@ -286,45 +266,183 @@ const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTab 
   );
 };
 
-
 export default function ServicesPage() {
-  const [activeTab, setActiveTab] = useState<'medical' | 'clinical'>('medical');
-  const [openItems, setOpenItems] = useState(new Set<number>()); // Use Set to track open items
+  const [pageData, setPageData] = useState<ServicesPageData | null>(null);
+  const [activeTabKey, setActiveTabKey] = useState<string>('');
+  const [openItems, setOpenItems] = useState(new Set<number>());
+  const [loading, setLoading] = useState(true);
+
+  // Function to get all tabs (combine legacy and new)
+  const getAllTabs = (): ServiceTab[] => {
+    if (!pageData?.whatWeOfferSection) return [];
+    
+    // Use new system if available and has data
+    if (pageData.whatWeOfferSection.serviceTabs && pageData.whatWeOfferSection.serviceTabs.length > 0) {
+      return pageData.whatWeOfferSection.serviceTabs;
+    }
+    
+    // Fallback to legacy system
+    const legacyTabs: ServiceTab[] = [];
+    
+    if (pageData.whatWeOfferSection.ourServicesTab?.services && pageData.whatWeOfferSection.ourServicesTab.services.length > 0) {
+      legacyTabs.push({
+        tabTitle: pageData.whatWeOfferSection.ourServicesTab.tabTitle || 'Our Services',
+        tabKey: 'our-services',
+        services: pageData.whatWeOfferSection.ourServicesTab.services,
+        order: 0
+      });
+    }
+    
+    if (pageData.whatWeOfferSection.clinicalServicesTab?.services && pageData.whatWeOfferSection.clinicalServicesTab.services.length > 0) {
+      legacyTabs.push({
+        tabTitle: pageData.whatWeOfferSection.clinicalServicesTab.tabTitle || 'Clinical Services',
+        tabKey: 'clinical-services',
+        services: pageData.whatWeOfferSection.clinicalServicesTab.services,
+        order: 1
+      });
+    }
+    
+    return legacyTabs;
+  };
+
+  // Handle hash navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && pageData?.whatWeOfferSection) {
+        const allTabs = getAllTabs();
+        const foundTab = allTabs.find(tab => tab.tabKey === hash);
+        if (foundTab) {
+          setActiveTabKey(hash);
+        }
+      }
+    };
+
+    handleHashChange();
+    window.addEventListener('hashchange', handleHashChange);
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [pageData]);
+
+  useEffect(() => {
+    const fetchPageData = async () => {
+      try {
+        const data = await client.fetch(SERVICES_PAGE_QUERY);
+        setPageData(data);
+        
+        // Set initial active tab
+        if (data?.whatWeOfferSection) {
+          // Check for new system first
+          if (data.whatWeOfferSection.serviceTabs?.length > 0) {
+            const sortedTabs = [...data.whatWeOfferSection.serviceTabs].sort((a, b) => (a.order || 0) - (b.order || 0));
+            const hash = window.location.hash.substring(1);
+            const foundTab = sortedTabs.find(tab => tab.tabKey === hash);
+            setActiveTabKey(foundTab ? hash : sortedTabs[0].tabKey);
+          } else {
+            // Fallback to legacy system
+            const hash = window.location.hash.substring(1);
+            if (hash === 'clinical-services' && data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
+              setActiveTabKey('clinical-services');
+            } else if (data.whatWeOfferSection.ourServicesTab?.services?.length > 0) {
+              setActiveTabKey('our-services');
+            } else if (data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
+              setActiveTabKey('clinical-services');
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching services page data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPageData();
+  }, []);
 
   const toggleItem = (index: number) => {
     setOpenItems(prevOpenItems => {
       const newOpenItems = new Set(prevOpenItems);
       if (newOpenItems.has(index)) {
-        newOpenItems.delete(index); // Close if already open
+        newOpenItems.delete(index);
       } else {
-        newOpenItems.clear(); // Close all other items for single-open behavior
-        newOpenItems.add(index); // Open the clicked one
+        newOpenItems.clear();
+        newOpenItems.add(index);
       }
       return newOpenItems;
     });
   };
 
-  const handleTabChange = (tab: 'medical' | 'clinical') => {
-    setActiveTab(tab);
-    setOpenItems(new Set()); // Close all items when switching tabs
+  const handleTabChange = (tabKey: string) => {
+    setActiveTabKey(tabKey);
+    setOpenItems(new Set());
+    // Update URL hash
+    window.history.replaceState(null, '', `#${tabKey}`);
   };
 
-  const currentServices = activeTab === 'medical' ? medicalServices : clinicalServices;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-lg text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!pageData?.whatWeOfferSection) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">No page data found.</p>
+          <p className="text-sm text-muted-foreground mt-2">Please check your Sanity Studio configuration.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const allTabs = getAllTabs();
+
+  if (allTabs.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-lg text-muted-foreground">No services available.</p>
+          <p className="text-sm text-muted-foreground mt-2">Please add services in your Sanity Studio.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Sort tabs by order
+  const sortedTabs = [...allTabs].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const activeTab = sortedTabs.find(tab => tab.tabKey === activeTabKey) || sortedTabs[0];
+  const currentServices = activeTab?.services || [];
+
+  const heroImageSrc = pageData.heroSection?.heroImage 
+    ? urlFor(pageData.heroSection.heroImage.asset).width(700).height(500).url()
+    : "/contact.jpg";
+
+  const experienceBackgroundSrc = pageData.experienceSection?.backgroundImage 
+    ? urlFor(pageData.experienceSection.backgroundImage.asset).width(1600).height(600).url()
+    : "/contact.jpg";
 
   return (
     <div className="flex flex-col mx-auto">
+      {/* Hero Section */}
       <section className="bg-white py-12 md:py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 items-center">
-            <div className="items-center ">
-            <h1 className="font-headline text-5xl md:text-7xl text-primary md:mx-24 md:text-left">
-              SAFE AT<br />ALAGA KA
-            </h1>
-            <p className="mt-4 text-muted-foreground max-w-lg mx-auto md:mx-24 md:text-left">
-            Las Piñas Doctors Hospital offers a wide range of medical services from checkups and 
-            diagnostics to emergency and specialized care. With expert doctors and modern facilities,
-              we're here to provide safe,fast, and compassionate healthcare for you and your family.
-            </p>
+            <div className="items-center">
+              <h1 className="font-headline text-5xl md:text-7xl text-primary md:mx-24 md:text-left">
+                {pageData.heroSection?.title || 'Our Services'}
+              </h1>
+              <p className="mt-4 text-muted-foreground max-w-lg mx-auto md:mx-24 md:text-left">
+                {pageData.heroSection?.description || 'Comprehensive healthcare services for your wellbeing.'}
+              </p>
             </div>
             <div className="relative flex justify-center items-center h-64 md:h-[500px]">
               <div className="relative w-64 h-64 md:w-[700px] md:h-[500px]">
@@ -336,19 +454,19 @@ export default function ServicesPage() {
                   <defs>
                     <clipPath id="roundedHex" clipPathUnits="objectBoundingBox">
                       <path d="
-                        M 0.27 0.05
-                        L 0.73 0.05
-                        Q 0.75 0.05 0.76 0.07
-                        L 0.98 0.48
-                        Q 1 0.5 0.98 0.52
-                        L 0.76 0.93
-                        Q 0.75 0.95 0.73 0.95
-                        L 0.27 0.95
-                        Q 0.25 0.95 0.24 0.93
-                        L 0.02 0.52
-                        Q 0 0.5 0.02 0.48
-                        L 0.24 0.07
-                        Q 0.25 0.05 0.27 0.05
+                        M 0.3 0.05
+                        L 0.7 0.05
+                        Q 0.8 0.05 0.85 0.15
+                        L 0.95 0.4
+                        Q 1 0.5 0.95 0.6
+                        L 0.85 0.85
+                        Q 0.8 0.95 0.7 0.95
+                        L 0.3 0.95
+                        Q 0.2 0.95 0.15 0.85
+                        L 0.05 0.6
+                        Q 0 0.5 0.05 0.4
+                        L 0.15 0.15
+                        Q 0.2 0.05 0.3 0.05
                         Z
                       " />
                     </clipPath>
@@ -356,7 +474,7 @@ export default function ServicesPage() {
                 </svg>
 
                 <Image
-                  src="/contact.jpg"
+                  src={heroImageSrc}
                   alt="Hospital Interior"
                   fill
                   className="object-cover"
@@ -364,78 +482,79 @@ export default function ServicesPage() {
                 />
               </div>
             </div>
-
           </div>
         </div>
       </section>
 
+      {/* Experience Section */}
       <section className="relative py-16 bg-gray-800 text-white">
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: "url('/contact.jpg')" }}
-          data-ai-hint="abstract texture"
+          style={{ backgroundImage: `url('${experienceBackgroundSrc}')` }}
         ></div>
         <div className="relative container mx-auto px-4 text-center">
           <h2 className="font-headline text-4xl md:text-5xl font-bold tracking-wider">
-            Experience Trusted Care
+            {pageData.experienceSection?.title || 'Experience Excellence'}
           </h2>
         </div>
       </section>
 
-      {/* What We Offer Section - Using ResponsiveServices */}
+      {/* What We Offer Section */}
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-primary mb-4">
-              What We Offer
+              {pageData.whatWeOfferSection?.title || 'What We Offer'}
             </h2>
             <div className="w-24 h-1 bg-primary mx-auto rounded-full mb-6"></div>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Comprehensive healthcare services delivered by our expert medical professionals
+              {pageData.whatWeOfferSection?.description || 'Comprehensive healthcare services tailored to your needs.'}
             </p>
           </div>
 
-          {/* Tab Navigation */}
+          {/* Dynamic Tab Navigation */}
           <div className="flex justify-center mb-12 transition-all duration-300 ease-in-out">
-            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
-              <button id="clinical-services"
-                onClick={() => handleTabChange('medical')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'medical'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                Clinical Services
-              </button>
-              <button
-                onClick={() => handleTabChange('clinical')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
-                  activeTab === 'clinical'
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-muted-foreground hover:text-primary'
-                }`}
-              >
-                Our Services
-              </button>
+            <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex flex-wrap gap-1">
+              {sortedTabs.map((tab) => (
+                <button
+                  key={tab.tabKey}
+                  onClick={() => handleTabChange(tab.tabKey)}
+                  className={`px-4 py-3 rounded-lg font-semibold transition-all duration-200 text-sm lg:text-base ${
+                    activeTabKey === tab.tabKey
+                      ? 'bg-primary text-white shadow-sm'
+                      : 'text-muted-foreground hover:text-primary'
+                  }`}
+                >
+                  {tab.tabTitle}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Services Grid - Using ResponsiveServices component */}
+          {/* Active Tab Description */}
+          {activeTab?.tabDescription && (
+            <div className="text-center mb-8">
+              <p className="text-muted-foreground max-w-3xl mx-auto">
+                {activeTab.tabDescription}
+              </p>
+            </div>
+          )}
+
+          {/* Services Grid */}
           <ResponsiveServices
             currentServices={currentServices}
             openItems={openItems}
             toggleItem={toggleItem}
-            activeTab={activeTab}
+            activeTabKey={activeTabKey}
           />
           
           {/* Tab Indicator for Mobile */}
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               Showing <span className="font-semibold text-primary">
-                {activeTab === 'medical' ? 'Our Services' : 'Clinical Services'}
-              </span> • {currentServices.length} services available
+                {activeTab?.tabTitle}
+              </span> • {currentServices.length} service{currentServices.length !== 1 ? 's' : ''} available
             </p>
           </div>
         </div>
@@ -446,17 +565,21 @@ export default function ServicesPage() {
         <div className="container mx-auto px-4">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Ready to Schedule Your Appointment?
+              {pageData.ctaSection?.title || 'Ready to Get Started?'}
             </h2>
             <p className="mx-auto mt-4 max-w-4xl text-lg text-muted-foreground lg:text-xl">
-              Our medical professionals are here to provide you with the best possible care. Schedule your appointment today.
+              {pageData.ctaSection?.description || 'Contact us today to schedule your appointment.'}
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row lg:gap-6">
               <Button asChild size="lg" className="text-base lg:text-lg px-6 lg:px-8 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
-                <Link href="/services/find-doctor">Find a Doctor</Link>
+                <Link href={pageData.ctaSection?.primaryButton?.link || '/appointments'}>
+                  {pageData.ctaSection?.primaryButton?.text || 'Book Appointment'}
+                </Link>
               </Button>
               <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8 hover:bg-transparent hover:text-primary transition-colors">
-                <Link href="/services/schedule-lab">Schedule Lab Work</Link>
+                <Link href={pageData.ctaSection?.secondaryButton?.link || '/contact'}>
+                  {pageData.ctaSection?.secondaryButton?.text || 'Contact Us'}
+                </Link>
               </Button>
             </div>
           </div>
