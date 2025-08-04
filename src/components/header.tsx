@@ -398,84 +398,27 @@ export function Header() {
 
             {/* Desktop: CTA Buttons */}
       <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
-        {isScrolled && (
-          // EMERGENCY Button - Adjusted sizing
-          <Button asChild
-              // Reduced padding from p-4 to px-4 py-2 (standard shadcn size)
-              // Adjusted text-size from text-base to text-sm to match other buttons
-              className={`group relative px-3 py-1 rounded-xl backdrop-blur-xl border-2 border-red-500/30
-                          bg-gradient-to-br from-red-900/40 via-black/60 to-black/80 shadow-2xl
-                          hover:shadow-red-500/30 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 active:scale-95
-                          transition-all duration-500 ease-out cursor-pointer hover:border-red-400/60 overflow-hidden
-                          `}
-          >
-            <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="relative z-10 flex items-center justify-center w-48 h-48">
-              {/* Inner absolute divs for hover effects */}
-              <div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"
-              ></div>
-              <div
-                  className="absolute inset-0 rounded-xl bg-gradient-to-r from-red-500/10 via-red-400/20 to-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-              ></div>
-
-              {/* Content of the button (Icon and Text) - ensure z-index to be on top of hover effects */}
-              <div className="relative z-20 flex items-center space-x-2">
-                  {/* Icon container - adjusted padding from p-3 to p-2 for smaller size */}
-                  <div
-                      className="p-2 rounded-lg backdrop-blur-sm transition-all duration-300
-                                bg-gradient-to-br from-red-500/30 to-red-600/10 group-hover:from-red-400/40 group-hover:to-red-500/20"
-                  >
-                      <Phone className="h-4 w-4 fill-current text-red-400 group-hover:text-white drop-shadow-lg transition-all duration-300 group-hover:scale-110" />
-                  </div>
-                  {/* Text content - adjusted from text-base to text-sm */}
-                  <span className="text-red-400 font-bold text-sm group-hover:text-white transition-colors duration-300 drop-shadow-sm">
-                      EMERGENCY
-                  </span>
-              </div>
-            </Link>
-          </Button>
-        )}
-        {/* Find a Doctor Button - Adjusted sizing */}
-        <Button asChild
-            className={`group relative px-4 py-2 rounded-xl backdrop-blur-xl border-2 border-[${PRIMARY_GREEN_HEX}]/30
-                        bg-gradient-to-br from-[${PRIMARY_GREEN_HEX}]/40 via-black/60 to-black/80 shadow-2xl
-                        hover:shadow-[${PRIMARY_GREEN_HEX}]/30 hover:shadow-2xl hover:scale-[1.02] hover:-translate-y-1 active:scale-95
-                        transition-all duration-500 ease-out cursor-pointer hover:border-[${MEDIUM_GREEN_HEX}]/60 overflow-hidden
-                        `}
-        >
-            <Link href="/services/find-doctor" className="relative z-10 flex items-center justify-center w-48 h-48">
-                {/* Inner absolute divs for hover effects */}
-                <div
-                    className={`absolute inset-0 bg-gradient-to-r from-transparent via-[${MEDIUM_GREEN_HEX}]/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out`}
-                ></div>
-                <div
-                    className={`absolute inset-0 rounded-xl bg-gradient-to-r from-[${PRIMARY_GREEN_HEX}]/10 via-[${MEDIUM_GREEN_HEX}]/20 to-[${PRIMARY_GREEN_HEX}]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                ></div>
-
-                {/* Content of the button (Icon and Text) - ensure z-index to be on top of hover effects */}
-                <div className="relative z-20 flex items-center space-x-1">
-                    {/* Icon container - adjusted padding from p-3 to p-2 for smaller size */}
-                    <div
-                        className={`p-2 rounded-lg backdrop-blur-sm transition-all duration-300
-                                  bg-gradient-to-br from-[${PRIMARY_GREEN_HEX}]/30 to-[${MEDIUM_GREEN_HEX}]/10 group-hover:from-[${MEDIUM_GREEN_HEX}]/40 group-hover:to-[${PRIMARY_GREEN_HEX}]/20`}
-                    >
-                        {/* Changed icon size from h-6 w-6 to h-4 w-4 to match other buttons */}
-                        <Activity className={`h-4 w-4 fill-current text-[${PRIMARY_GREEN_HEX}] group-hover:text-[${LIGHT_GREEN_HEX}] drop-shadow-lg transition-all duration-300 group-hover:scale-110`} />
-                    </div>
-                    {/* Text content - adjusted from text-base to text-sm */}
-                    <span className={`text-[${PRIMARY_GREEN_HEX}] font-bold text-sm group-hover:text-[${LIGHT_GREEN_HEX}] transition-colors duration-300 drop-shadow-sm`}>
-                        Find a Doctor
-                    </span>
-                </div>
-      </Link>
-  </Button>
-  <Button asChild className="bg-primary hover:bg-primary text-white font-semibold shadow-sm">
-    <Link href="/get-result">
-      <Paperclip className="h-4 w-4 mr-2" />
-      Get Result Online
-    </Link>
-  </Button>
-</div>
+              {isScrolled && (
+                <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
+                  <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
+                    <Phone className="h-4 w-4 mr-2" />
+                    EMERGENCY
+                  </Link>
+                </Button>
+              )}
+              <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
+                <Link href="/services/find-doctor">
+                  <Activity className="h-4 w-4 mr-2" />
+                  Find a Doctor
+                </Link>
+              </Button>
+              <Button asChild className="bg-primary hover:bg-primary text-white font-semibold shadow-sm">
+                <Link href="/get-result">
+                  <Paperclip className="h-4 w-4 mr-2" />
+                  Get Result Online
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
