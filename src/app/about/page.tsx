@@ -30,11 +30,11 @@ const getHealthCardsPerView = () => {
 
 // Custom hook to hide scrollbar
 const useHideScrollbar = (ref: React.RefObject<HTMLElement | null>) => {
-    useEffect(() => {
-        const element = ref.current;
-        if (element) {
-            const style = document.createElement('style');
-            style.innerHTML = `
+  useEffect(() => {
+    const element = ref.current;
+    if (element) {
+      const style = document.createElement('style');
+      style.innerHTML = `
                 .no-scrollbar::-webkit-scrollbar {
                     display: none;
                 }
@@ -43,99 +43,99 @@ const useHideScrollbar = (ref: React.RefObject<HTMLElement | null>) => {
                     scrollbar-width: none;
                 }
             `;
-            document.head.appendChild(style);
-            element.classList.add('no-scrollbar');
+      document.head.appendChild(style);
+      element.classList.add('no-scrollbar');
 
-            return () => {
-                document.head.removeChild(style);
-            };
-        }
-    }, [ref]);
+      return () => {
+        document.head.removeChild(style);
+      };
+    }
+  }, [ref]);
 };
 
 // Generic carousel hook
 const useCarousel = (totalItems: number, cardsPerView: number) => {
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    const totalSlides = Math.ceil(totalItems / cardsPerView);
+  const totalSlides = Math.ceil(totalItems / cardsPerView);
 
-    useHideScrollbar(containerRef);
+  useHideScrollbar(containerRef);
 
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-        let isDown = false;
-        let startX: number;
-        let scrollLeft: number;
+    let isDown = false;
+    let startX: number;
+    let scrollLeft: number;
 
-        const onMouseDown = (e: MouseEvent) => {
-            isDown = true;
-            container.classList.add("cursor-grabbing");
-            startX = e.pageX - container.offsetLeft;
-            scrollLeft = container.scrollLeft;
-        };
-
-        const onMouseLeaveOrUp = () => {
-            isDown = false;
-            container.classList.remove("cursor-grabbing");
-        };
-
-        const onMouseMove = (e: MouseEvent) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - container.offsetLeft;
-            const walk = (x - startX) * 1.5;
-            container.scrollLeft = scrollLeft - walk;
-        };
-
-        const handleScroll = () => {
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
-            }
-            scrollTimeout.current = setTimeout(() => {
-                if (container) {
-                    const slideWidth = container.scrollWidth / totalSlides;
-                    const newSlide = Math.round(container.scrollLeft / slideWidth);
-                    if (newSlide !== currentSlide) {
-                        setCurrentSlide(newSlide);
-                    }
-                }
-            }, 150);
-        };
-
-        container.addEventListener("mousedown", onMouseDown);
-        container.addEventListener("mouseleave", onMouseLeaveOrUp);
-        container.addEventListener("mouseup", onMouseLeaveOrUp);
-        container.addEventListener("mousemove", onMouseMove);
-        container.addEventListener('scroll', handleScroll, { passive: true });
-
-        return () => {
-            container.removeEventListener("mousedown", onMouseDown);
-            container.removeEventListener("mouseleave", onMouseLeaveOrUp);
-            container.removeEventListener("mouseup", onMouseLeaveOrUp);
-            container.removeEventListener("mousemove", onMouseMove);
-            container.removeEventListener('scroll', handleScroll);
-            if (scrollTimeout.current) {
-                clearTimeout(scrollTimeout.current);
-            }
-        };
-    }, [currentSlide, totalSlides]);
-
-    const goToSlide = (slideIndex: number) => {
-        setCurrentSlide(slideIndex);
-        if (containerRef.current) {
-            const slideWidth = containerRef.current.scrollWidth / totalSlides;
-            containerRef.current.scrollTo({
-                left: slideWidth * slideIndex,
-                behavior: 'smooth'
-            });
-        }
+    const onMouseDown = (e: MouseEvent) => {
+      isDown = true;
+      container.classList.add("cursor-grabbing");
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
     };
 
-    return { containerRef, currentSlide, totalSlides, goToSlide };
+    const onMouseLeaveOrUp = () => {
+      isDown = false;
+      container.classList.remove("cursor-grabbing");
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      container.scrollLeft = scrollLeft - walk;
+    };
+
+    const handleScroll = () => {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+      scrollTimeout.current = setTimeout(() => {
+        if (container) {
+          const slideWidth = container.scrollWidth / totalSlides;
+          const newSlide = Math.round(container.scrollLeft / slideWidth);
+          if (newSlide !== currentSlide) {
+            setCurrentSlide(newSlide);
+          }
+        }
+      }, 150);
+    };
+
+    container.addEventListener("mousedown", onMouseDown);
+    container.addEventListener("mouseleave", onMouseLeaveOrUp);
+    container.addEventListener("mouseup", onMouseLeaveOrUp);
+    container.addEventListener("mousemove", onMouseMove);
+    container.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      container.removeEventListener("mousedown", onMouseDown);
+      container.removeEventListener("mouseleave", onMouseLeaveOrUp);
+      container.removeEventListener("mouseup", onMouseLeaveOrUp);
+      container.removeEventListener("mousemove", onMouseMove);
+      container.removeEventListener('scroll', handleScroll);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
+      }
+    };
+  }, [currentSlide, totalSlides]);
+
+  const goToSlide = (slideIndex: number) => {
+    setCurrentSlide(slideIndex);
+    if (containerRef.current) {
+      const slideWidth = containerRef.current.scrollWidth / totalSlides;
+      containerRef.current.scrollTo({
+        left: slideWidth * slideIndex,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  return { containerRef, currentSlide, totalSlides, goToSlide };
 };
 
 
@@ -146,7 +146,7 @@ export default function AboutPage() {
   const [healthAdvisories, setHealthAdvisories] = useState<HealthAdvisory[]>([]);
   const [newsUpdates, setNewsUpdates] = useState<NewsUpdate[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -155,7 +155,7 @@ export default function AboutPage() {
           client.fetch(HEALTH_ADVISORIES_QUERY),
           client.fetch(NEWS_UPDATES_QUERY)
         ]);
-        
+
         setAboutData(aboutPageData);
         setHealthAdvisories(healthAdvisoriesData);
         setNewsUpdates(newsUpdatesData);
@@ -168,7 +168,7 @@ export default function AboutPage() {
 
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     const handleResize = () => {
       setCardsPerView(getCardsPerView());
@@ -180,11 +180,11 @@ export default function AboutPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { 
-    containerRef: healthContainerRef, 
-    currentSlide: currentHealthSlide, 
-    totalSlides: totalHealthSlides, 
-    goToSlide: goToHealthSlide 
+  const {
+    containerRef: healthContainerRef,
+    currentSlide: currentHealthSlide,
+    totalSlides: totalHealthSlides,
+    goToSlide: goToHealthSlide
   } = useCarousel(healthAdvisories.length, healthCardsPerView);
 
   const {
@@ -217,23 +217,23 @@ export default function AboutPage() {
 
 
   return (
-    <div className="flex flex-col text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl"> 
+    <div className="flex flex-col text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl">
       <section className="relative grid md:grid-cols-2 min-h-[60vh]">
         <div className="flex items-center justify-center bg-background order-2 md:order-1">
-            <div className="p-8 lg:p-16 max-w-2xl text-center md:text-left">
-              <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary">
-                {aboutData.title}
-              </h1>
-              <p className="mt-2 text-xl md:text-2xl font-semibold text-foreground">{aboutData.subtitle}</p>
-              <p className="mt-4 text-muted-foreground">
-                {aboutData.description}
-              </p>
-              <Link href="/about/history">
-                <Button variant="outline" className="mt-6 border-primary text-dark hover:bg-secondary-foreground hover:text-white hover:border-primary">
-                  Learn the LPDH History
-                </Button>
-              </Link>
-            </div>
+          <div className="p-8 lg:p-16 max-w-2xl text-center md:text-left">
+            <h1 className="font-headline text-4xl md:text-5xl lg:text-6xl tracking-tight text-primary">
+              {aboutData.title}
+            </h1>
+            <p className="mt-2 text-xl md:text-2xl font-semibold text-foreground">{aboutData.subtitle}</p>
+            <p className="mt-4 text-muted-foreground">
+              {aboutData.description}
+            </p>
+            <Link href="/about/history">
+              <Button variant="outline" className="mt-6 border-primary text-dark hover:bg-secondary-foreground hover:text-white hover:border-primary">
+                Learn the LPDH History
+              </Button>
+            </Link>
+          </div>
         </div>
         <div className="relative order-1 md:order-2 min-h-[300px] md:min-h-0">
           {aboutData.heroImage ? (
@@ -256,54 +256,54 @@ export default function AboutPage() {
       </section>
 
       <section className="text-primary-foreground py-6" style={{ backgroundColor: '#097747' }}>
-          <div className="container px-4 md:px-6 mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-2 max-w-full mx-auto">
+        <div className="container px-4 md:px-6 mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-2 max-w-full mx-auto">
 
-              {/* Vision */}
-        <div className="flex flex-col text-center mx-8 px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1">
-          <div className="px-8"> {/* inner padding to push content inward */}
-            <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Vision</h3>
-            <p className="text-primary-foreground/90 text-sm leading-relaxed">
-              {aboutData.vision}
-            </p>
-          </div>
-        </div>
+            {/* Vision */}
+            <div className="flex flex-col text-center mx-8 px-0 py-4 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1">
+              <div className="px-8"> {/* inner padding to push content inward */}
+                <h3 className="font-headline text-xl mb-3 flex justify-center md:justify-start items-center">Vision</h3>
+                <p className="text-primary-foreground/90 text-sm leading-relaxed">
+                  {aboutData.vision}
+                </p>
+              </div>
+            </div>
 
-        {/* Mission */}
-        <div className="flex flex-col justify-center text-center px-0 py-1 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-1">
-          <div className="mx-4 md:mx-8">
-            <h3 className="font-headline text-x1 font-semibold mb-2 flex justify-center md:justify-start items-center">
-              Mission
-            </h3>
+            {/* Mission */}
+            <div className="flex flex-col justify-center text-center px-0 py-1 md:text-left md:border-r md:border-primary-foreground/30 md:col-span-1 md:-mx-1">
+              <div className="mx-4 md:mx-8">
+                <h3 className="font-headline text-x1 mb-2 flex justify-center md:justify-start items-center">
+                  Mission
+                </h3>
 
-            <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-primary-foreground/90 text-sm leading-snug">
-              {aboutData.mission.map((point, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <CheckCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                  <span>{point}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-              {/* Core Values */}
-              <div className="flex flex-col  text-center px-3 py-4 md:text-left md:pl-4 mx-10">
-                <div>
-                  <h3 className="font-headline text-xl font-bold mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                    {aboutData.coreValues.map(item => (
-                      <div key={item.value} className="flex items-center">
-                        <span className="font-bold text-base">{item.letter}</span>
-                        <span className="ml-2">- {item.value}</span>
-                      </div>
-                    ))}
-                  </div>
+                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-primary-foreground/90 text-sm leading-snug">
+                  {aboutData.mission.map((point, index) => (
+                    <li key={index} className="flex items-start gap-2">
+                      <CheckCircle className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                      <span>{point}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            {/* Core Values */}
+            <div className="flex flex-col  text-center px-3 py-4 md:text-left md:pl-4 mx-10">
+              <div>
+                <h3 className="font-headline text-xl mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                  {aboutData.coreValues.map(item => (
+                    <div key={item.value} className="flex items-center">
+                      <span className="font-bold text-base">{item.letter}</span>
+                      <span className="ml-2">- {item.value}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-
             </div>
+
           </div>
-        </section>
+        </div>
+      </section>
 
       <section className="py-12 md:py-24 mx-auto px-4">
         <div className="container px-4 md:px-6">
@@ -317,7 +317,7 @@ export default function AboutPage() {
               />
             </div>
             <div className="text-center md:text-left order-1 md:order-2">
-              <h2 className="font-headline text-3xl md:text-4xl font-bold tracking-tight text-primary">
+              <h2 className="font-headline text-3xl md:text-4xl tracking-tight text-primary">
                 Find Us Here
               </h2>
               <p className="text-lg text-muted-foreground">
@@ -330,12 +330,15 @@ export default function AboutPage() {
 
       <section className="py-12 md:py-16" style={{ backgroundColor: '#c2d7c9' }}>
         <div className="container mx-auto px-4 w-[80%] max-w-[1600px]">
-          <h2 className="font-headline text-3xl font-bold text-center mb-8 text-foreground">What's Happening</h2>
+          <h2 className="font-headline text-3xl text-center mb-8 text-foreground">What's Happening</h2>
+          <p className="text-center text-muted-foreground text-sm mb-8 flex items-center justify-center gap-1">
+            Swipe right <ArrowRight className="h-4 w-4" />
+          </p>
           <div
-          ref={healthContainerRef}
-          className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
-          style={{ minHeight: '400px' }}
-        >
+            ref={healthContainerRef}
+            className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
+            style={{ minHeight: '400px' }}
+          >
             {healthAdvisories.map((advisory, index) => (
               <div
                 key={advisory._id}
@@ -367,11 +370,11 @@ export default function AboutPage() {
                   )}
                   {advisory.link && (
                     <CardFooter className="pt-0 mt-auto">
-                      <Link 
-                        href={advisory.link} 
-                        target="_blank" 
+                      <Link
+                        href={advisory.link}
+                        target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-semibold text-primary hover:underline flex items-center gap-1"
+                        className="text-sm font-semibold text-accent hover:text-primary flex items-center gap-1"
                       >
                         View <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -399,7 +402,10 @@ export default function AboutPage() {
 
       <section className="py-12 md:py-16" style={{ backgroundColor: '#c2d7c9' }}>
         <div className="container mx-auto px-4 max-w-[1400px]">
-          <h2 className="font-headline text-3xl font-bold text-center mb-8 text-foreground">News & Updates</h2>
+          <h2 className="font-headline text-3xl text-center mb-8 text-foreground">News & Updates</h2>
+          <p className="text-center text-muted-foreground text-sm mb-8 flex items-center justify-center gap-1">
+            Swipe right <ArrowRight className="h-4 w-4" />
+          </p>
           <div
             ref={updatesContainerRef}
             className="flex items-stretch gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 cursor-grab select-none"
@@ -424,12 +430,13 @@ export default function AboutPage() {
                         alt={update.image.alt || update.title}
                         width={300}
                         height={800}
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-300"
                       />
                       {/* Overlay for visual feedback */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full p-2">
-                          <ArrowRight className="h-6 w-6 text-primary" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 rounded-full px-3 py-1.5 flex items-center gap-1.5">
+                          <span className="font-medium text-primary text-sm">View</span>
+                          <ArrowRight className="h-4 w-4 text-primary" />
                         </div>
                       </div>
                     </a>
@@ -468,7 +475,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      
+
     </div>
   );
 }

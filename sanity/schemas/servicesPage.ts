@@ -133,7 +133,7 @@ export const servicesPage = defineType({
                       title: 'Service Details',
                       type: 'array',
                       of: [{ type: 'string' }],
-                      validation: Rule => Rule.min(1).max(8)
+                      validation: Rule => Rule.min(1).max(15)
                     },
                     {
                       name: 'order',
@@ -203,7 +203,7 @@ export const servicesPage = defineType({
                       title: 'Service Details',
                       type: 'array',
                       of: [{ type: 'string' }],
-                      validation: Rule => Rule.min(1).max(8)
+                      validation: Rule => Rule.min(1).max(15)
                     },
                     {
                       name: 'order',
@@ -300,7 +300,7 @@ export const servicesPage = defineType({
                           title: 'Service Details',
                           type: 'array',
                           of: [{ type: 'string' }],
-                          validation: Rule => Rule.min(1).max(8)
+                          validation: Rule => Rule.min(1).max(15)
                         },
                         {
                           name: 'order',
