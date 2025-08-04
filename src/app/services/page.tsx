@@ -336,19 +336,19 @@ export default function ServicesPage() {
                   <defs>
                     <clipPath id="roundedHex" clipPathUnits="objectBoundingBox">
                       <path d="
-                        M 0.3 0.05
-                        L 0.7 0.05
-                        Q 0.8 0.05 0.85 0.15
-                        L 0.95 0.4
-                        Q 1 0.5 0.95 0.6
-                        L 0.85 0.85
-                        Q 0.8 0.95 0.7 0.95
-                        L 0.3 0.95
-                        Q 0.2 0.95 0.15 0.85
-                        L 0.05 0.6
-                        Q 0 0.5 0.05 0.4
-                        L 0.15 0.15
-                        Q 0.2 0.05 0.3 0.05
+                        M 0.27 0.05
+                        L 0.73 0.05
+                        Q 0.75 0.05 0.76 0.07
+                        L 0.98 0.48
+                        Q 1 0.5 0.98 0.52
+                        L 0.76 0.93
+                        Q 0.75 0.95 0.73 0.95
+                        L 0.27 0.95
+                        Q 0.25 0.95 0.24 0.93
+                        L 0.02 0.52
+                        Q 0 0.5 0.02 0.48
+                        L 0.24 0.07
+                        Q 0.25 0.05 0.27 0.05
                         Z
                       " />
                     </clipPath>
@@ -399,7 +399,7 @@ export default function ServicesPage() {
           {/* Tab Navigation */}
           <div className="flex justify-center mb-12 transition-all duration-300 ease-in-out">
             <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 inline-flex">
-              <button
+              <button id="clinical-services"
                 onClick={() => handleTabChange('medical')}
                 className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                   activeTab === 'medical'
@@ -407,7 +407,7 @@ export default function ServicesPage() {
                     : 'text-muted-foreground hover:text-primary'
                 }`}
               >
-                Our Services
+                Clinical Services
               </button>
               <button
                 onClick={() => handleTabChange('clinical')}
@@ -417,7 +417,7 @@ export default function ServicesPage() {
                     : 'text-muted-foreground hover:text-primary'
                 }`}
               >
-                Clinical Services
+                Our Services
               </button>
             </div>
           </div>
