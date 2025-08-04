@@ -240,6 +240,80 @@ export const admission = defineType({
           initialValue: 'Las Piñas Doctors Hospital is committed to the protection of the privacy of the patient\'s personal data in compliance with the Republic Act No. 10173 or the Data Privacy Act of 2012. The hospital guarantees that all data collected will be managed with safety and confidentiality.',
         },
         {
+          name: 'guidelines',
+          title: 'Data Privacy Guidelines',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              name: 'privacyGuideline',
+              title: 'Privacy Guideline',
+              fields: [
+                {
+                  name: 'text',
+                  title: 'Guideline Text',
+                  type: 'text',
+                }
+              ],
+              preview: {
+                select: {
+                  title: 'text'
+                },
+                prepare(selection) {
+                  const { title } = selection
+                  return {
+                    title: title ? (title.length > 60 ? title.substring(0, 60) + '...' : title) : 'Empty privacy guideline'
+                  }
+                }
+              }
+            }
+          ],
+          description: 'List of data privacy guidelines and patient rights',
+        },
+        {
+          name: 'subtitle2',
+          title: 'Second Subtitle',
+          type: 'string',
+          initialValue: 'Patient Rights',
+        },
+        {
+          name: 'description2',
+          title: 'Second Description',
+          type: 'text',
+          initialValue: 'As a patient, you have specific rights regarding your personal information and medical care. We are committed to respecting and protecting these rights throughout your treatment.',
+        },
+        {
+          name: 'guidelines2',
+          title: 'Patient Rights Guidelines',
+          type: 'array',
+          of: [
+            {
+              type: 'object',
+              name: 'patientRightGuideline',
+              title: 'Patient Right Guideline',
+              fields: [
+                {
+                  name: 'text',
+                  title: 'Patient Right Text',
+                  type: 'text',
+                }
+              ],
+              preview: {
+                select: {
+                  title: 'text'
+                },
+                prepare(selection) {
+                  const { title } = selection
+                  return {
+                    title: title ? (title.length > 60 ? title.substring(0, 60) + '...' : title) : 'Empty patient right'
+                  }
+                }
+              }
+            }
+          ],
+          description: 'List of patient rights and entitlements',
+        },
+        {
           name: 'isActive',
           title: 'Show Section',
           type: 'boolean',
