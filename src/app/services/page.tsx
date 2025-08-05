@@ -790,7 +790,7 @@ export default function ServicesPage() {
                   {pageData.ctaSection?.primaryButton?.text || 'Book Appointment'}
                 </Link>
               </Button>
-              <Button asChild variant="ghost" size="lg" className="text-base lg:text-lg px-6 lg:px-8 hover:bg-transparent hover:text-primary transition-colors">
+              <Button asChild variant="ghost" size="lg" className="hover:bg-transparent hover:text-primary transition-colors">
                 <Link href={pageData.ctaSection?.secondaryButton?.link || '/contact'}>
                   {pageData.ctaSection?.secondaryButton?.text || 'Contact Us'}
                 </Link>

@@ -37,7 +37,7 @@ export default function DirectoriesPage() {
     <div className="min-h-screen bg-gradient-to-br bg-[#faf9fa] py-12 md:py-24">
       <section className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h1 className="font-headline text-5xl font-bold tracking-tight text-[#169a53] md:text-6xl">
+          <h1 className="font-headline text-5xl tracking-tight text-primary md:text-6xl">
             LPDH Directory
           </h1>
         </div>
@@ -56,7 +56,7 @@ export default function DirectoriesPage() {
               {directoryData.map((item, index) => (
                 <TableRow
                   key={item.department}
-                  className={index % 2 === 0 ? "bg-white" : "bg-[#c2d7c9]/30"}
+                  className={index % 2 === 0 ? "bg-white" : "bg-accent/10"}
                 >
                   <TableCell className="font-medium text-gray-800">{item.department}</TableCell>
                   <TableCell className="text-gray-700">{item.local || '-'}</TableCell>
