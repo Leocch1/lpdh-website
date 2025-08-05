@@ -164,10 +164,10 @@ export default function CareersPage() {
           />
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            <h1 className="font-headline text-4xl tracking-tight sm:text-5xl md:text-6xl [text-shadow:0_3px_5px_rgba(0,0,0,0.2)]">
               {heroSection.heroTitle}
             </h1>
-            <Button asChild className="mt-8" size="lg">
+            <Button asChild className="mt-8 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:bg-accent  hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]" size="lg">
               <Link href="#openings">{heroSection.buttonText}</Link>
             </Button>
           </div>
@@ -178,7 +178,7 @@ export default function CareersPage() {
       {jobListingsSection && (
         <section id="openings" className="py-12 md:py-24 mx-auto px-4">
           <div className="container">
-            <h2 className="font-headline text-center text-3xl font-bold tracking-tight text-primary sm:text-4xl">
+            <h2 className="font-headline text-center text-3xl tracking-tight text-primary sm:text-4xl">
               {jobListingsSection.sectionTitle}
             </h2>
             <div className="mt-8 mx-auto max-w-2xl flex flex-col sm:flex-row gap-4">
@@ -260,7 +260,7 @@ export default function CareersPage() {
                         <p className="text-muted-foreground line-clamp-2 md:line-clamp-3 text-xs md:text-sm">{job.summary}</p>
                       </CardContent>
                       <CardFooter className="p-3 md:p-6 pt-0">
-                        <Button asChild className="w-full h-8 md:h-10 text-xs md:text-sm">
+                        <Button asChild className="w-full h-8 md:h-10 text-xs md:text-sm [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]">
                           <Link href={`/careers/${job.slug.current}`}>
                             <Briefcase className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                             <span className="truncate">Apply Now</span>
