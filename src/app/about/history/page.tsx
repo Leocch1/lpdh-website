@@ -53,7 +53,7 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div className="bg-background text-foreground py-12 md:py-24 w-full">
+    <div className="bg-background text-foreground py-12 md:py-16 w-full">
       <div className="container mx-auto px-4">
         <header className="text-center mb-12 md:mb-20">
           <h1 className="font-headline text-5xl md:text-6xl font-bold text-primary tracking-tight">
@@ -62,7 +62,7 @@ export default async function HistoryPage() {
         </header>
 
         <section className="py-2 mb-12 xl:mb-20">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 md:px-0">
             <div className="flex flex-col xl:flex-row items-center gap-8">
               
               {/* LEFT COLUMN: Hexagon Images */}

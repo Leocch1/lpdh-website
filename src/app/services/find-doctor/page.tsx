@@ -252,7 +252,7 @@ export default function FindDoctorPage() {
                           className={`w-full justify-start h-12 text-left ${
                             selectedSpecialty === department.name 
                               ? "bg-green-600 hover:bg-green-700 text-white" 
-                              : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                              : "bg-white hover:bg-[#169A53] text-gray-700 border-gray-300"
                           }`}
                           onClick={() => {
                             // If clicking on already selected department, unselect it

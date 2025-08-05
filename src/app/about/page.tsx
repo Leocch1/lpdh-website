@@ -255,7 +255,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="text-primary-foreground py-6" style={{ backgroundColor: '#097747' }}>
+      <section className="text-primary-foreground py-6 bg-cover bg-center bg-no-repeat" style={{ backgroundColor: '#169A53',backgroundImage: "url('/Mission.png')", }}>
         <div className="container px-4 md:px-6 mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-2 max-w-full mx-auto">
 
