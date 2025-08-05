@@ -198,13 +198,24 @@ interface ServicesPageData {
 }
 
 // ResponsiveServices Component
-const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTabKey }: {
+const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTabKey, setOpenItems }: {
   currentServices: Service[];
   openItems: Set<number>;
   toggleItem: (index: number) => void;
   activeTabKey: string;
+  setOpenItems: React.Dispatch<React.SetStateAction<Set<number>>>;
 }) => {
   const [columns, setColumns] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate services per page based on screen size
+  const getServicesPerPage = (cols: number) => {
+    if (cols >= 3) return 12; // Desktop: 4x3 grid
+    if (cols === 2) return 8;  // Tablet: 4x2 grid
+    return 4; // Mobile: 1x4 grid
+  };
+
+  const servicesPerPage = getServicesPerPage(columns);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -218,50 +229,249 @@ const ResponsiveServices = ({ currentServices, openItems, toggleItem, activeTabK
     return () => window.removeEventListener("resize", updateColumns);
   }, []);
 
+  // Reset to first page when active tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setOpenItems(new Set()); // Close all open items when changing tabs
+  }, [activeTabKey]);
+
+  // Reset to first page when columns change (responsive)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [columns]);
+
   const columnsArray = Array.from({ length: columns });
 
   // Sort services by order
   const sortedServices = [...currentServices].sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedServices.length / servicesPerPage);
+  const startIndex = (currentPage - 1) * servicesPerPage;
+  const endIndex = startIndex + servicesPerPage;
+  const currentPageServices = sortedServices.slice(startIndex, endIndex);
+
+  // Pagination handlers
+  const goToPage = (page: number) => {
+    setCurrentPage(page);
+    setOpenItems(new Set()); // Close all open items when changing pages
+    // Scroll to top of services section
+    const servicesSection = document.getElementById('services-grid');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      goToPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      goToPage(currentPage - 1);
+    }
+  };
+
+  // Generate page numbers for pagination
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      const halfVisible = Math.floor(maxVisiblePages / 2);
+      let startPage = Math.max(1, currentPage - halfVisible);
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+    }
+    
+    return pages;
+  };
+
+  if (sortedServices.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">No services available in this category.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
-      {columnsArray.map((_, colIndex) => (
-        <div
-          key={colIndex}
-          className="flex-1 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
-        >
-          {sortedServices
-            .filter((_, index) => index % columns === colIndex)
-            .map((service, serviceIndex) => {
-              const originalIndex = sortedServices.findIndex(s => s.title === service.title);
-              const isOpen = openItems.has(originalIndex);
+    <div className="space-y-8">
+      {/* Services Grid */}
+      <div id="services-grid" className="flex flex-col md:flex-row gap-4 md:gap-6 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]">
+        {columnsArray.map((_, colIndex) => (
+          <div
+            key={colIndex}
+            className="flex-1 space-y-4 transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          >
+            {currentPageServices
+              .filter((_, index) => index % columns === colIndex)
+              .map((service, serviceIndex) => {
+                const originalIndex = startIndex + currentPageServices.findIndex(s => s.title === service.title);
+                const isOpen = openItems.has(originalIndex);
 
-              // Convert service to format expected by ServiceCard
-              const serviceForCard = {
-                ...service,
-                icon: getIcon(service.icon)
-              };
+                // Convert service to format expected by ServiceCard
+                const serviceForCard = {
+                  ...service,
+                  icon: getIcon(service.icon)
+                };
 
-              return (
-                <div
-                  key={`${activeTabKey}-${originalIndex}`}
-                  className={`relative transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
-                              ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-[0.98] opacity-90 translate-y-1'}
-                             `}
-                  style={{
-                    zIndex: isOpen ? 20 : 1,
-                  }}
+                return (
+                  <div
+                    key={`${activeTabKey}-${originalIndex}`}
+                    className={`relative transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
+                                ${isOpen ? 'scale-100 opacity-100 translate-y-0' : 'scale-[0.98] opacity-90 translate-y-1'}
+                               `}
+                    style={{
+                      zIndex: isOpen ? 20 : 1,
+                    }}
+                  >
+                    <ServiceCard
+                      service={serviceForCard}
+                      isOpen={isOpen}
+                      onToggle={() => toggleItem(originalIndex)}
+                    />
+                  </div>
+                );
+              })}
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col items-center space-y-4">
+          {/* Page Info */}
+          <div className="text-sm text-muted-foreground">
+            Showing {startIndex + 1}-{Math.min(endIndex, sortedServices.length)} of {sortedServices.length} services
+          </div>
+
+          {/* Pagination Buttons */}
+          <div className="flex items-center space-x-2">
+            {/* Previous Button */}
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
+                currentPage === 1
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center space-x-1">
+              {/* First page if not visible */}
+              {getPageNumbers()[0] > 1 && (
+                <>
+                  <button
+                    onClick={() => goToPage(1)}
+                    className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200"
+                  >
+                    1
+                  </button>
+                  {getPageNumbers()[0] > 2 && (
+                    <span className="px-2 text-gray-400">...</span>
+                  )}
+                </>
+              )}
+
+              {/* Visible page numbers */}
+              {getPageNumbers().map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => goToPage(pageNum)}
+                  className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
+                    currentPage === pageNum
+                      ? 'border-primary bg-primary text-white'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+                  }`}
                 >
-                  <ServiceCard
-                    service={serviceForCard}
-                    isOpen={isOpen}
-                    onToggle={() => toggleItem(originalIndex)}
-                  />
-                </div>
-              );
-            })}
+                  {pageNum}
+                </button>
+              ))}
+
+              {/* Last page if not visible */}
+              {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+                <>
+                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && (
+                    <span className="px-2 text-gray-400">...</span>
+                  )}
+                  <button
+                    onClick={() => goToPage(totalPages)}
+                    className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors duration-200"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-2 rounded-lg border transition-colors duration-200 ${
+                currentPage === totalPages
+                  ? 'border-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Mobile: Simple Previous/Next */}
+          <div className="flex md:hidden items-center justify-between w-full max-w-xs">
+            <button
+              onClick={prevPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                currentPage === 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-primary hover:bg-primary/10'
+              }`}
+            >
+              ← Previous
+            </button>
+            
+            <span className="text-sm text-muted-foreground">
+              {currentPage} of {totalPages}
+            </span>
+            
+            <button
+              onClick={nextPage}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                currentPage === totalPages
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-primary hover:bg-primary/10'
+              }`}
+            >
+              Next →
+            </button>
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
@@ -540,21 +750,25 @@ export default function ServicesPage() {
               </p>
             </div>
           )}
-
           {/* Services Grid */}
           <ResponsiveServices
             currentServices={currentServices}
             openItems={openItems}
             toggleItem={toggleItem}
             activeTabKey={activeTabKey}
+            setOpenItems={setOpenItems}
           />
           
-          {/* Tab Indicator for Mobile */}
+          
+          {/* Tab Indicator for Mobile - Updated to show pagination info */}
           <div className="mt-8 text-center">
             <p className="text-sm text-muted-foreground">
               Showing <span className="font-semibold text-primary">
                 {activeTab?.tabTitle}
-              </span> • {currentServices.length} service{currentServices.length !== 1 ? 's' : ''} available
+              </span> • {currentServices.length} service{currentServices.length !== 1 ? 's' : ''} total
+              {Math.ceil(currentServices.length / (window.innerWidth >= 1024 ? 12 : window.innerWidth >= 768 ? 8 : 4)) > 1 && (
+                <> • {Math.ceil(currentServices.length / (window.innerWidth >= 1024 ? 12 : window.innerWidth >= 768 ? 8 : 4))} page{Math.ceil(currentServices.length / (window.innerWidth >= 1024 ? 12 : window.innerWidth >= 768 ? 8 : 4)) !== 1 ? 's' : ''}</>
+              )}
             </p>
           </div>
         </div>
