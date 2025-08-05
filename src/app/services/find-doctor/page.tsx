@@ -126,23 +126,15 @@ export default function FindDoctorPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
+     <section className="relative w-full h-[200px] md:h-[300px] lg:h-[500px] overflow-hidden">
         <Image
-          src="/contact.jpg"
-          alt="Find a doctor"
-          data-ai-hint="hospital doctors"
+          src="/title.png"
+          alt="A background image for the section"
+          data-ai-hint="A serene landscape or a medical-themed image"
           fill
-          className="object-cover"
+          className="object-contain"
         />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            Find a Doctor
-          </h1>
-          <p className="mt-4 text-lg max-w-3xl lg:text-xl">
-            Connect with our experienced medical professionals and schedule your appointment
-          </p>
-        </div>
+        {/* The overlay and content divs are removed */}
       </section>
 
       {/* Main Content Section */}
