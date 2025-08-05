@@ -16,7 +16,7 @@ export default function ContactPage() {
               <div className="grid md:grid-cols-3">
                 <div className="relative w-80 h-64 md:h-auto md:col-span-1">
                   <Image
-                    src="/contact.jpg"
+                    src="/contact.jpg" 
                     alt="Contact background"
                     data-ai-hint="office interior"
                     fill

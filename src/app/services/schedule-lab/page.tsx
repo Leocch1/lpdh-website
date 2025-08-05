@@ -7,10 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle } from "lucide-react";
+import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
+import { createClient } from "@sanity/client";
 
 // Simple native select to avoid Radix UI issues
 interface SimpleSelectProps {
@@ -135,8 +136,12 @@ export default function ScheduleLabPage() {
     phone: "",
     date: "",
     time: "",
-    notes: ""
+    notes: "",
+    hasDoctorRequest: true, // Set to true by default since it's required
+    doctorRequestNotes: ""
   });
+  const [doctorRequestFile, setDoctorRequestFile] = useState<File | null>(null);
+  const [doctorRequestPreview, setDoctorRequestPreview] = useState<string | null>(null);
 
   const [phoneError, setPhoneError] = useState("");
 
@@ -244,6 +249,66 @@ export default function ScheduleLabPage() {
     setPhoneError(error);
   };
 
+  // Handle doctor's request file upload
+  const handleDoctorRequestFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (JPG, PNG, etc.)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+
+      setDoctorRequestFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setDoctorRequestPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove doctor's request file
+  const removeDoctorRequestFile = () => {
+    setDoctorRequestFile(null);
+    setDoctorRequestPreview(null);
+    // Clear file input
+    const fileInput = document.getElementById('doctorRequest') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
+  // Upload image to Sanity
+  const uploadImageToSanity = async (file: File): Promise<any> => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to upload image')
+      }
+      
+      const { asset } = await response.json()
+      return asset
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      throw new Error('Failed to upload image')
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -254,10 +319,16 @@ export default function ScheduleLabPage() {
       return;
     }
 
+    // Validate doctor's request is provided
+    if (!doctorRequestFile) {
+      alert('Please upload a doctor\'s request/prescription image. This is required for all lab appointments.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      // Double-check if the time slot is still available using read client
+      // Double-check if the time slot is still available
       const recentBookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
         date: formData.date
       });
@@ -271,6 +342,15 @@ export default function ScheduleLabPage() {
         return;
       }
 
+      // Upload doctor's request image (now required)
+      let doctorRequestImageAsset = null;
+      try {
+        doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile);
+      } catch (error) {
+        alert('Failed to upload doctor\'s request image. Please try again.');
+        return;
+      }
+
       // Clean phone number (keep only digits) for submission
       const cleanPhone = formData.phone.replace(/\D/g, '');
 
@@ -278,11 +358,14 @@ export default function ScheduleLabPage() {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        phone: cleanPhone, // Submit only digits
+        phone: cleanPhone,
         date: formData.date,
         time: formData.time,
         notes: formData.notes,
-        selectedTests: selectedTests
+        selectedTests: selectedTests,
+        hasDoctorRequest: true, // Always true now
+        doctorRequestImage: doctorRequestImageAsset,
+        doctorRequestNotes: formData.doctorRequestNotes
       };
 
       // Create appointment in Sanity using API route
@@ -298,10 +381,14 @@ export default function ScheduleLabPage() {
         phone: "",
         date: "",
         time: "",
-        notes: ""
+        notes: "",
+        hasDoctorRequest: true, // Keep true since it's required
+        doctorRequestNotes: ""
       });
       setSelectedTests([]);
       setPhoneError("");
+      setDoctorRequestFile(null);
+      setDoctorRequestPreview(null);
       
       alert(`Lab appointment scheduled successfully! Your appointment number is: ${newAppointment.appointmentNumber}. We will contact you shortly to confirm.`);
       
@@ -630,10 +717,95 @@ export default function ScheduleLabPage() {
                       />
                     </div>
 
+                    {/* Doctor's Request Section - Now Required */}
+                    <div className="border-t pt-4">
+                      <div className="mb-3">
+                        <Label className="text-sm font-medium text-red-600">
+                          Doctor's Request/Prescription *
+                        </Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          A doctor's request or prescription is required for all lab appointments
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor="doctorRequest" className="text-sm">
+                            Upload Request Image *
+                          </Label>
+                          <div className="mt-1">
+                            {!doctorRequestPreview ? (
+                              <div className="border-2 border-dashed border-red-300 rounded-lg p-4 text-center hover:border-red-400 transition-colors">
+                                <input
+                                  type="file"
+                                  id="doctorRequest"
+                                  accept="image/*"
+                                  onChange={handleDoctorRequestFile}
+                                  className="hidden"
+                                  required
+                                />
+                                <label htmlFor="doctorRequest" className="cursor-pointer">
+                                  <Upload className="h-8 w-8 mx-auto text-red-400 mb-2" />
+                                  <p className="text-sm text-gray-600">
+                                    Click to upload doctor's request *
+                                  </p>
+                                  <p className="text-xs text-red-500 mt-1">
+                                    Required: JPG, PNG up to 5MB
+                                  </p>
+                                </label>
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <div className="border rounded-lg p-2 border-green-300 bg-green-50">
+                                  <Image
+                                    src={doctorRequestPreview}
+                                    alt="Doctor's request preview"
+                                    width={200}
+                                    height={150}
+                                    className="w-full h-32 object-cover rounded"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={removeDoctorRequestFile}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Please upload a clear photo or scan of your doctor's prescription or request form
+                          </p>
+                        </div>
+
+                        <div>
+                          <Label htmlFor="doctorRequestNotes" className="text-sm">
+                            Additional Notes (Optional)
+                          </Label>
+                          <Textarea
+                            id="doctorRequestNotes"
+                            rows={2}
+                            placeholder="Any additional information about the doctor's request..."
+                            value={formData.doctorRequestNotes}
+                            onChange={(e) => setFormData({...formData, doctorRequestNotes: e.target.value})}
+                            className="mt-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     <Button 
                       type="submit" 
                       className="w-full" 
-                      disabled={selectedTests.length === 0 || !formData.time || submitting || phoneError !== ""}
+                      disabled={
+                        selectedTests.length === 0 || 
+                        !formData.time || 
+                        submitting || 
+                        phoneError !== "" ||
+                        !doctorRequestFile // Add this validation
+                      }
                     >
                       <Calendar className="h-4 w-4 mr-2" />
                       {submitting ? 'Scheduling...' : 'Schedule Appointment'}
