@@ -1,95 +1,108 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@sanity/client'
 
+// Create a server-side client with write permissions
 const writeClient = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+  apiVersion: '2023-12-01',
   useCdn: false,
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_API_TOKEN!,
-});
-
-// Phone number validation function
-const validatePhoneNumber = (phone: string) => {
-  const digitsOnly = phone.replace(/\D/g, '');
-  return digitsOnly.length === 11 && /^\d{11}$/.test(digitsOnly);
-};
+  token: process.env.SANITY_API_TOKEN, // Server-side token
+})
 
 export async function POST(request: NextRequest) {
   try {
-    const appointmentData = await request.json();
-    
-    // Validate required fields
-    if (!appointmentData.firstName || !appointmentData.lastName || !appointmentData.email || 
-        !appointmentData.phone || !appointmentData.date || !appointmentData.time || 
-        !appointmentData.selectedTests || appointmentData.selectedTests.length === 0) {
+    const { 
+      firstName, 
+      lastName, 
+      email, 
+      phone, 
+      date, 
+      time, 
+      notes, 
+      selectedTests,
+      doctorRequestImage, // Now required
+      doctorRequestNotes
+    } = await request.json()
+
+    // Validate required fields (including doctor's request)
+    if (!firstName || !lastName || !email || !phone || !date || !time || !selectedTests?.length || !doctorRequestImage) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields. Doctor\'s request image is required for all appointments.' },
         { status: 400 }
-      );
+      )
     }
 
-    // Validate phone number
-    if (!validatePhoneNumber(appointmentData.phone)) {
-      return NextResponse.json(
-        { error: 'Phone number must be exactly 11 digits' },
-        { status: 400 }
-      );
-    }
+    // Create test references
+    const testReferences = selectedTests.map((testId: string) => ({
+      _type: 'object',
+      test: {
+        _type: 'reference',
+        _ref: testId
+      }
+    }))
 
-    // Clean phone number (ensure only digits)
-    const cleanPhone = appointmentData.phone.replace(/\D/g, '');
-
-    const appointment = {
-      _type: 'appointment',
-      appointmentNumber: `APT-${Date.now()}`,
-      patientInfo: {
-        firstName: appointmentData.firstName,
-        lastName: appointmentData.lastName,
-        email: appointmentData.email,
-        phone: cleanPhone
-      },
-      appointmentDate: appointmentData.date,
-      appointmentTime: appointmentData.time,
-      selectedTests: appointmentData.selectedTests.map((testId: string, index: number) => ({
-        _key: `test-${Date.now()}-${index}`,
-        test: {
+    // Prepare doctor's request object (now always required)
+    const doctorRequest = {
+      requestImage: {
+        _type: 'image',
+        asset: {
           _type: 'reference',
-          _ref: testId
-        }
-      })),
-      notes: appointmentData.notes || '',
+          _ref: doctorRequestImage._id
+        },
+        alt: 'Doctor\'s request document'
+      },
+      notes: doctorRequestNotes || ''
+    }
+
+    // Generate appointment number
+    const appointmentNumber = `APT-${Date.now()}`
+
+    // Create appointment document
+    const appointmentDoc = {
+      _type: 'appointment',
+      appointmentNumber,
+      patientInfo: {
+        firstName,
+        lastName,
+        email,
+        phone
+      },
+      appointmentDate: date,
+      appointmentTime: time,
+      selectedTests: testReferences,
+      doctorRequest, // Now always included
+      notes: notes || '',
       status: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    };
+    }
 
-    console.log('Creating appointment:', appointment);
+    // Use the server-side client with write permissions
+    const result = await writeClient.create(appointmentDoc)
 
-    const result = await writeClient.create(appointment);
-    
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json({
+      message: 'Appointment created successfully',
+      appointmentNumber,
+      appointment: result
+    })
+
   } catch (error) {
-    console.error('Error creating appointment:', error);
+    console.error('Error creating appointment:', error)
     
     if (error instanceof Error) {
       if (error.message.includes('Insufficient permissions')) {
         return NextResponse.json(
-          { error: 'Insufficient permissions to create appointment' },
+          { error: 'Insufficient permissions to create appointment. Please check API token.' },
           { status: 403 }
-        );
-      } else if (error.message.includes('validation')) {
-        return NextResponse.json(
-          { error: 'Validation error: ' + error.message },
-          { status: 400 }
-        );
+        )
       }
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to create appointment' },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -99,7 +112,6 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date');
     
     if (date) {
-      // Fetch appointments for a specific date
       const appointments = await writeClient.fetch(
         `*[_type == "appointment" && appointmentDate == $date && status != "cancelled"] {
           appointmentTime,
@@ -125,6 +137,12 @@ export async function GET(request: NextRequest) {
               name,
               category
             }
+          },
+          doctorRequest {
+            requestImage {
+              asset
+            },
+            notes
           },
           notes,
           status,

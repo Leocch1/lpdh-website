@@ -4,13 +4,21 @@ import imageUrlBuilder from '@sanity/image-url'
 export const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  useCdn: false,
-  apiVersion: '2024-01-01',
-  token: process.env.NEXT_PUBLIC_SANITY_TOKEN, // Use public env var for client-side
+  apiVersion: '2023-12-01',
+  useCdn: false, // Set to false for write operations
+  token: process.env.SANITY_API_TOKEN, // Use server-side token for writes
+  ignoreBrowserTokenWarning: true // Add this to avoid warnings
+})
+
+// For public read operations (no token needed)
+export const publicClient = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+  apiVersion: '2023-12-01',
+  useCdn: true // Can use CDN for reads
 })
 
 const builder = imageUrlBuilder(client)
-
 export const urlFor = (source: any) => builder.image(source)
 
 // GROQ queries

@@ -88,6 +88,42 @@ export const appointment = defineType({
       validation: Rule => Rule.min(1).error('At least one test must be selected')
     }),
     defineField({
+      name: 'doctorRequest',
+      title: 'Doctor\'s Request (Required)',
+      type: 'object',
+      description: 'Doctor\'s request or prescription for the lab tests - REQUIRED for all appointments',
+      validation: Rule => Rule.required().error('Doctor\'s request is required for all lab appointments'),
+      fields: [
+        {
+          name: 'requestImage',
+          title: 'Request Image',
+          type: 'image',
+          options: {
+            hotspot: true,
+            accept: 'image/*'
+          },
+          fields: [
+            {
+              name: 'alt',
+              type: 'string',
+              title: 'Alternative text',
+              description: 'Describe the content of the doctor\'s request',
+              initialValue: 'Doctor\'s request document'
+            }
+          ],
+          validation: Rule => Rule.required().error('Doctor\'s request image is required'),
+          description: 'Upload a clear photo or scan of the doctor\'s request/prescription'
+        },
+        {
+          name: 'notes',
+          title: 'Request Notes',
+          type: 'text',
+          description: 'Additional notes about the doctor\'s request',
+          rows: 3
+        }
+      ]
+    }),
+    defineField({
       name: 'notes',
       title: 'Special Instructions',
       type: 'text'
@@ -126,11 +162,12 @@ export const appointment = defineType({
       lastName: 'patientInfo.lastName',
       date: 'appointmentDate',
       time: 'appointmentTime',
-      status: 'status'
+      status: 'status',
+      hasRequest: 'doctorRequest.requestImage'
     },
-    prepare({ firstName, lastName, date, time, status }) {
+    prepare({ firstName, lastName, date, time, status, hasRequest }) {
       return {
-        title: `${firstName} ${lastName}`,
+        title: `${firstName} ${lastName} 📄`, // Always show document icon since it's required
         subtitle: `${date} at ${time} - ${status}`
       }
     }
