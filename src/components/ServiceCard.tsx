@@ -102,7 +102,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isOpen, onTog
                     `}
       >
         <div className="border-l-4  border-primary/30 pl-4 mt-2">
-          {service.details.map((detail: string, index: number) => (
+          {(service.details || []).map((detail: string, index: number) => (
             <p key={index} className="text-muted-foreground leading-relaxed mb-2 last:mb-0 text-sm">
               {detail}
             </p>
