@@ -42,7 +42,7 @@ export function Footer() {
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left col-span-1 lg:col-span-1">
               <Logo />
               <p className="mt-4 max-w-xs text-sm text-white/80">
-                Your health, our commitment. Providing compassionate care for our community.
+                Safe at Alaga Ka
               </p>
               <div className="mt-8 flex gap-4">
                 {socialLinks.map((social) => (
@@ -84,6 +84,7 @@ export function Footer() {
                 <div className="mt-4 space-y-2 text-sm text-white/80">
                   <p>#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
                   <p>(02) 8825 - 5236</p>
+                  <p>lpdh@sample.com</p>
                 </div>
               </div>
             </div>
