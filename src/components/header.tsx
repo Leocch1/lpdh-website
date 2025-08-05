@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Phone, Paperclip, MapPin, ChevronDown, Clock, Activity } from "lucide-react";
+import { Menu, Phone, Paperclip, MapPin, ChevronDown, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -23,6 +23,11 @@ import Image from "next/image";
 const EMERGENCY_NUMBER = {
   display: "(02) 8820-9376",
   tel: "+0288209376"
+};
+
+const NON_EMERGENCY_NUMBER = {
+  display: "(02) 8820-9375",
+  tel: "+0288209375"
 };
 
 const navLinks = [
@@ -203,11 +208,20 @@ export function Header() {
             </div>
             <div className="flex items-center gap-8">
               <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-8 h-8 bg-secondary rounded-full">
+                  <Phone className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-primary text-xs uppercase tracking-wide leading-none">Non-Emergency</p>
+                  <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-accent font-semibold text-sm transition-colors">{NON_EMERGENCY_NUMBER.display}</Link>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
                   <Phone className="h-4 w-4 text-red-600" />
                 </div>
                 <div>
-                  <p className="font-semibold text-red-600 text-xs uppercase tracking-wide leading-none">Emergency</p>
+                  <p className="font-semibold text-red-600 text-xs uppercase tracking-wide leading-none">24/7 Emergency</p>
                   <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
                 </div>
               </div>
@@ -218,15 +232,6 @@ export function Header() {
                 <div>
                   <p className="font-semibold text-primary text-xs uppercase tracking-wide">Location</p>
                   <p className="text-slate-800 font-semibold">#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-secondary rounded-full">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="font-semibold text-primary text-xs uppercase tracking-wide">Hours</p>
-                  <p className="text-slate-800 font-semibold">24/7 Emergency Care</p>
                 </div>
               </div>
               <div className="border-l border-slate-300 pl-6">
@@ -351,19 +356,20 @@ export function Header() {
                     {/* Mobile contact info */}
                     <div className="mt-6 pt-6 border-t border-slate-200 space-y-4">
                       <div className="flex items-center gap-3">
+                        <Phone className="h-5 w-5 text-primary" />
+                        <div>
+                          <p className="text-xs font-semibold text-primary uppercase tracking-wide">Non-Emergency</p>
+                          <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-primary font-semibold text-sm transition-colors">{NON_EMERGENCY_NUMBER.display}</Link>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
                         <Phone className="h-5 w-5 text-red-600" />
                         <div>
                           <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Emergency</p>
                           <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="text-xs font-semibold text-primary uppercase tracking-wide">Hours</p>
-                          <p className="text-sm font-semibold text-slate-800">24/7 Emergency Care</p>
-                        </div>
-                      </div>
+
                       {/* Add the ISO section here */}
                       <div className="mt-6 pt-6 border-t border-slate-300">
                         <button
@@ -418,12 +424,20 @@ export function Header() {
             {/* Desktop: CTA Buttons */}
             <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
               {isScrolled && (
-                <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
-                  <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
-                    <Phone className="h-4 w-4 mr-2" />
-                    EMERGENCY
-                  </Link>
-                </Button>
+                <>
+                  <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-300">
+                    <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      NON-EMERGENCY
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
+                    <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
+                      <Phone className="h-4 w-4 mr-2" />
+                      EMERGENCY
+                    </Link>
+                  </Button>
+                </>
               )}
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
                 <Link href="/services/find-doctor">
