@@ -12,9 +12,10 @@ export default function ContactPage() {
       <section className="py-12 md:py-12 mx-auto px-4">
         <div className="container">
           <div className="max-w-5xl mx-auto">
-            <Card className="overflow-hidden shadow-lg">
-              <div className="grid md:grid-cols-3">
-                <div className="relative w-80 h-64 md:h-auto md:col-span-1">
+            <div className="overflow-hidden shadow-lg rounded-lg">
+              <div className="grid grid-cols-1 md:grid-cols-5 min-h-[600px] bg-card">
+                {/* Photo Section - Full Height */}
+                <div className="relative w-80 h-64 md:h-auto md:col-span-2">
                   <Image
                     src="/contact.jpg" 
                     alt="Contact background"
@@ -23,12 +24,14 @@ export default function ContactPage() {
                     className="object-cover"
                   />
                 </div>
-                <div className="p-8 md:p-12 md:col-span-2">
-                  <h2 className="font-headline text-3xl font-bold text-primary">
+                
+                {/* Form Section - Red Background */}
+                <div className="col-span-1 md:col-span-3 p-8 md:p-12 flex flex-col justify-center">
+                  <h2 className="font-headline text-3xl text-primary">
                     Send Us A Message
                   </h2>
 
-                  {/* Replaces the paragraph with dropdown */}
+                  {/* Message Type Dropdown */}
                   <div className="mt-4">
                     <Label htmlFor="message-type" className="sr-only">Message Type</Label>
                     <Select defaultValue="inquiry" name="message-type">
@@ -36,8 +39,8 @@ export default function ContactPage() {
                         <SelectValue placeholder="Select message type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="inquiry">Inquiry</SelectItem>
-                        <SelectItem value="complaint">Complaint</SelectItem>
+                        <SelectItem value="inquiry">General Inquiry</SelectItem>
+                        <SelectItem value="complaint">Submit a Complaint</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -60,12 +63,12 @@ export default function ContactPage() {
                       <Textarea id="message" placeholder="Message" rows={5} />
                     </div>
                     <div className="flex justify-start">
-                      <Button type="submit">Submit</Button>
+                      <Button type="submit" className="bg-green-600 hover:bg-green-700 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]">Submit</Button>
                     </div>
                   </form>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </section>
