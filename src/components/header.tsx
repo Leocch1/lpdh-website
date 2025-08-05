@@ -61,6 +61,8 @@ export function Header() {
   const [mobileContactDropdownOpen, setMobileContactDropdownOpen] = useState(false);
   const [mobileServicesDropdownOpen, setMobileServicesDropdownOpen] = useState(false);
   const [isIsoImageOpen, setIsIsoImageOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
+  const [isNonEmergencyModalOpen, setIsNonEmergencyModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const lastDirection = useRef<'up' | 'down' | null>(null);
   const lastScrollY = useRef(0);
@@ -192,8 +194,55 @@ export function Header() {
     )
   };
 
+  const PhoneCallModal = ({ isOpen, onOpenChange, title, number, numberDisplay, buttonColor }: { isOpen: boolean, onOpenChange: (open: boolean) => void, title: string, number: string, numberDisplay: string, buttonColor: string }) => (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm p-6 text-center">
+        <div className="relative">
+          <DialogClose className="absolute -right-6 -top-6 z-20 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md">
+            <X className="h-5 w-5 text-gray-500" />
+          </DialogClose>
+          <div className="flex flex-col items-center p-4">
+            <Phone className={cn("h-10 w-10 mb-4", buttonColor)} />
+            <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
+            <p className="text-sm text-slate-600 mb-6">
+              You are about to make a phone call to our {title} line.
+            </p>
+            <a
+              href={`tel:${number}`}
+              onClick={() => onOpenChange(false)}
+              className={cn(
+                "w-full py-3 px-4 rounded-lg font-bold text-white transition-colors text-lg",
+                buttonColor === 'text-red-600' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-dark'
+              )}
+            >
+              Call {numberDisplay}
+            </a>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   return (
     <div className="sticky top-0 z-50 w-full bg-white shadow-md">
+      <PhoneCallModal
+        isOpen={isNonEmergencyModalOpen}
+        onOpenChange={setIsNonEmergencyModalOpen}
+        title="Non-Emergency"
+        number={NON_EMERGENCY_NUMBER.tel}
+        numberDisplay={NON_EMERGENCY_NUMBER.display}
+        buttonColor="text-primary"
+      />
+
+      <PhoneCallModal
+        isOpen={isEmergencyModalOpen}
+        onOpenChange={setIsEmergencyModalOpen}
+        title="Emergency"
+        number={EMERGENCY_NUMBER.tel}
+        numberDisplay={EMERGENCY_NUMBER.display}
+        buttonColor="text-red-600"
+      />
+
       {/* Upper Header - Contact Info */}
       <div className={cn(
         "hidden bg-slate-50 border-b border-slate-200 text-sm lg:block transition-all duration-300",
@@ -213,7 +262,7 @@ export function Header() {
                 </div>
                 <div>
                   <p className="font-semibold text-primary text-xs uppercase tracking-wide leading-none">Non-Emergency</p>
-                  <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-accent font-semibold text-sm transition-colors">{NON_EMERGENCY_NUMBER.display}</Link>
+                  <button onClick={() => setIsNonEmergencyModalOpen(true)} className="text-slate-800 hover:text-accent font-semibold text-sm transition-colors cursor-pointer">{NON_EMERGENCY_NUMBER.display}</button>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -222,7 +271,7 @@ export function Header() {
                 </div>
                 <div>
                   <p className="font-semibold text-red-600 text-xs uppercase tracking-wide leading-none">24/7 Emergency</p>
-                  <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
+                  <button onClick={() => setIsEmergencyModalOpen(true)} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors cursor-pointer">{EMERGENCY_NUMBER.display}</button>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -359,14 +408,14 @@ export function Header() {
                         <Phone className="h-5 w-5 text-primary" />
                         <div>
                           <p className="text-xs font-semibold text-primary uppercase tracking-wide">Non-Emergency</p>
-                          <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-primary font-semibold text-sm transition-colors">{NON_EMERGENCY_NUMBER.display}</Link>
+                          <button onClick={() => { setIsNonEmergencyModalOpen(true); setIsMobileMenuOpen(false); }} className="text-slate-800 hover:text-primary font-semibold text-sm transition-colors cursor-pointer">{NON_EMERGENCY_NUMBER.display}</button>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <Phone className="h-5 w-5 text-red-600" />
                         <div>
                           <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">Emergency</p>
-                          <Link href={`tel:${EMERGENCY_NUMBER.tel}`} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors">{EMERGENCY_NUMBER.display}</Link>
+                          <button onClick={() => { setIsEmergencyModalOpen(true); setIsMobileMenuOpen(false); }} className="text-slate-800 hover:text-red-600 font-semibold text-sm transition-colors cursor-pointer">{EMERGENCY_NUMBER.display}</button>
                         </div>
                       </div>
 
@@ -426,16 +475,16 @@ export function Header() {
               {isScrolled && (
                 <>
                   <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-300">
-                    <Link href={`tel:${NON_EMERGENCY_NUMBER.tel}`}>
+                    <button onClick={() => setIsNonEmergencyModalOpen(true)}>
                       <Phone className="h-4 w-4 mr-2" />
                       NON-EMERGENCY
-                    </Link>
+                    </button>
                   </Button>
                   <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
-                    <Link href={`tel:${EMERGENCY_NUMBER.tel}`}>
+                    <button onClick={() => setIsEmergencyModalOpen(true)}>
                       <Phone className="h-4 w-4 mr-2" />
                       EMERGENCY
-                    </Link>
+                    </button>
                   </Button>
                 </>
               )}
