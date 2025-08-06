@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Phone, Calendar, Star, ChevronLeft, ChevronRight, Building2, ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { client, DOCTORS_QUERY, DEPARTMENTS_QUERY, urlFor } from "@/lib/sanity";
+import { client, DOCTORS_QUERY, DEPARTMENTS_QUERY, FIND_DOCTOR_PAGE_QUERY, urlFor } from "@/lib/sanity";
 import type { Doctor, Department } from "@/types/sanity";
 
 export default function FindDoctorPage() {
@@ -21,12 +21,7 @@ export default function FindDoctorPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Hero image for find doctor page
-  const heroImage = {
-    src: "/doctor-banner.svg", // Using the doctors.jpg from public folder
-    alt: "Our Medical Team",
-    dataAiHint: "doctors team"
-  };
+  const [pageData, setPageData] = useState<any>(null);
 
   // Dynamic doctors per page based on screen size
   const doctorsPerPage = isMobile ? 6 : 9;
@@ -45,13 +40,15 @@ export default function FindDoctorPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [doctorsData, departmentsData] = await Promise.all([
+        const [doctorsData, departmentsData, pageData] = await Promise.all([
           client.fetch(DOCTORS_QUERY),
-          client.fetch(DEPARTMENTS_QUERY)
+          client.fetch(DEPARTMENTS_QUERY),
+          client.fetch(FIND_DOCTOR_PAGE_QUERY)
         ]);
         
         setDoctors(doctorsData);
         setDepartments(departmentsData);
+        setPageData(pageData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -128,17 +125,17 @@ export default function FindDoctorPage() {
         >
           <div className="absolute inset-0">
             <Image
-              src={heroImage.src}
-              alt={heroImage.alt}
-              data-ai-hint={heroImage.dataAiHint}
+              src={pageData?.heroSection?.heroImage ? urlFor(pageData.heroSection.heroImage).width(1920).height(700).url() : '/doctor-banner.svg'}
+              alt={pageData?.heroSection?.heroImage?.alt || "Our Medical Team"}
+              data-ai-hint={pageData?.heroSection?.heroImage?.dataAiHint || "doctors team"}
               width={1920}
-              height={880}
+              height={700}
               className="object-cover w-full h-full select-none pointer-events-none"
               sizes="100vw"
               priority={true}
               draggable={false}
               style={{ maxWidth: '100%', height: '100%', margin: 0, padding: 0 }}
-            />            
+            />
           </div>
         </div>
       </section>
