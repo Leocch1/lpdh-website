@@ -478,10 +478,13 @@ export function Header() {
             {/* Desktop: CTA Buttons */}
             <div className="hidden xl:flex items-center justify-end gap-2 flex-shrink-0">
               {/* Call Us Dropdown */}
-              <div className="relative">
+              <div className={cn(
+                "relative transition-all duration-300",
+                !isScrolled ? "opacity-0 scale-0 w-0" : "opacity-100 scale-100"
+              )}>
                 <Button
                   variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary"
+                  className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary whitespace-nowrap"
                   onClick={() => setIsCallUsDropdownOpen(!isCallUsDropdownOpen)}
                 >
                   <Phone className="h-4 w-4 mr-2" />
