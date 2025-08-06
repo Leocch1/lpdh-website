@@ -203,7 +203,9 @@ export function Header() {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-6 text-center">
         <div className="relative">
-
+          <DialogClose className="absolute -right-6 -top-6 z-20 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md">
+            <X className="h-5 w-5 text-gray-500" />
+          </DialogClose>
           <div className="flex flex-col items-center p-4">
             <Phone className={cn("h-10 w-10 mb-4", buttonColor)} />
             <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
@@ -482,7 +484,7 @@ export function Header() {
               )}>
                 <Button
                   variant="outline"
-                  className="border-primary text-primary hover:bg-primary hover:text-white whitespace-nowrap"
+                  className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary whitespace-nowrap"
                   onClick={() => setIsCallUsDropdownOpen(!isCallUsDropdownOpen)}
                 >
                   <Phone className="h-4 w-4 mr-2" />
