@@ -7,103 +7,87 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
 
 // Simple native select to avoid Radix UI issues
 interface SimpleSelectProps {
-  value: string;
-  onValueChange: (value: string) => void;
-  disabled?: boolean;
-  placeholder?: string;
-  options: string[];
+    value: string;
+    onValueChange: (value: string) => void;
+    disabled?: boolean;
+    placeholder?: string;
+    options: string[];
 }
 
 function SimpleSelect({ value, onValueChange, disabled, placeholder, options }: SimpleSelectProps) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onValueChange(e.target.value)}
-      disabled={disabled}
-      className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      <option value="" disabled>
-        {placeholder}
-      </option>
-      {options.map((option) => (
-        <option key={option} value={option}>
-          {option}
-        </option>
-      ))}
-    </select>
-  );
+    return (
+        <select
+            value={value}
+            onChange={(e) => onValueChange(e.target.value)}
+            disabled={disabled}
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            <option value="" disabled>
+                {placeholder}
+            </option>
+            {options.map((option) => (
+                <option key={option} value={option}>
+                    {option}
+                </option>
+            ))}
+        </select>
+    );
 }
 
 // Sanity queries
 const SCHEDULE_LAB_QUERY = `*[_type == "scheduleLabPage"][0] {
-  _id,
-  heroSection {
-    title,
-    subtitle,
-    backgroundImage {
-      asset
+    _id,
+    heroSection {
+        title,
+        subtitle,
+        backgroundImage {
+            asset
+        }
+    },
+    mainContent {
+        sectionTitle,
+        description
+    },
+    infoSection {
+        title,
+        infoCards[] {
+            _key,
+            title,
+            description,
+            icon
+        }
     }
-  },
-  mainContent {
-    sectionTitle,
-    description
-  },
-  infoSection {
-    title,
-    infoCards[] {
-      _key,
-      title,
-      description,
-      icon
-    }
-  }
 }`;
 
-// Updated query with better error handling and debugging
-const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(coalesce(labDepartment->name, "zzz_uncategorized") asc, order asc) {
+const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(category asc, order asc) {
   _id,
   name,
-  labDepartment-> {
-    _id,
-    name,
-    email,
-    backupEmail,
-    description
-  },
+  category,
   duration,
   isActive,
   order,
   availableDays[],
   availableTimeSlots[],
   preparationNotes,
-  resultTime,
-  "hasLabDepartment": defined(labDepartment),
-  "labDepartmentRef": labDepartment
+  resultTime
 }`;
 
-// Query to check booked appointments for a specific date
 const BOOKED_APPOINTMENTS_QUERY = `*[_type == "appointment" && appointmentDate == $date && status != "cancelled"] {
-  appointmentTime
+    appointmentTime
 }`;
 
 // Updated interface to handle optional labDepartment
 interface LabTest {
   _id: string;
   name: string;
-  labDepartment?: {
-    _id: string;
-    name: string;
-    email: string;
-    backupEmail?: string;
-    description?: string;
-  } | null;
+  category: string;
   duration: string;
   isActive: boolean;
   order: number;
@@ -111,32 +95,39 @@ interface LabTest {
   availableTimeSlots: string[];
   preparationNotes?: string;
   resultTime?: string;
-  hasLabDepartment?: boolean;
-  labDepartmentRef?: any;
 }
 
 interface ScheduleLabPageData {
-  _id: string;
-  heroSection: {
-    title: string;
-    subtitle: string;
-    backgroundImage?: {
-      asset: any;
+    _id: string;
+    heroSection: {
+        title: string;
+        subtitle: string;
+        backgroundImage?: {
+            asset: any;
+        };
     };
-  };
-  mainContent: {
-    sectionTitle: string;
-    description: string;
-  };
-  infoSection: {
+    mainContent: {
+        sectionTitle: string;
+        description: string;
+    };
+    infoSection: {
+        title: string;
+        infoCards: Array<{
+            _key: string;
+            title: string;
+            description: string;
+            icon: string;
+        }>;
+    };
+}
+
+// Add interfaces for custom alert
+interface CustomAlert {
+    isOpen: boolean;
+    type: 'success' | 'error' | 'warning';
     title: string;
-    infoCards: Array<{
-      _key: string;
-      title: string;
-      description: string;
-      icon: string;
-    }>;
-  };
+    message: string;
+    action?: () => void;
 }
 
 export default function ScheduleLabPage() {
@@ -146,7 +137,11 @@ export default function ScheduleLabPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
-  const [setupIssues, setSetupIssues] = useState<string[]>([]);
+  
+  // Add missing state declarations
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
+  const [customAlert, setCustomAlert] = useState<CustomAlert | null>(null);
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -155,50 +150,13 @@ export default function ScheduleLabPage() {
     date: "",
     time: "",
     notes: "",
-    hasDoctorRequest: true,
+    hasDoctorRequest: true, // Set to true by default since it's required
     doctorRequestNotes: ""
   });
   const [doctorRequestFile, setDoctorRequestFile] = useState<File | null>(null);
   const [doctorRequestPreview, setDoctorRequestPreview] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState("");
 
-  // Check setup issues
-  const checkSetupIssues = async () => {
-    try {
-      const issues: string[] = [];
-      
-      // Check if labDepartment schema exists
-      const departments = await client.fetch(`*[_type == "labDepartment"] | order(name asc) {
-        _id,
-        name
-      }`);
-      
-      if (departments.length === 0) {
-        issues.push("No lab departments found. Please create lab departments first.");
-      }
-      
-      // Check tests without departments
-      const testsWithoutDept = await client.fetch(`*[_type == "labTest" && !defined(labDepartment)] {
-        _id,
-        name
-      }`);
-      
-      if (testsWithoutDept.length > 0) {
-        issues.push(`${testsWithoutDept.length} lab tests need to be assigned to departments.`);
-      }
-      
-      setSetupIssues(issues);
-      
-      if (issues.length > 0) {
-        console.log('Setup issues found:', issues);
-        console.log('Available departments:', departments);
-        console.log('Tests without departments:', testsWithoutDept);
-      }
-      
-    } catch (error) {
-      console.error('Error checking setup:', error);
-    }
-  };
+  const [phoneError, setPhoneError] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -208,23 +166,8 @@ export default function ScheduleLabPage() {
           client.fetch(LAB_TESTS_QUERY)
         ]);
         
-        // Debug: Log the fetched data
-        console.log('Lab Tests Data:', testsData);
-        testsData?.forEach((test: LabTest, index: number) => {
-          console.log(`Test ${index + 1}:`, {
-            name: test.name,
-            hasLabDepartment: test.hasLabDepartment,
-            labDepartment: test.labDepartment,
-            labDepartmentRef: test.labDepartmentRef
-          });
-        });
-        
         setPageData(pageContent);
         setLabTests(testsData || []);
-        
-        // Check for setup issues
-        await checkSetupIssues();
-        
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -235,7 +178,6 @@ export default function ScheduleLabPage() {
     fetchData();
   }, []);
 
-  // Fetch booked appointments when date changes
   useEffect(() => {
     const fetchBookedAppointments = async () => {
       if (!formData.date) {
@@ -247,7 +189,7 @@ export default function ScheduleLabPage() {
         const bookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
           date: formData.date
         });
-        
+
         const bookedTimeSlots = bookedAppointments.map((apt: any) => apt.appointmentTime);
         setBookedTimes(bookedTimeSlots);
       } catch (error) {
@@ -260,8 +202,8 @@ export default function ScheduleLabPage() {
   }, [formData.date]);
 
   const handleTestSelection = (testId: string) => {
-    setSelectedTests(prev => 
-      prev.includes(testId) 
+    setSelectedTests(prev =>
+      prev.includes(testId)
         ? prev.filter(id => id !== testId)
         : [...prev, testId]
     );
@@ -278,7 +220,8 @@ export default function ScheduleLabPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create appointment');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create appointment');
       }
 
       const result = await response.json();
@@ -291,6 +234,7 @@ export default function ScheduleLabPage() {
 
   // Phone number validation function
   const validatePhoneNumber = (phone: string) => {
+    // Remove any non-digit characters for validation
     const digitsOnly = phone.replace(/\D/g, '');
     
     if (digitsOnly.length === 0) {
@@ -306,8 +250,14 @@ export default function ScheduleLabPage() {
   // Handle phone input change with validation
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    
+    // Allow only digits and common phone number formatting characters
     const sanitized = value.replace(/[^\d\s\-\(\)\+]/g, '');
+    
+    // Update form data
     setFormData({...formData, phone: sanitized});
+    
+    // Validate and set error
     const error = validatePhoneNumber(sanitized);
     setPhoneError(error);
   };
@@ -316,18 +266,31 @@ export default function ScheduleLabPage() {
   const handleDoctorRequestFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file (JPG, PNG, etc.)');
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'Invalid File Type',
+          message: 'Please select an image file (JPG, PNG, etc.)'
+        });
         return;
       }
       
+      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'File Too Large',
+          message: 'File size must be less than 5MB'
+        });
         return;
       }
 
       setDoctorRequestFile(file);
       
+      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setDoctorRequestPreview(e.target?.result as string);
@@ -340,26 +303,25 @@ export default function ScheduleLabPage() {
   const removeDoctorRequestFile = () => {
     setDoctorRequestFile(null);
     setDoctorRequestPreview(null);
+    // Clear file input
     const fileInput = document.getElementById('doctorRequest') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };
 
-  // Upload image to Sanity
   const uploadImageToSanity = async (file: File): Promise<any> => {
     try {
       const formData = new FormData()
       formData.append('file', file)
-      
       const response = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
       })
-      
+
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.error || 'Failed to upload image')
       }
-      
+
       const { asset } = await response.json()
       return asset
     } catch (error) {
@@ -368,24 +330,36 @@ export default function ScheduleLabPage() {
     }
   };
 
-  // Update the handleSubmit function to show better success messages
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate phone number before submission
     const phoneValidationError = validatePhoneNumber(formData.phone);
     if (phoneValidationError) {
       setPhoneError(phoneValidationError);
       return;
     }
 
+    // Validate doctor's request is provided
     if (!doctorRequestFile) {
-      alert('Please upload a doctor\'s request/prescription image. This is required for all lab appointments.');
+      setCustomAlert({
+        isOpen: true,
+        type: 'warning',
+        title: 'Doctor\'s Request Required',
+        message: 'Please upload a doctor\'s request/prescription image. This is required for all lab appointments.'
+      });
       return;
     }
 
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleConfirmSubmission = async () => {
     setSubmitting(true);
+    setIsConfirmationModalOpen(false);
 
     try {
+      // Double-check if the time slot is still available
       const recentBookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
         date: formData.date
       });
@@ -393,25 +367,35 @@ export default function ScheduleLabPage() {
       const recentBookedTimes = recentBookedAppointments.map((apt: any) => apt.appointmentTime);
       
       if (recentBookedTimes.includes(formData.time)) {
-        alert('Sorry, this time slot has been booked by another patient. Please select a different time.');
-        setBookedTimes(recentBookedTimes);
-        setFormData(prev => ({ ...prev, time: "" }));
+        setCustomAlert({
+          isOpen: true,
+          type: 'warning',
+          title: 'Time Slot Unavailable',
+          message: 'Sorry, this time slot has been booked by another patient. Please select a different time.',
+          action: () => {
+            setBookedTimes(recentBookedTimes);
+            setFormData(prev => ({ ...prev, time: "" }));
+          }
+        });
         return;
       }
 
+      // Upload doctor's request image (now required)
       let doctorRequestImageAsset = null;
       try {
-        doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile);
+        doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile!);
       } catch (error) {
-        alert('Failed to upload doctor\'s request image. Please try again.');
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'Upload Failed',
+          message: 'Failed to upload doctor\'s request image. Please try again.'
+        });
         return;
       }
 
+      // Clean phone number (keep only digits) for submission
       const cleanPhone = formData.phone.replace(/\D/g, '');
-
-      // Get selected test details for department info
-      const selectedTestsData = labTests.filter(test => selectedTests.includes(test._id));
-      const departments = [...new Set(selectedTestsData.map(test => test.labDepartment?.name).filter(Boolean))];
 
       const appointmentData = {
         firstName: formData.firstName,
@@ -422,15 +406,17 @@ export default function ScheduleLabPage() {
         time: formData.time,
         notes: formData.notes,
         selectedTests: selectedTests,
-        hasDoctorRequest: true,
+        hasDoctorRequest: true, // Always true now
         doctorRequestImage: doctorRequestImageAsset,
         doctorRequestNotes: formData.doctorRequestNotes
       };
 
+      // Create appointment in Sanity using API route
       const newAppointment = await createAppointment(appointmentData);
       
       console.log('Appointment created successfully:', newAppointment);
       
+      // Reset form and clear errors
       setFormData({
         firstName: "",
         lastName: "",
@@ -439,7 +425,7 @@ export default function ScheduleLabPage() {
         date: "",
         time: "",
         notes: "",
-        hasDoctorRequest: true,
+        hasDoctorRequest: true, // Keep true since it's required
         doctorRequestNotes: ""
       });
       setSelectedTests([]);
@@ -447,30 +433,47 @@ export default function ScheduleLabPage() {
       setDoctorRequestFile(null);
       setDoctorRequestPreview(null);
       
-      // Enhanced success message with department notification info
-      const departmentInfo = departments.length > 0 
-        ? `\n\nNotifications have been sent to: ${departments.join(', ')}`
-        : '';
-      
-      alert(`Lab appointment scheduled successfully! 
-      
-Your appointment number is: ${newAppointment.appointmentNumber}
-
-We will contact you shortly to confirm your appointment.${departmentInfo}`);
+      setCustomAlert({
+        isOpen: true,
+        type: 'success',
+        title: 'Appointment Scheduled!',
+        message: `Lab appointment scheduled successfully! Your appointment number is: ${newAppointment.appointmentNumber}. We will contact you shortly to confirm.`
+      });
       
     } catch (error) {
       console.error('Error submitting appointment:', error);
       
+      // More detailed error handling
       if (error instanceof Error) {
         if (error.message.includes('Insufficient permissions')) {
-          alert('Unable to schedule appointment due to permissions. Please contact us directly at (02) 8825-5236.');
+          setCustomAlert({
+            isOpen: true,
+            type: 'error',
+            title: 'Permission Error',
+            message: 'Unable to schedule appointment due to permissions. Please contact us directly at (02) 8825-5236.'
+          });
         } else if (error.message.includes('authentication')) {
-          alert('Authentication error. Please refresh the page and try again.');
+          setCustomAlert({
+            isOpen: true,
+            type: 'error',
+            title: 'Authentication Error',
+            message: 'Authentication error. Please refresh the page and try again.'
+          });
         } else {
-          alert(`Error: ${error.message}. Please try again or contact us directly.`);
+          setCustomAlert({
+            isOpen: true,
+            type: 'error',
+            title: 'Error',
+            message: `Error: ${error.message}. Please try again or contact us directly.`
+          });
         }
       } else {
-        alert('There was an error scheduling your appointment. Please try again or contact us directly.');
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'Appointment Error',
+          message: 'There was an error scheduling your appointment. Please try again or contact us directly.'
+        });
       }
     } finally {
       setSubmitting(false);
@@ -484,46 +487,35 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
     const selectedDate = new Date(formData.date);
     const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
     
+    // Get time slots that are available for all selected tests
     const selectedTestData = labTests.filter(test => selectedTests.includes(test._id));
     
     if (selectedTestData.length === 0) return [];
     
+    // Find common available days and time slots
     let availableSlots = selectedTestData[0].availableTimeSlots || [];
     
     for (const test of selectedTestData) {
       if (!test.availableDays.includes(dayName)) {
-        return [];
+        return []; // If any test is not available on this day, no slots available
       }
       
+      // Intersect time slots
       availableSlots = availableSlots.filter(slot => 
         test.availableTimeSlots?.includes(slot)
       );
     }
     
+    // Filter out booked time slots
     return availableSlots.filter(slot => !bookedTimes.includes(slot));
   };
 
-  // Group tests by lab department with better error handling
+  // Group tests by category
   const groupedTests = labTests.reduce((acc, test) => {
-    let departmentName = 'Available Tests';
-    
-    // Check if labDepartment exists and has a name
-    if (test.labDepartment && test.labDepartment.name) {
-      departmentName = test.labDepartment.name;
-    } else {
-      // Log tests without departments for debugging
-      console.log('Test without department:', {
-        name: test.name,
-        hasLabDepartment: test.hasLabDepartment,
-        labDepartment: test.labDepartment,
-        labDepartmentRef: test.labDepartmentRef
-      });
+    if (!acc[test.category]) {
+      acc[test.category] = [];
     }
-    
-    if (!acc[departmentName]) {
-      acc[departmentName] = [];
-    }
-    acc[departmentName].push(test);
+    acc[test.category].push(test);
     return acc;
   }, {} as Record<string, LabTest[]>);
 
@@ -540,7 +532,6 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
     );
   }
 
-  // Fallback values when pageData is not available
   const heroSection = pageData?.heroSection || {
     title: "Schedule Lab Work",
     subtitle: "Book your laboratory tests and imaging services with our experienced technicians"
@@ -575,7 +566,7 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
     ]
   };
 
-  const heroImageSrc = pageData?.heroSection?.backgroundImage 
+  const heroImageSrc = pageData?.heroSection?.backgroundImage
     ? urlFor(pageData.heroSection.backgroundImage.asset).width(1600).height(600).url()
     : "/contact.jpg";
 
@@ -604,26 +595,6 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
       {/* Main Content */}
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4">
-          {/* Setup Issues Warning */}
-          {setupIssues.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-              <div className="flex items-start">
-                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
-                <div>
-                  <h3 className="text-sm font-medium text-yellow-800 mb-2">Setup Required</h3>
-                  <ul className="text-sm text-yellow-700 space-y-1">
-                    {setupIssues.map((issue, index) => (
-                      <li key={index}>• {issue}</li>
-                    ))}
-                  </ul>
-                  <p className="text-xs text-yellow-600 mt-2">
-                    Please contact the administrator to complete the setup in the content management system.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
             
             {/* Test Selection */}
@@ -633,17 +604,10 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
                   {mainContent.sectionTitle}
                 </h2>
                 
-                {Object.entries(groupedTests).map(([department, tests]) => (
-                  <Card key={department} className="mb-6">
+                {Object.entries(groupedTests).map(([category, tests]) => (
+                  <Card key={category} className="mb-6">
                     <CardHeader>
-                      <CardTitle className="text-lg lg:text-xl">
-                        {department}
-                        {department === 'Available Tests' && (
-                          <span className="text-sm font-normal text-muted-foreground ml-2">
-                            (Department assignment pending)
-                          </span>
-                        )}
-                      </CardTitle>
+                      <CardTitle className="text-lg lg:text-xl">{category}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3 lg:space-y-4">
@@ -820,7 +784,7 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
                       />
                     </div>
 
-                    {/* Doctor's Request Section */}
+                    {/* Doctor's Request Section - Now Required */}
                     <div className="border-t pt-4">
                       <div className="mb-3">
                         <Label className="text-sm font-medium text-red-600">
@@ -907,7 +871,7 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
                         !formData.time || 
                         submitting || 
                         phoneError !== "" ||
-                        !doctorRequestFile
+                        !doctorRequestFile // Add this validation
                       }
                     >
                       <Calendar className="h-4 w-4 mr-2" />
@@ -916,37 +880,158 @@ We will contact you shortly to confirm your appointment.${departmentInfo}`);
                   </form>
                 </CardContent>
               </Card>
+
+             
             </div>
           </div>
         </div>
       </section>
 
-      {/* Info Section */}
-      <section className="bg-secondary py-12 md:py-24">
-        <div className="container px-4 text-center md:px-6">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl mb-8">
+      {/* General Info Section */}
+      <section className="bg-gray-50 dark:bg-gray-900 py-12 md:py-24">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-12 lg:text-3xl">
             {infoSection.title}
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {infoSection.infoCards.map((card) => (
-              <div key={card._key} className="flex flex-col items-center">
-                {card.icon === 'preparation' && <FileText className="h-12 w-12 text-primary mb-4" />}
-                {card.icon === 'timeline' && <Clock className="h-12 w-12 text-primary mb-4" />}
-                {card.icon === 'quality' && <CheckCircle className="h-12 w-12 text-primary mb-4" />}
-                <h3 className="font-semibold mb-2">{card.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {card.description}
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {infoSection.infoCards.map(card => (
+              <Card key={card._key} className="bg-white dark:bg-gray-800">
+                <CardContent className="p-6 text-center">
+                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-4">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">{card.title}</h3>
+                  <p className="text-sm text-muted-foreground">{card.description}</p>
+                </CardContent>
+              </Card>
             ))}
-          </div>
-          <div className="mt-8">
-            <Button asChild variant="outline" size="lg">
-              <Link href="/services">View All Services</Link>
-            </Button>
           </div>
         </div>
       </section>
+
+      {/* Confirmation Modal */}
+      {isConfirmationModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 relative m-4">
+            <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">Confirm Requests</h3>
+            <p className="text-center text-gray-600 mb-6">
+              Please review your appointment details before confirming.
+            </p>
+            <div className="space-y-4 text-gray-700">
+              <div className="flex items-center space-x-3">
+                <FileText className="h-5 w-5 text-green-500" />
+                <span className="font-semibold">Tests:</span>
+                <span>{selectedTests.map(testId => labTests.find(t => t._id === testId)?.name).join(', ')}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Calendar className="h-5 w-5 text-green-500" />
+                <span className="font-semibold">Date:</span>
+                <span>{formData.date}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Clock className="h-5 w-5 text-green-500" />
+                <span className="font-semibold">Time:</span>
+                <span>{formData.time}</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Phone className="h-5 w-5 text-green-500" />
+                <span className="font-semibold">Phone:</span>
+                <span>{formData.phone}</span>
+              </div>
+            </div>
+            <div className="mt-8 flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsConfirmationModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleConfirmSubmission}
+                disabled={submitting}
+              >
+                {submitting ? 'Confirming...' : 'Confirm Appointment'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* General Modal for all alerts (success, error, warning) */}
+      {customAlert?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-[350px] flex flex-col p-4 relative items-center justify-center bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-lg">
+            <div className="text-center p-3 flex-auto justify-center">
+              {customAlert.type === 'success' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-12 h-12 flex items-center text-green-500 mx-auto"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              )}
+              {customAlert.type === 'error' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-12 h-12 flex items-center text-red-500 mx-auto"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  ></path>
+                </svg>
+              )}
+              {customAlert.type === 'warning' && (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-12 h-12 flex items-center text-yellow-500 mx-auto"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+              )}
+              <h2 className="text-xl font-bold py-4 text-gray-800 dark:text-gray-200">{customAlert.title}</h2>
+              <p className="text-sm text-gray-500 px-2">{customAlert.message}</p>
+            </div>
+            <div className="p-2 mt-2 text-center">
+              <Button
+                onClick={() => {
+                  setCustomAlert(null);
+                  if (customAlert.action) {
+                    customAlert.action();
+                  }
+                }}
+                className={`px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 rounded-full transition ease-in duration-300 ${
+                  customAlert.type === 'success' ? 'bg-green-500 hover:bg-green-600 border-green-400 hover:border-green-600 text-white' :
+                  customAlert.type === 'error' ? 'bg-red-500 hover:bg-red-600 border-red-400 hover:border-red-600 text-white' :
+                  'bg-yellow-500 hover:bg-yellow-600 border-yellow-400 hover:border-yellow-600 text-white'
+                }`}
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

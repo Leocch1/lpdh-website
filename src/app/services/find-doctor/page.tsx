@@ -94,25 +94,6 @@ export default function FindDoctorPage() {
     return (
       <div className="flex flex-col">
         {/* Hero Section */}
-        <section className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
-          <Image
-            src="/contact.jpg"
-            alt="Find a doctor"
-            data-ai-hint="hospital doctors"
-            fill
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-black/50" />
-          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-            <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-              Find a Doctor
-            </h1>
-            <p className="mt-4 text-lg max-w-3xl lg:text-xl">
-              Connect with our experienced medical professionals and schedule your appointment
-            </p>
-          </div>
-        </section>
-        
         <section className="py-12 bg-gray-50 min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
@@ -126,23 +107,15 @@ export default function FindDoctorPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative w-full h-[300px] md:h-[400px] lg:h-[500px] overflow-hidden">
+     <section className="relative w-full h-[200px] md:h-[300px] lg:h-[500px] overflow-hidden">
         <Image
-          src="/contact.jpg"
-          alt="Find a doctor"
-          data-ai-hint="hospital doctors"
+          src="/doctors.jpg"
+          alt="A background image for the section"
+          data-ai-hint="A serene landscape or a medical-themed image"
           fill
-          className="object-cover"
+          className="object-contain"
         />
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-            Find a Doctor
-          </h1>
-          <p className="mt-4 text-lg max-w-3xl lg:text-xl">
-            Connect with our experienced medical professionals and schedule your appointment
-          </p>
-        </div>
+        {/* The overlay and content divs are removed */}
       </section>
 
       {/* Main Content Section */}
@@ -502,10 +475,10 @@ export default function FindDoctorPage() {
             Our patient coordinators are here to help you find the right specialist for your needs.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Button asChild size="lg">
+            <Button asChild size="lg" className="[box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]">
               <Link href="/contact">Contact Us</Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="ghost" size="lg" className="hover:bg-transparent hover:text-primary transition-colors">
               <Link href="/services">View All Services</Link>
             </Button>
           </div>
