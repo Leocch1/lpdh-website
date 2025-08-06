@@ -201,11 +201,10 @@ export function Header() {
 
   const PhoneCallModal = ({ isOpen, onOpenChange, title, number, numberDisplay, buttonColor }: { isOpen: boolean, onOpenChange: (open: boolean) => void, title: string, number: string, numberDisplay: string, buttonColor: string }) => (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm p-6 text-center">
-        <div className="relative">
-          <DialogClose className="absolute -right-6 -top-6 z-20 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md">
-            <X className="h-5 w-5 text-gray-500" />
-          </DialogClose>
+      <DialogContent className="max-w-sm p-6 text-center focus:outline-none">
+        <div className="relative rounded-lg overflow-hidden">
+          <DialogClose className="absolute -right-2 -top-2 z-20  rounded-full  p-2 hover:bg-gray-100 transition-colors shadow-md focus:outline-none">
+      </DialogClose>
           <div className="flex flex-col items-center p-4">
             <Phone className={cn("h-10 w-10 mb-4", buttonColor)} />
             <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
@@ -408,7 +407,7 @@ export function Header() {
                     </div>
 
                     {/* Mobile contact info */}
-                    <div className="mt-6 pt-6 border-t border-slate-200 space-y-4">
+                    <div className="mt-6 pt-6 border-t border-slate-200 space-y-4 focus:outline-none">
                       <div className="flex items-center gap-3">
                         <Phone className="h-5 w-5 text-primary" />
                         <div>
