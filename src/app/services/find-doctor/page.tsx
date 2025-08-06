@@ -21,6 +21,13 @@ export default function FindDoctorPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Hero image for find doctor page
+  const heroImage = {
+    src: "/doctor-banner.svg", // Using the doctors.jpg from public folder
+    alt: "Our Medical Team",
+    dataAiHint: "doctors team"
+  };
+
   // Dynamic doctors per page based on screen size
   const doctorsPerPage = isMobile ? 6 : 9;
 
@@ -107,15 +114,33 @@ export default function FindDoctorPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-     <section className="relative w-full h-[200px] md:h-[300px] lg:h-[500px] overflow-hidden">
-        <Image
-          src="/doctors.jpg"
-          alt="A background image for the section"
-          data-ai-hint="A serene landscape or a medical-themed image"
-          fill
-          className="object-contain"
-        />
-        {/* The overlay and content divs are removed */}
+      <section className="w-full p-0 m-0 bg-accent-foreground">
+        <div
+          className="relative w-full"
+          style={{ 
+            maxWidth: '100vw', 
+            overflow: 'hidden', 
+            margin: 0, 
+            padding: 0,
+            aspectRatio: '1920/700',
+            width: '100%'
+          }}
+        >
+          <div className="absolute inset-0">
+            <Image
+              src={heroImage.src}
+              alt={heroImage.alt}
+              data-ai-hint={heroImage.dataAiHint}
+              width={1920}
+              height={880}
+              className="object-cover w-full h-full select-none pointer-events-none"
+              sizes="100vw"
+              priority={true}
+              draggable={false}
+              style={{ maxWidth: '100%', height: '100%', margin: 0, padding: 0 }}
+            />            
+          </div>
+        </div>
       </section>
 
       {/* Main Content Section */}
