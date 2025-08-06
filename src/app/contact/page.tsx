@@ -41,8 +41,8 @@ const MessageSentModal = ({ isOpen, onOpenChange }) => {
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     messageType: "inquiry",
-    fullName: "",
-    email: "",
+    name: "",
+    "email-contact": "",
     subject: "",
     message: "",
   });
@@ -79,8 +79,8 @@ export default function ContactPage() {
     // Reset the form fields
     setFormData({
       messageType: "inquiry",
-      fullName: "",
-      email: "",
+      name: "",
+      "email-contact": "",
       subject: "",
       message: "",
     });
@@ -98,7 +98,7 @@ export default function ContactPage() {
       <section className="py-12 md:py-12 mx-auto px-4">
         <div className="container">
           <div className="max-w-5xl mx-auto">
-            <Card className="overflow-hidden shadow-lg">
+            <div className="overflow-hidden shadow-lg rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-5 min-h-[600px] bg-card">
                 {/* Photo Section - Full Height */}
                 <div className="relative w-80 h-64 md:h-auto md:col-span-2">
@@ -111,7 +111,7 @@ export default function ContactPage() {
                   />
                 </div>
                 
-                {/* Form Section - Red Background */}
+                {/* Form Section */}
                 <div className="col-span-1 md:col-span-3 p-8 md:p-12 flex flex-col justify-center">
                   <h2 className="font-headline text-3xl text-primary">
                     Send Us A Message
@@ -137,24 +137,22 @@ export default function ContactPage() {
 
                   <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div>
-                      <Label htmlFor="fullName" className="sr-only">Full Name</Label>
+                      <Label htmlFor="name" className="sr-only">Full Name</Label>
                       <Input
-                        id="fullName"
+                        id="name"
                         placeholder="Full Name"
-                        value={formData.fullName}
+                        value={formData.name}
                         onChange={handleInputChange}
-                        required
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email" className="sr-only">Email Address</Label>
+                      <Label htmlFor="email-contact" className="sr-only">Email Address</Label>
                       <Input
-                        id="email"
+                        id="email-contact"
                         type="email"
                         placeholder="Email Address"
-                        value={formData.email}
+                        value={formData["email-contact"]}
                         onChange={handleInputChange}
-                        required
                       />
                     </div>
                     <div>
@@ -164,7 +162,6 @@ export default function ContactPage() {
                         placeholder="Subject"
                         value={formData.subject}
                         onChange={handleInputChange}
-                        required
                       />
                     </div>
                     <div>
@@ -175,18 +172,21 @@ export default function ContactPage() {
                         rows={5}
                         value={formData.message}
                         onChange={handleInputChange}
-                        required
                       />
                     </div>
                     <div className="flex justify-start">
-                      <Button type="submit" disabled={isSubmitting} className="bg-green-600 hover:bg-green-700 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="bg-green-600 hover:bg-green-700 [box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)]"
+                      >
                         {isSubmitting ? "Submitting..." : "Submit"}
                       </Button>
                     </div>
                   </form>
                 </div>
               </div>
-            </Card>
+            </div>
           </div>
         </div>
       </section>
