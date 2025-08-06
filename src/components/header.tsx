@@ -362,7 +362,7 @@ export function Header() {
                             (link.label === "Contact Us" && mobileContactDropdownOpen) ||
                             (link.label === "Our Services" && mobileServicesDropdownOpen)
                           ) && (
-                              <div className="ml-4 mt-2 space-y-2">
+                              <div className="ml-2 mt-2 space-y-2">
                                 {link.dropdown.map((item) => (
                                   <Link
                                     key={item.href}
@@ -454,7 +454,7 @@ export function Header() {
             <div className="flex-shrink-0 lg:hidden w-10"></div>
 
             {/* Desktop Nav - Starts from left, with logo */}
-            <div className="hidden lg:flex items-center gap-8 flex-1">
+            <div className="hidden lg:flex items-center gap-4 flex-1">
               <div className={cn(
                 "transition-all duration-300",
                 isScrolled ? "opacity-100 scale-75" : "opacity-0 scale-0 w-0"
@@ -471,7 +471,7 @@ export function Header() {
             </div>
 
             {/* Desktop: CTA Buttons */}
-            <div className="hidden lg:flex items-center justify-end gap-3 flex-shrink-0">
+            <div className="hidden lg:flex items-center justify-end gap-2 flex-shrink-0">
               {isScrolled && (
                 <>
                   <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-300">
