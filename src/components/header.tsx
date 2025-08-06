@@ -463,7 +463,7 @@ export function Header() {
                   <Logo />
                 </Link>
               </div>
-              <nav className="flex items-center gap-8 text-sm">
+              <nav className="flex items-center gap-4 text-sm">
                 {navLinks.map((link) => (
                   <NavLinkItem key={link.href} href={link.href} label={link.label} dropdown={link.dropdown} isMobile={false} />
                 ))}
