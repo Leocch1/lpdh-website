@@ -12,18 +12,12 @@ export const labTest = defineType({
       validation: Rule => Rule.required()
     }),
     defineField({
-      name: 'category',
-      title: 'Category',
-      type: 'string',
-      options: {
-        list: [
-          { title: 'Blood Tests', value: 'Blood Tests' },
-          { title: 'Urine Tests', value: 'Urine Tests' },
-          { title: 'Imaging', value: 'Imaging' },
-          { title: 'Special Tests', value: 'Special Tests' },
-        ]
-      },
-      validation: Rule => Rule.required()
+      name: 'labDepartment',
+      title: 'Lab Department',
+      type: 'reference',
+      to: [{ type: 'labDepartment' }],
+      validation: Rule => Rule.required(),
+      description: 'Select the lab department that handles this test'
     }),
     defineField({
       name: 'duration',
@@ -106,22 +100,22 @@ export const labTest = defineType({
   preview: {
     select: {
       title: 'name',
-      subtitle: 'category',
+      subtitle: 'labDepartment.name',
       isActive: 'isActive'
     },
     prepare({ title, subtitle, isActive }) {
       return {
         title: `${title}${!isActive ? ' (Inactive)' : ''}`,
-        subtitle
+        subtitle: subtitle || 'No Department'
       }
     }
   },
   orderings: [
     {
-      title: 'Category, then Order',
-      name: 'categoryOrder',
+      title: 'Lab Department, then Order',
+      name: 'labDepartmentOrder',
       by: [
-        { field: 'category', direction: 'asc' },
+        { field: 'labDepartment.name', direction: 'asc' },
         { field: 'order', direction: 'asc' }
       ]
     }

@@ -7,11 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X } from "lucide-react";
+import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
-import { createClient } from "@sanity/client";
 
 // Simple native select to avoid Radix UI issues
 interface SimpleSelectProps {
@@ -67,17 +66,26 @@ const SCHEDULE_LAB_QUERY = `*[_type == "scheduleLabPage"][0] {
   }
 }`;
 
-const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(category asc, order asc) {
+// Updated query with better error handling and debugging
+const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(coalesce(labDepartment->name, "zzz_uncategorized") asc, order asc) {
   _id,
   name,
-  category,
+  labDepartment-> {
+    _id,
+    name,
+    email,
+    backupEmail,
+    description
+  },
   duration,
   isActive,
   order,
   availableDays[],
   availableTimeSlots[],
   preparationNotes,
-  resultTime
+  resultTime,
+  "hasLabDepartment": defined(labDepartment),
+  "labDepartmentRef": labDepartment
 }`;
 
 // Query to check booked appointments for a specific date
@@ -85,10 +93,17 @@ const BOOKED_APPOINTMENTS_QUERY = `*[_type == "appointment" && appointmentDate =
   appointmentTime
 }`;
 
+// Updated interface to handle optional labDepartment
 interface LabTest {
   _id: string;
   name: string;
-  category: string;
+  labDepartment?: {
+    _id: string;
+    name: string;
+    email: string;
+    backupEmail?: string;
+    description?: string;
+  } | null;
   duration: string;
   isActive: boolean;
   order: number;
@@ -96,6 +111,8 @@ interface LabTest {
   availableTimeSlots: string[];
   preparationNotes?: string;
   resultTime?: string;
+  hasLabDepartment?: boolean;
+  labDepartmentRef?: any;
 }
 
 interface ScheduleLabPageData {
@@ -129,6 +146,7 @@ export default function ScheduleLabPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [setupIssues, setSetupIssues] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -137,13 +155,50 @@ export default function ScheduleLabPage() {
     date: "",
     time: "",
     notes: "",
-    hasDoctorRequest: true, // Set to true by default since it's required
+    hasDoctorRequest: true,
     doctorRequestNotes: ""
   });
   const [doctorRequestFile, setDoctorRequestFile] = useState<File | null>(null);
   const [doctorRequestPreview, setDoctorRequestPreview] = useState<string | null>(null);
-
   const [phoneError, setPhoneError] = useState("");
+
+  // Check setup issues
+  const checkSetupIssues = async () => {
+    try {
+      const issues: string[] = [];
+      
+      // Check if labDepartment schema exists
+      const departments = await client.fetch(`*[_type == "labDepartment"] | order(name asc) {
+        _id,
+        name
+      }`);
+      
+      if (departments.length === 0) {
+        issues.push("No lab departments found. Please create lab departments first.");
+      }
+      
+      // Check tests without departments
+      const testsWithoutDept = await client.fetch(`*[_type == "labTest" && !defined(labDepartment)] {
+        _id,
+        name
+      }`);
+      
+      if (testsWithoutDept.length > 0) {
+        issues.push(`${testsWithoutDept.length} lab tests need to be assigned to departments.`);
+      }
+      
+      setSetupIssues(issues);
+      
+      if (issues.length > 0) {
+        console.log('Setup issues found:', issues);
+        console.log('Available departments:', departments);
+        console.log('Tests without departments:', testsWithoutDept);
+      }
+      
+    } catch (error) {
+      console.error('Error checking setup:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -153,8 +208,23 @@ export default function ScheduleLabPage() {
           client.fetch(LAB_TESTS_QUERY)
         ]);
         
+        // Debug: Log the fetched data
+        console.log('Lab Tests Data:', testsData);
+        testsData?.forEach((test: LabTest, index: number) => {
+          console.log(`Test ${index + 1}:`, {
+            name: test.name,
+            hasLabDepartment: test.hasLabDepartment,
+            labDepartment: test.labDepartment,
+            labDepartmentRef: test.labDepartmentRef
+          });
+        });
+        
         setPageData(pageContent);
         setLabTests(testsData || []);
+        
+        // Check for setup issues
+        await checkSetupIssues();
+        
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -221,7 +291,6 @@ export default function ScheduleLabPage() {
 
   // Phone number validation function
   const validatePhoneNumber = (phone: string) => {
-    // Remove any non-digit characters for validation
     const digitsOnly = phone.replace(/\D/g, '');
     
     if (digitsOnly.length === 0) {
@@ -237,14 +306,8 @@ export default function ScheduleLabPage() {
   // Handle phone input change with validation
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    
-    // Allow only digits and common phone number formatting characters
     const sanitized = value.replace(/[^\d\s\-\(\)\+]/g, '');
-    
-    // Update form data
     setFormData({...formData, phone: sanitized});
-    
-    // Validate and set error
     const error = validatePhoneNumber(sanitized);
     setPhoneError(error);
   };
@@ -253,13 +316,11 @@ export default function ScheduleLabPage() {
   const handleDoctorRequestFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file (JPG, PNG, etc.)');
         return;
       }
       
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('File size must be less than 5MB');
         return;
@@ -267,7 +328,6 @@ export default function ScheduleLabPage() {
 
       setDoctorRequestFile(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         setDoctorRequestPreview(e.target?.result as string);
@@ -280,7 +340,6 @@ export default function ScheduleLabPage() {
   const removeDoctorRequestFile = () => {
     setDoctorRequestFile(null);
     setDoctorRequestPreview(null);
-    // Clear file input
     const fileInput = document.getElementById('doctorRequest') as HTMLInputElement;
     if (fileInput) fileInput.value = '';
   };
@@ -309,17 +368,16 @@ export default function ScheduleLabPage() {
     }
   };
 
+  // Update the handleSubmit function to show better success messages
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate phone number before submission
     const phoneValidationError = validatePhoneNumber(formData.phone);
     if (phoneValidationError) {
       setPhoneError(phoneValidationError);
       return;
     }
 
-    // Validate doctor's request is provided
     if (!doctorRequestFile) {
       alert('Please upload a doctor\'s request/prescription image. This is required for all lab appointments.');
       return;
@@ -328,7 +386,6 @@ export default function ScheduleLabPage() {
     setSubmitting(true);
 
     try {
-      // Double-check if the time slot is still available
       const recentBookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
         date: formData.date
       });
@@ -342,7 +399,6 @@ export default function ScheduleLabPage() {
         return;
       }
 
-      // Upload doctor's request image (now required)
       let doctorRequestImageAsset = null;
       try {
         doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile);
@@ -351,8 +407,11 @@ export default function ScheduleLabPage() {
         return;
       }
 
-      // Clean phone number (keep only digits) for submission
       const cleanPhone = formData.phone.replace(/\D/g, '');
+
+      // Get selected test details for department info
+      const selectedTestsData = labTests.filter(test => selectedTests.includes(test._id));
+      const departments = [...new Set(selectedTestsData.map(test => test.labDepartment?.name).filter(Boolean))];
 
       const appointmentData = {
         firstName: formData.firstName,
@@ -363,17 +422,15 @@ export default function ScheduleLabPage() {
         time: formData.time,
         notes: formData.notes,
         selectedTests: selectedTests,
-        hasDoctorRequest: true, // Always true now
+        hasDoctorRequest: true,
         doctorRequestImage: doctorRequestImageAsset,
         doctorRequestNotes: formData.doctorRequestNotes
       };
 
-      // Create appointment in Sanity using API route
       const newAppointment = await createAppointment(appointmentData);
       
       console.log('Appointment created successfully:', newAppointment);
       
-      // Reset form and clear errors
       setFormData({
         firstName: "",
         lastName: "",
@@ -382,7 +439,7 @@ export default function ScheduleLabPage() {
         date: "",
         time: "",
         notes: "",
-        hasDoctorRequest: true, // Keep true since it's required
+        hasDoctorRequest: true,
         doctorRequestNotes: ""
       });
       setSelectedTests([]);
@@ -390,12 +447,20 @@ export default function ScheduleLabPage() {
       setDoctorRequestFile(null);
       setDoctorRequestPreview(null);
       
-      alert(`Lab appointment scheduled successfully! Your appointment number is: ${newAppointment.appointmentNumber}. We will contact you shortly to confirm.`);
+      // Enhanced success message with department notification info
+      const departmentInfo = departments.length > 0 
+        ? `\n\nNotifications have been sent to: ${departments.join(', ')}`
+        : '';
+      
+      alert(`Lab appointment scheduled successfully! 
+      
+Your appointment number is: ${newAppointment.appointmentNumber}
+
+We will contact you shortly to confirm your appointment.${departmentInfo}`);
       
     } catch (error) {
       console.error('Error submitting appointment:', error);
       
-      // More detailed error handling
       if (error instanceof Error) {
         if (error.message.includes('Insufficient permissions')) {
           alert('Unable to schedule appointment due to permissions. Please contact us directly at (02) 8825-5236.');
@@ -419,35 +484,46 @@ export default function ScheduleLabPage() {
     const selectedDate = new Date(formData.date);
     const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
     
-    // Get time slots that are available for all selected tests
     const selectedTestData = labTests.filter(test => selectedTests.includes(test._id));
     
     if (selectedTestData.length === 0) return [];
     
-    // Find common available days and time slots
     let availableSlots = selectedTestData[0].availableTimeSlots || [];
     
     for (const test of selectedTestData) {
       if (!test.availableDays.includes(dayName)) {
-        return []; // If any test is not available on this day, no slots available
+        return [];
       }
       
-      // Intersect time slots
       availableSlots = availableSlots.filter(slot => 
         test.availableTimeSlots?.includes(slot)
       );
     }
     
-    // Filter out booked time slots
     return availableSlots.filter(slot => !bookedTimes.includes(slot));
   };
 
-  // Group tests by category
+  // Group tests by lab department with better error handling
   const groupedTests = labTests.reduce((acc, test) => {
-    if (!acc[test.category]) {
-      acc[test.category] = [];
+    let departmentName = 'Available Tests';
+    
+    // Check if labDepartment exists and has a name
+    if (test.labDepartment && test.labDepartment.name) {
+      departmentName = test.labDepartment.name;
+    } else {
+      // Log tests without departments for debugging
+      console.log('Test without department:', {
+        name: test.name,
+        hasLabDepartment: test.hasLabDepartment,
+        labDepartment: test.labDepartment,
+        labDepartmentRef: test.labDepartmentRef
+      });
     }
-    acc[test.category].push(test);
+    
+    if (!acc[departmentName]) {
+      acc[departmentName] = [];
+    }
+    acc[departmentName].push(test);
     return acc;
   }, {} as Record<string, LabTest[]>);
 
@@ -528,6 +604,26 @@ export default function ScheduleLabPage() {
       {/* Main Content */}
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4">
+          {/* Setup Issues Warning */}
+          {setupIssues.length > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+              <div className="flex items-start">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-sm font-medium text-yellow-800 mb-2">Setup Required</h3>
+                  <ul className="text-sm text-yellow-700 space-y-1">
+                    {setupIssues.map((issue, index) => (
+                      <li key={index}>• {issue}</li>
+                    ))}
+                  </ul>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Please contact the administrator to complete the setup in the content management system.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
             
             {/* Test Selection */}
@@ -537,10 +633,17 @@ export default function ScheduleLabPage() {
                   {mainContent.sectionTitle}
                 </h2>
                 
-                {Object.entries(groupedTests).map(([category, tests]) => (
-                  <Card key={category} className="mb-6">
+                {Object.entries(groupedTests).map(([department, tests]) => (
+                  <Card key={department} className="mb-6">
                     <CardHeader>
-                      <CardTitle className="text-lg lg:text-xl">{category}</CardTitle>
+                      <CardTitle className="text-lg lg:text-xl">
+                        {department}
+                        {department === 'Available Tests' && (
+                          <span className="text-sm font-normal text-muted-foreground ml-2">
+                            (Department assignment pending)
+                          </span>
+                        )}
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3 lg:space-y-4">
@@ -717,7 +820,7 @@ export default function ScheduleLabPage() {
                       />
                     </div>
 
-                    {/* Doctor's Request Section - Now Required */}
+                    {/* Doctor's Request Section */}
                     <div className="border-t pt-4">
                       <div className="mb-3">
                         <Label className="text-sm font-medium text-red-600">
@@ -804,7 +907,7 @@ export default function ScheduleLabPage() {
                         !formData.time || 
                         submitting || 
                         phoneError !== "" ||
-                        !doctorRequestFile // Add this validation
+                        !doctorRequestFile
                       }
                     >
                       <Calendar className="h-4 w-4 mr-2" />
@@ -813,8 +916,6 @@ export default function ScheduleLabPage() {
                   </form>
                 </CardContent>
               </Card>
-
-             
             </div>
           </div>
         </div>

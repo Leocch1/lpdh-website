@@ -13,6 +13,7 @@ import newsUpdate from './newsUpdate'
 import { appointment } from './appointment'
 import { scheduleLabPage } from './scheduleLabPage'
 import { labTest } from './labTest'
+import { labDepartment } from './labDepartment'
 import { servicesPage } from './servicesPage'
 
-export const schemaTypes = [homepage, careers, jobOpening, jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate, appointment, scheduleLabPage, labTest, servicesPage]
+export const schemaTypes = [homepage, careers, jobOpening, jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate, labDepartment, appointment, scheduleLabPage, labTest, servicesPage]

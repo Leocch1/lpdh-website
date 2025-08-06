@@ -94,22 +94,25 @@ export default defineConfig({
                   .title('Lab Scheduling Management')
                   .items([
                     S.listItem()
-                      .title('Schedule Lab Page')
-                      .child(
-                        S.document()
-                          .schemaType('scheduleLabPage')
-                          .documentId('scheduleLabPage')
-                      ),
+                      .title('Lab Departments')
+                      .child(S.documentTypeList('labDepartment').title('Lab Departments')),
                     S.listItem()
                       .title('Lab Tests')
                       .child(S.documentTypeList('labTest').title('Lab Tests')),
                     S.listItem()
                       .title('Lab Appointments')
                       .child(S.documentTypeList('appointment').title('Lab Appointments')),
+                    S.listItem()
+                      .title('Schedule Lab Page')
+                      .child(
+                        S.document()
+                          .schemaType('scheduleLabPage')
+                          .documentId('scheduleLabPage')
+                      ),
                   ])
               ),
             ...S.documentTypeListItems().filter(
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment'].includes(listItem.getId() || '')
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment'].includes(listItem.getId() || '')
             ),
           ]),
     }),

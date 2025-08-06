@@ -74,12 +74,12 @@ export const appointment = defineType({
           preview: {
             select: {
               title: 'test.name',
-              category: 'test.category'
+              department: 'test.labDepartment.name'
             },
-            prepare({ title, category }) {
+            prepare({ title, department }) {
               return {
                 title: title || 'Unknown Test',
-                subtitle: category || 'No Category'
+                subtitle: department || 'No Department'
               }
             }
           }
@@ -143,6 +143,33 @@ export const appointment = defineType({
       initialValue: 'pending'
     }),
     defineField({
+      name: 'notificationStatus',
+      title: 'Notification Status',
+      type: 'object',
+      fields: [
+        {
+          name: 'emailSent',
+          title: 'Email Notifications Sent',
+          type: 'boolean',
+          initialValue: false,
+          description: 'Whether email notifications were sent to lab departments'
+        },
+        {
+          name: 'sentTo',
+          title: 'Notifications Sent To',
+          type: 'array',
+          of: [{ type: 'string' }],
+          description: 'List of email addresses that received notifications'
+        },
+        {
+          name: 'sentAt',
+          title: 'Notification Sent At',
+          type: 'datetime',
+          description: 'When the notifications were sent'
+        }
+      ]
+    }),
+    defineField({
       name: 'createdAt',
       title: 'Created At',
       type: 'datetime',
@@ -163,11 +190,12 @@ export const appointment = defineType({
       date: 'appointmentDate',
       time: 'appointmentTime',
       status: 'status',
-      hasRequest: 'doctorRequest.requestImage'
+      emailSent: 'notificationStatus.emailSent'
     },
-    prepare({ firstName, lastName, date, time, status, hasRequest }) {
+    prepare({ firstName, lastName, date, time, status, emailSent }) {
+      const emailIcon = emailSent ? '✅' : '📧';
       return {
-        title: `${firstName} ${lastName} 📄`, // Always show document icon since it's required
+        title: `${firstName} ${lastName} ${emailIcon}`,
         subtitle: `${date} at ${time} - ${status}`
       }
     }
