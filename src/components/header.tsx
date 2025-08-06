@@ -63,6 +63,7 @@ export function Header() {
   const [isIsoImageOpen, setIsIsoImageOpen] = useState(false);
   const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const [isNonEmergencyModalOpen, setIsNonEmergencyModalOpen] = useState(false);
+  const [isCallUsDropdownOpen, setIsCallUsDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const lastDirection = useRef<'up' | 'down' | null>(null);
   const lastScrollY = useRef(0);
@@ -97,6 +98,7 @@ export function Header() {
   }, []);
   const contactDropdownRef = useRef<HTMLDivElement>(null);
   const servicesDropdownRef = useRef<HTMLDivElement>(null);
+  const callUsDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -106,6 +108,9 @@ export function Header() {
       }
       if (servicesDropdownRef.current && !servicesDropdownRef.current.contains(event.target as Node)) {
         setIsServicesDropdownOpen(false);
+      }
+      if (callUsDropdownRef.current && !callUsDropdownRef.current.contains(event.target as Node)) {
+        setIsCallUsDropdownOpen(false);
       }
     }
 
@@ -158,7 +163,7 @@ export function Header() {
 
           {/* Desktop Dropdown */}
           {!isMobile && isDropdownOpen && (
-            <div className="hidden lg:block absolute left-0 top-full pt-2 z-50">
+            <div className="hidden xl:block absolute left-0 top-full pt-2 z-50">
               <div className="bg-white rounded-lg shadow-xl border border-slate-200 min-w-[200px] py-2">
                 {dropdown.map((item) => (
                   <Link
@@ -198,9 +203,7 @@ export function Header() {
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-6 text-center">
         <div className="relative">
-          <DialogClose className="absolute -right-6 -top-6 z-20 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors shadow-md">
-            <X className="h-5 w-5 text-gray-500" />
-          </DialogClose>
+
           <div className="flex flex-col items-center p-4">
             <Phone className={cn("h-10 w-10 mb-4", buttonColor)} />
             <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
@@ -212,7 +215,7 @@ export function Header() {
               onClick={() => onOpenChange(false)}
               className={cn(
                 "w-full py-3 px-4 rounded-lg font-bold text-white transition-colors text-lg",
-                buttonColor === 'text-red-600' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary-dark'
+                buttonColor === 'text-red-600' ? 'bg-red-600 hover:bg-red-700' : 'bg-primary hover:bg-primary/90'
               )}
             >
               Call {numberDisplay}
@@ -245,7 +248,7 @@ export function Header() {
 
       {/* Upper Header - Contact Info */}
       <div className={cn(
-        "hidden bg-slate-50 border-b border-slate-200 text-sm lg:block transition-all duration-300",
+        "hidden bg-slate-50 border-b border-slate-200 text-sm xl:block transition-all duration-300",
         isScrolled ? "h-0 opacity-0 overflow-hidden" : "h-20 opacity-100"
       )}>
         <div className="w-full px-12 sm:px-16 lg:px-20 h-full">
@@ -337,7 +340,7 @@ export function Header() {
         <div className="w-full px-12 sm:px-16 lg:px-20">
           <div className="flex h-16 items-center justify-between">
             {/* Mobile: Hamburger */}
-            <div className="flex-shrink-0 lg:hidden">
+            <div className="flex-shrink-0 xl:hidden">
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-slate-700 hover:text-primary hover:bg-slate-100">
@@ -444,17 +447,17 @@ export function Header() {
             </div>
 
             {/* Mobile: Logo in center (no buttons beside it) */}
-            <div className="flex justify-center lg:hidden flex-1">
+            <div className="flex justify-center xl:hidden flex-1">
               <Link href="/" className="transition-opacity hover:opacity-80 scale-75">
                 <Logo />
               </Link>
             </div>
 
             {/* Mobile: Empty div to maintain flexbox layout */}
-            <div className="flex-shrink-0 lg:hidden w-10"></div>
+            <div className="flex-shrink-0 xl:hidden w-10"></div>
 
             {/* Desktop Nav - Starts from left, with logo */}
-            <div className="hidden lg:flex items-center gap-4 flex-1">
+            <div className="hidden xl:flex items-center gap-4 flex-1">
               <div className={cn(
                 "transition-all duration-300",
                 isScrolled ? "opacity-100 scale-75" : "opacity-0 scale-0 w-0"
@@ -471,23 +474,53 @@ export function Header() {
             </div>
 
             {/* Desktop: CTA Buttons */}
-            <div className="hidden lg:flex items-center justify-end gap-2 flex-shrink-0">
-              {isScrolled && (
-                <>
-                  <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary transition-all duration-300">
-                    <button onClick={() => setIsNonEmergencyModalOpen(true)}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      NON-EMERGENCY
-                    </button>
-                  </Button>
-                  <Button asChild variant="outline" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all duration-300">
-                    <button onClick={() => setIsEmergencyModalOpen(true)}>
-                      <Phone className="h-4 w-4 mr-2" />
-                      EMERGENCY
-                    </button>
-                  </Button>
-                </>
-              )}
+            <div className="hidden xl:flex items-center justify-end gap-2 flex-shrink-0">
+              {/* Call Us Dropdown */}
+              <div className={cn(
+                "relative transition-all duration-300",
+                !isScrolled ? "opacity-0 scale-0 w-0" : "opacity-100 scale-100"
+              )}>
+                <Button
+                  variant="outline"
+                  className="border-primary text-primary hover:bg-primary hover:text-white whitespace-nowrap"
+                  onClick={() => setIsCallUsDropdownOpen(!isCallUsDropdownOpen)}
+                >
+                  <Phone className="h-4 w-4 mr-2" />
+                  Call Us
+                  <ChevronDown className={cn(
+                    "ml-2 h-4 w-4 transition-transform duration-200",
+                    isCallUsDropdownOpen ? "rotate-180" : ""
+                  )} />
+                </Button>
+                
+                {isCallUsDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setIsNonEmergencyModalOpen(true);
+                          setIsCallUsDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-primary hover:bg-slate-50 flex items-center gap-2"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Non-Emergency
+                      </button>
+                      <button
+                        onClick={() => {
+                          setIsEmergencyModalOpen(true);
+                          setIsCallUsDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-50 flex items-center gap-2"
+                      >
+                        <Phone className="h-4 w-4" />
+                        Emergency
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
                 <Link href="/services/find-doctor">
                   <Activity className="h-4 w-4 mr-2" />
