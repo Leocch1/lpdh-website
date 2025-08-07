@@ -104,7 +104,7 @@ export function PrivacyNotice() {
       
       <Dialog open={isOpen}>
         <DialogContent 
-          className="max-w-7xl w-[98vw] max-h-[85vh] p-0 border-0 shadow-none z-50 [&>button]:hidden" 
+          className="max-w-7xl w-[94vw] md:w-[98vw] max-h-[90vh] md:max-h-[85vh] p-0 border-0 shadow-none z-50 [&>button]:hidden flex items-center justify-center" 
           onPointerDownOutside={(e) => e.preventDefault()} 
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
@@ -122,7 +122,7 @@ export function PrivacyNotice() {
           </DialogHeader>
           
           {/* Content area - Fixed height, no scroll */}
-          <div className="px-8 md:px-12 py-4 md:py-6 bg-white h-[400px] md:h-[450px] overflow-hidden">
+          <div className="px-10 md:px-12 py-4 md:py-6 bg-white h-[400px] md:h-[450px] overflow-hidden">
             <div className="h-full flex flex-col">
               <div className="text-gray-700 leading-snug text-[10px] md:text-xs whitespace-pre-line flex-1 overflow-hidden prose prose-xs max-w-none prose-strong:text-gray-900 prose-strong:font-bold">
                 {noticePages[currentPage].content}
@@ -131,17 +131,19 @@ export function PrivacyNotice() {
           </div>
           
           {/* Page indicator */}
-          <div className="px-8 md:px-12 py-2 bg-white border-b border-gray-200">
-            <div className="flex justify-center items-center gap-2">
-              {noticePages.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === currentPage ? 'bg-emerald-500' : 'bg-gray-300'
-                  }`}
-                />
-              ))}
-              <span className="ml-2 text-xs text-gray-500">
+          <div className="px-10 md:px-12 py-2 bg-white border-b border-gray-200">
+            <div className="relative flex justify-center items-center">
+              <div className="flex items-center gap-2">
+                {noticePages.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      index === currentPage ? 'bg-emerald-500' : 'bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="absolute right-0 text-xs text-gray-500">
                 {currentPage + 1} of {noticePages.length}
               </span>
             </div>

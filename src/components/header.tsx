@@ -26,8 +26,8 @@ const EMERGENCY_NUMBER = {
 };
 
 const NON_EMERGENCY_NUMBER = {
-  display: "(02) 8820-9375",
-  tel: "+0288209375"
+  display: "(02) 8825-5236",
+  tel: "+0288255236"
 };
 
 const navLinks = [
