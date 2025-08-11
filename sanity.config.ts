@@ -1,6 +1,6 @@
 import { defineConfig } from 'sanity'
 import { structureTool } from 'sanity/structure'
-import { visionTool } from '@sanity/vision'
+// import { visionTool } from '@sanity/vision' // Temporarily disabled due to dependency issues
 import { schemaTypes } from './sanity/schemas'
 
 export default defineConfig({
@@ -111,12 +111,38 @@ export default defineConfig({
                       ),
                   ])
               ),
+            S.listItem()
+              .title('Contact Messages')
+              .id('contactMessages')
+              .child(
+                S.list()
+                  .title('Contact Messages Management')
+                  .items([
+                    S.listItem()
+                      .title('All Messages')
+                      .child(S.documentTypeList('contactMessage').title('All Contact Messages')),
+                    S.listItem()
+                      .title('New Messages')
+                      .child(
+                        S.documentTypeList('contactMessage')
+                          .title('New Messages')
+                          .filter('status == "new"')
+                      ),
+                    S.listItem()
+                      .title('Complaints')
+                      .child(
+                        S.documentTypeList('contactMessage')
+                          .title('Complaints')
+                          .filter('messageType == "complaint"')
+                      ),
+                  ])
+              ),
             ...S.documentTypeListItems().filter(
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment'].includes(listItem.getId() || '')
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage'].includes(listItem.getId() || '')
             ),
           ]),
     }),
-    visionTool(),
+    // visionTool(), // Temporarily disabled due to dependency issues
   ],
 
   schema: {

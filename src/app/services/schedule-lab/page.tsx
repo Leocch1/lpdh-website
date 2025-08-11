@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X } from "lucide-react";
+import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, Mail, TestTube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
@@ -66,7 +66,7 @@ const SCHEDULE_LAB_QUERY = `*[_type == "scheduleLabPage"][0] {
     }
 }`;
 
-const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(category asc, order asc) {
+const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(labDepartment->name asc, order asc) {
   _id,
   name,
   category,
@@ -76,7 +76,24 @@ const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(categ
   availableDays[],
   availableTimeSlots[],
   preparationNotes,
-  resultTime
+  resultTime,
+  requiresEligibilityCheck,
+  eligibilityQuestions[] {
+    _key,
+    question,
+    riskLevel,
+    warningMessage
+  },
+  cannotProceedMessage {
+    title,
+    message
+  },
+  labDepartment-> {
+    _id,
+    name,
+    email,
+    backupEmail
+  }
 }`;
 
 const BOOKED_APPOINTMENTS_QUERY = `*[_type == "appointment" && appointmentDate == $date && status != "cancelled"] {
@@ -95,6 +112,23 @@ interface LabTest {
   availableTimeSlots: string[];
   preparationNotes?: string;
   resultTime?: string;
+  requiresEligibilityCheck?: boolean;
+  eligibilityQuestions?: Array<{
+    _key: string;
+    question: string;
+    riskLevel: 'high' | 'medium' | 'low';
+    warningMessage?: string;
+  }>;
+  cannotProceedMessage?: {
+    title?: string;
+    message?: string;
+  };
+  labDepartment?: {
+    _id: string;
+    name: string;
+    email: string;
+    backupEmail?: string;
+  };
 }
 
 interface ScheduleLabPageData {
@@ -141,6 +175,7 @@ export default function ScheduleLabPage() {
   // Add missing state declarations
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [customAlert, setCustomAlert] = useState<CustomAlert | null>(null);
+  const [editMode, setEditMode] = useState(false);
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -153,10 +188,28 @@ export default function ScheduleLabPage() {
     hasDoctorRequest: true, // Set to true by default since it's required
     doctorRequestNotes: ""
   });
+  
+  // Temporary form data for editing in confirmation modal
+  const [tempFormData, setTempFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    date: "",
+    time: "",
+    notes: "",
+    doctorRequestNotes: ""
+  });
   const [doctorRequestFile, setDoctorRequestFile] = useState<File | null>(null);
   const [doctorRequestPreview, setDoctorRequestPreview] = useState<string | null>(null);
 
   const [phoneError, setPhoneError] = useState("");
+  
+  // Eligibility check state
+  const [eligibilityAnswers, setEligibilityAnswers] = useState<Record<string, Record<string, boolean>>>({});
+  const [eligibilityWarnings, setEligibilityWarnings] = useState<string[]>([]);
+  const [canProceed, setCanProceed] = useState(true);
+  const [showEligibilityModal, setShowEligibilityModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,12 +254,115 @@ export default function ScheduleLabPage() {
     fetchBookedAppointments();
   }, [formData.date]);
 
+  // Eligibility check functions
+  const checkEligibility = () => {
+    const warnings: string[] = [];
+    let highRisk = false;
+    let highRiskTest: LabTest | undefined;
+    
+    const testsRequiringCheck = labTests.filter(test => 
+      selectedTests.includes(test._id) && test.requiresEligibilityCheck
+    );
+    
+    testsRequiringCheck.forEach(test => {
+      test.eligibilityQuestions?.forEach(question => {
+        const answer = eligibilityAnswers[test._id]?.[question._key];
+        if (answer === true) {
+          if (question.riskLevel === 'high') {
+            highRisk = true;
+            highRiskTest = test;
+            warnings.push(`❌ ${test.name}: ${question.warningMessage || question.question}`);
+          } else if (question.riskLevel === 'medium') {
+            warnings.push(`⚠️ ${test.name}: ${question.warningMessage || question.question}`);
+          } else if (question.riskLevel === 'low') {
+            warnings.push(`ℹ️ ${test.name}: ${question.warningMessage || question.question}`);
+          }
+        }
+      });
+    });
+    
+    setEligibilityWarnings(warnings);
+    setCanProceed(!highRisk);
+    
+    if (highRisk && highRiskTest) {
+      // Use custom message from the test that triggered the high risk
+      const customMessage = highRiskTest.cannotProceedMessage;
+      setCustomAlert({
+        isOpen: true,
+        type: 'error',
+        title: customMessage?.title || 'Cannot Proceed with Examination',
+        message: customMessage?.message || 'Based on your answers, this examination may not be safe for you. Please consult with your doctor before proceeding. You may also contact the hospital for alternative examination options.'
+      });
+    } else if (warnings.length > 0) {
+      setCustomAlert({
+        isOpen: true,
+        type: 'warning',
+        title: 'Please Review Medical Warnings',
+        message: 'We have noted some medical considerations for your examination. Please ensure you follow all preparation instructions and inform the medical staff about these conditions during your appointment.'
+      });
+      // Still allow to proceed with warnings, initialize temp form data
+      setTempFormData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes,
+        doctorRequestNotes: formData.doctorRequestNotes
+      });
+      setTimeout(() => setIsConfirmationModalOpen(true), 2000);
+    } else {
+      // No issues, proceed to confirmation and initialize temp form data
+      setTempFormData({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        date: formData.date,
+        time: formData.time,
+        notes: formData.notes,
+        doctorRequestNotes: formData.doctorRequestNotes
+      });
+      setIsConfirmationModalOpen(true);
+    }
+  };
+  
+  const handleEligibilityAnswer = (testId: string, questionKey: string, answer: boolean) => {
+    setEligibilityAnswers(prev => ({
+      ...prev,
+      [testId]: {
+        ...prev[testId],
+        [questionKey]: answer
+      }
+    }));
+  };
+
   const handleTestSelection = (testId: string) => {
+    const isAdding = !selectedTests.includes(testId);
+    
     setSelectedTests(prev =>
       prev.includes(testId)
         ? prev.filter(id => id !== testId)
         : [...prev, testId]
     );
+    
+    // If adding a test that requires eligibility check, show modal
+    if (isAdding) {
+      const test = labTests.find(t => t._id === testId);
+      if (test?.requiresEligibilityCheck) {
+        // Initialize eligibility answers for this test
+        if (test.eligibilityQuestions) {
+          setEligibilityAnswers(prev => ({
+            ...prev,
+            [testId]: test.eligibilityQuestions!.reduce((acc, q) => ({
+              ...acc,
+              [q._key]: false
+            }), {})
+          }));
+        }
+      }
+    }
   };
 
   const createAppointment = async (appointmentData: any) => {
@@ -310,23 +466,55 @@ export default function ScheduleLabPage() {
 
   const uploadImageToSanity = async (file: File): Promise<any> => {
     try {
+      console.log('📤 Uploading image:', file.name, file.size, 'bytes');
+      
       const formData = new FormData()
       formData.append('file', file)
+      
+      // Add timeout to fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+      
       const response = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       })
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to upload image')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('❌ Upload failed:', response.status, errorData);
+        throw new Error(errorData.error || `Upload failed with status ${response.status}`);
       }
 
       const { asset } = await response.json()
+      console.log('✅ Upload successful:', asset._id);
       return asset
     } catch (error) {
-      console.error('Error uploading image:', error)
-      throw new Error('Failed to upload image')
+      console.error('❌ Error uploading image:', error);
+      
+      // Provide user-friendly error messages
+      let userMessage = 'Failed to upload image';
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          userMessage = 'Upload timeout - please check your internet connection and try again';
+        } else if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
+          userMessage = 'Upload timeout - please try again';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          userMessage = 'Network error - please check your internet connection';
+        } else if (error.message.includes('too large')) {
+          userMessage = 'File is too large (max 10MB allowed)';
+        } else if (error.message.includes('file type') || error.message.includes('image files')) {
+          userMessage = 'Only image files are allowed';
+        } else if (error.message) {
+          userMessage = error.message;
+        }
+      }
+      
+      throw new Error(userMessage);
     }
   };
 
@@ -351,6 +539,36 @@ export default function ScheduleLabPage() {
       return;
     }
 
+    // Check if any selected tests require eligibility checking
+    const testsRequiringCheck = labTests.filter(test => 
+      selectedTests.includes(test._id) && test.requiresEligibilityCheck
+    );
+    
+    if (testsRequiringCheck.length > 0) {
+      // Initialize eligibility answers for tests that need checking
+      const initialAnswers: Record<string, Record<string, boolean>> = {};
+      testsRequiringCheck.forEach(test => {
+        initialAnswers[test._id] = {};
+        test.eligibilityQuestions?.forEach(q => {
+          initialAnswers[test._id][q._key] = false;
+        });
+      });
+      setEligibilityAnswers(initialAnswers);
+      setShowEligibilityModal(true);
+      return;
+    }
+
+    // If no eligibility check needed, proceed directly to confirmation
+    setTempFormData({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      date: formData.date,
+      time: formData.time,
+      notes: formData.notes,
+      doctorRequestNotes: formData.doctorRequestNotes
+    });
     setIsConfirmationModalOpen(true);
   };
 
@@ -359,14 +577,17 @@ export default function ScheduleLabPage() {
     setIsConfirmationModalOpen(false);
 
     try {
+      // Use tempFormData for the final submission if it was edited
+      const finalFormData = editMode ? tempFormData : formData;
+
       // Double-check if the time slot is still available
       const recentBookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
-        date: formData.date
+        date: finalFormData.date
       });
       
       const recentBookedTimes = recentBookedAppointments.map((apt: any) => apt.appointmentTime);
       
-      if (recentBookedTimes.includes(formData.time)) {
+      if (recentBookedTimes.includes(finalFormData.time)) {
         setCustomAlert({
           isOpen: true,
           type: 'warning',
@@ -374,7 +595,11 @@ export default function ScheduleLabPage() {
           message: 'Sorry, this time slot has been booked by another patient. Please select a different time.',
           action: () => {
             setBookedTimes(recentBookedTimes);
-            setFormData(prev => ({ ...prev, time: "" }));
+            if (editMode) {
+              setTempFormData(prev => ({ ...prev, time: "" }));
+            } else {
+              setFormData(prev => ({ ...prev, time: "" }));
+            }
           }
         });
         return;
@@ -395,20 +620,20 @@ export default function ScheduleLabPage() {
       }
 
       // Clean phone number (keep only digits) for submission
-      const cleanPhone = formData.phone.replace(/\D/g, '');
+      const cleanPhone = finalFormData.phone.replace(/\D/g, '');
 
       const appointmentData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
+        firstName: finalFormData.firstName,
+        lastName: finalFormData.lastName,
+        email: finalFormData.email,
         phone: cleanPhone,
-        date: formData.date,
-        time: formData.time,
-        notes: formData.notes,
+        date: finalFormData.date,
+        time: finalFormData.time,
+        notes: finalFormData.notes,
         selectedTests: selectedTests,
         hasDoctorRequest: true, // Always true now
         doctorRequestImage: doctorRequestImageAsset,
-        doctorRequestNotes: formData.doctorRequestNotes
+        doctorRequestNotes: finalFormData.doctorRequestNotes
       };
 
       // Create appointment in Sanity using API route
@@ -428,10 +653,21 @@ export default function ScheduleLabPage() {
         hasDoctorRequest: true, // Keep true since it's required
         doctorRequestNotes: ""
       });
+      setTempFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        date: "",
+        time: "",
+        notes: "",
+        doctorRequestNotes: ""
+      });
       setSelectedTests([]);
       setPhoneError("");
       setDoctorRequestFile(null);
       setDoctorRequestPreview(null);
+      setEditMode(false);
       
       setCustomAlert({
         isOpen: true,
@@ -480,6 +716,39 @@ export default function ScheduleLabPage() {
     }
   };
 
+  // Handle saving changes in confirmation modal
+  const handleSaveChanges = () => {
+    // Update the main form data with temp data
+    setFormData({
+      ...formData,
+      firstName: tempFormData.firstName,
+      lastName: tempFormData.lastName,
+      email: tempFormData.email,
+      phone: tempFormData.phone,
+      date: tempFormData.date,
+      time: tempFormData.time,
+      notes: tempFormData.notes,
+      doctorRequestNotes: tempFormData.doctorRequestNotes
+    });
+    setEditMode(false);
+  };
+
+  // Handle canceling changes in confirmation modal
+  const handleCancelChanges = () => {
+    // Revert temp data to original form data
+    setTempFormData({
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      email: formData.email,
+      phone: formData.phone,
+      date: formData.date,
+      time: formData.time,
+      notes: formData.notes,
+      doctorRequestNotes: formData.doctorRequestNotes
+    });
+    setEditMode(false);
+  };
+
   // Get available time slots for selected date (excluding booked times)
   const getAvailableTimeSlots = () => {
     if (!formData.date || selectedTests.length === 0) return [];
@@ -512,10 +781,11 @@ export default function ScheduleLabPage() {
 
   // Group tests by category
   const groupedTests = labTests.reduce((acc, test) => {
-    if (!acc[test.category]) {
-      acc[test.category] = [];
+    const departmentName = test.labDepartment?.name || 'Other Tests';
+    if (!acc[departmentName]) {
+      acc[departmentName] = [];
     }
-    acc[test.category].push(test);
+    acc[departmentName].push(test);
     return acc;
   }, {} as Record<string, LabTest[]>);
 
@@ -604,10 +874,18 @@ export default function ScheduleLabPage() {
                   {mainContent.sectionTitle}
                 </h2>
                 
-                {Object.entries(groupedTests).map(([category, tests]) => (
-                  <Card key={category} className="mb-6">
-                    <CardHeader>
-                      <CardTitle className="text-lg lg:text-xl">{category}</CardTitle>
+                {Object.entries(groupedTests).map(([departmentName, tests]) => (
+                  <Card key={departmentName} className="mb-6">
+                    <CardHeader className="border-b">
+                      <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                          <span className="text-green-600 font-semibold text-sm">🏥</span>
+                        </div>
+                        {departmentName}
+                        <Badge variant="outline" className="ml-auto">
+                          {tests.length} {tests.length === 1 ? 'test' : 'tests'}
+                        </Badge>
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3 lg:space-y-4">
@@ -631,7 +909,14 @@ export default function ScheduleLabPage() {
                                         : 'text-muted-foreground'
                                     }`}
                                   />
-                                  <h4 className="font-medium">{test.name}</h4>
+                                  <h4 className="font-medium flex items-center gap-2">
+                                    {test.name}
+                                    {test.requiresEligibilityCheck && (
+                                      <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
+                                        🩺 Screening Required
+                                      </Badge>
+                                    )}
+                                  </h4>
                                 </div>
                                 <div className="flex gap-4 mt-2 ml-7">
                                   <Badge variant="outline">{test.duration}</Badge>
@@ -912,48 +1197,254 @@ export default function ScheduleLabPage() {
       {/* Confirmation Modal */}
       {isConfirmationModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 relative m-4">
-            <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">Confirm Requests</h3>
-            <p className="text-center text-gray-600 mb-6">
-              Please review your appointment details before confirming.
-            </p>
-            <div className="space-y-4 text-gray-700">
-              <div className="flex items-center space-x-3">
-                <FileText className="h-5 w-5 text-green-500" />
-                <span className="font-semibold">Tests:</span>
-                <span>{selectedTests.map(testId => labTests.find(t => t._id === testId)?.name).join(', ')}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Calendar className="h-5 w-5 text-green-500" />
-                <span className="font-semibold">Date:</span>
-                <span>{formData.date}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Clock className="h-5 w-5 text-green-500" />
-                <span className="font-semibold">Time:</span>
-                <span>{formData.time}</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-5 w-5 text-green-500" />
-                <span className="font-semibold">Phone:</span>
-                <span>{formData.phone}</span>
-              </div>
-            </div>
-            <div className="mt-8 flex justify-end space-x-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsConfirmationModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleConfirmSubmission}
-                disabled={submitting}
-              >
-                {submitting ? 'Confirming...' : 'Confirm Appointment'}
-              </Button>
-            </div>
+          <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+            <>
+              <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
+                {editMode ? 'Edit Appointment Details' : 'Confirm Appointment'}
+              </h3>
+              <p className="text-center text-gray-600 mb-6">
+                {editMode ? 'Make changes to your appointment details below.' : 'Please review your appointment details before confirming.'}
+              </p>
+                  
+                  {!editMode ? (
+                    // Display mode
+                    <div className="space-y-4 text-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <FileText className="h-5 w-5 text-green-500" />
+                        <div>
+                          <span className="font-medium">Patient:</span> {tempFormData.firstName} {tempFormData.lastName}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Mail className="h-5 w-5 text-green-500" />
+                        <div>
+                          <span className="font-medium">Email:</span> {tempFormData.email}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Calendar className="h-5 w-5 text-green-500" />
+                        <div>
+                          <span className="font-medium">Date:</span> {new Date(tempFormData.date).toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Clock className="h-5 w-5 text-green-500" />
+                        <div>
+                          <span className="font-medium">Time:</span> {tempFormData.time}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Phone className="h-5 w-5 text-green-500" />
+                        <div>
+                          <span className="font-medium">Phone:</span> {tempFormData.phone}
+                        </div>
+                      </div>
+                      {tempFormData.notes && (
+                        <div className="flex items-start space-x-3">
+                          <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                          <div>
+                            <span className="font-medium">Notes:</span> {tempFormData.notes}
+                          </div>
+                        </div>
+                      )}
+                      {tempFormData.doctorRequestNotes && (
+                        <div className="flex items-start space-x-3">
+                          <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                          <div>
+                            <span className="font-medium">Doctor's Request Notes:</span> {tempFormData.doctorRequestNotes}
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex items-start space-x-3">
+                        <TestTube className="h-5 w-5 text-green-500 mt-0.5" />
+                        <div>
+                          <span className="font-medium">Selected Tests:</span>
+                          <ul className="mt-1 ml-4 list-disc">
+                            {selectedTests.map(testId => {
+                              const test = labTests.find(t => t._id === testId);
+                              return (
+                                <li key={testId}>{test?.name}</li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    // Edit mode (unchanged since it's form fields)
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="editFirstName">First Name</Label>
+                          <Input
+                            id="editFirstName"
+                            value={tempFormData.firstName}
+                            onChange={(e) => setTempFormData({...tempFormData, firstName: e.target.value})}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="editLastName">Last Name</Label>
+                          <Input
+                            id="editLastName"
+                            value={tempFormData.lastName}
+                            onChange={(e) => setTempFormData({...tempFormData, lastName: e.target.value})}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="editEmail">Email</Label>
+                        <Input
+                          id="editEmail"
+                          type="email"
+                          value={tempFormData.email}
+                          onChange={(e) => setTempFormData({...tempFormData, email: e.target.value})}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="editPhone">Phone Number</Label>
+                        <Input
+                          id="editPhone"
+                          type="tel"
+                          value={tempFormData.phone}
+                          onChange={(e) => {
+                            const sanitized = e.target.value.replace(/[^\d\s\-\(\)\+]/g, '');
+                            setTempFormData({...tempFormData, phone: sanitized});
+                          }}
+                          placeholder="09XXXXXXXXX"
+                          required
+                          className={validatePhoneNumber(tempFormData.phone) ? "border-red-500" : ""}
+                        />
+                        {validatePhoneNumber(tempFormData.phone) && (
+                          <p className="text-red-500 text-sm mt-1">
+                            {validatePhoneNumber(tempFormData.phone)}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="editDate">Date</Label>
+                          <Input
+                            id="editDate"
+                            type="date"
+                            value={tempFormData.date}
+                            onChange={(e) => setTempFormData({...tempFormData, date: e.target.value})}
+                            min={new Date().toISOString().split('T')[0]}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="editTime">Time</Label>
+                          <SimpleSelect
+                            value={tempFormData.time}
+                            onValueChange={(value) => setTempFormData({...tempFormData, time: value})}
+                            placeholder="Select time"
+                            options={availableTimeSlots}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="editNotes">Additional Notes (Optional)</Label>
+                        <Textarea
+                          id="editNotes"
+                          value={tempFormData.notes}
+                          onChange={(e) => setTempFormData({...tempFormData, notes: e.target.value})}
+                          placeholder="Any additional information or special requirements"
+                          rows={3}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="editDoctorRequestNotes">Doctor's Request Notes (Optional)</Label>
+                        <Textarea
+                          id="editDoctorRequestNotes"
+                          value={tempFormData.doctorRequestNotes}
+                          onChange={(e) => setTempFormData({...tempFormData, doctorRequestNotes: e.target.value})}
+                          placeholder="Additional notes about the doctor's request"
+                          rows={2}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="mt-8 flex justify-between">
+                    {!editMode ? (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setEditMode(true)}
+                        >
+                          Edit Details
+                        </Button>
+                        <div className="flex space-x-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setIsConfirmationModalOpen(false);
+                              setEditMode(false);
+                              // Reset temp form data to original
+                              setTempFormData({
+                                firstName: formData.firstName,
+                                lastName: formData.lastName,
+                                email: formData.email,
+                                phone: formData.phone,
+                                date: formData.date,
+                                time: formData.time,
+                                notes: formData.notes,
+                                doctorRequestNotes: formData.doctorRequestNotes
+                              });
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleConfirmSubmission}
+                            disabled={submitting}
+                          >
+                            {submitting ? 'Submitting...' : 'Confirm Appointment'}
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleCancelChanges}
+                        >
+                          Cancel Changes
+                        </Button>
+                        <Button
+                          onClick={handleSaveChanges}
+                          disabled={
+                            !tempFormData.firstName || 
+                            !tempFormData.lastName || 
+                            !tempFormData.email || 
+                            !tempFormData.phone || 
+                            !tempFormData.date || 
+                            !tempFormData.time ||
+                            validatePhoneNumber(tempFormData.phone) !== ""
+                          }
+                        >
+                          Save Changes
+                        </Button>
+                      </>
+                    )}
+                  </div>
+            </>
           </div>
         </div>
       )}
@@ -1027,6 +1518,114 @@ export default function ScheduleLabPage() {
                 }`}
               >
                 OK
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Eligibility Check Modal */}
+      {showEligibilityModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-2xl bg-white rounded-lg shadow-xl p-6 relative m-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
+              Medical Screening Questions
+            </h3>
+            <p className="text-center text-gray-600 mb-6">
+              Please answer the following questions to ensure your safety during the examination.
+            </p>
+            
+            <div className="space-y-6">
+              {labTests
+                .filter(test => selectedTests.includes(test._id) && test.requiresEligibilityCheck)
+                .map(test => (
+                  <div key={test._id} className="border rounded-lg p-4">
+                    <h4 className="font-bold text-lg text-gray-800 mb-3 flex items-center">
+                      <FileText className="h-5 w-5 mr-2 text-blue-500" />
+                      {test.name}
+                    </h4>
+                    
+                    <div className="space-y-3">
+                      {test.eligibilityQuestions?.map(question => (
+                        <div key={question._key} className="border-l-4 border-gray-200 pl-4">
+                          <p className="font-medium text-gray-700 mb-2">{question.question}</p>
+                          <div className="flex space-x-4">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`${test._id}_${question._key}`}
+                                value="no"
+                                checked={eligibilityAnswers[test._id]?.[question._key] === false}
+                                onChange={() => handleEligibilityAnswer(test._id, question._key, false)}
+                                className="text-green-600 focus:ring-green-500"
+                              />
+                              <span className="text-green-700 font-medium">No</span>
+                            </label>
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name={`${test._id}_${question._key}`}
+                                value="yes"
+                                checked={eligibilityAnswers[test._id]?.[question._key] === true}
+                                onChange={() => handleEligibilityAnswer(test._id, question._key, true)}
+                                className="text-red-600 focus:ring-red-500"
+                              />
+                              <span className="text-red-700 font-medium">Yes</span>
+                            </label>
+                          </div>
+                          
+                          {eligibilityAnswers[test._id]?.[question._key] === true && question.warningMessage && (
+                            <div className={`mt-2 p-3 rounded-lg ${
+                              question.riskLevel === 'high' 
+                                ? 'bg-red-50 border border-red-200 text-red-800'
+                                : question.riskLevel === 'medium'
+                                ? 'bg-orange-50 border border-orange-200 text-orange-800'
+                                : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
+                            }`}>
+                              <div className="flex items-start space-x-2">
+                                <span className="flex-shrink-0 text-lg">
+                                  {question.riskLevel === 'high' ? '⚠️' : 
+                                   question.riskLevel === 'medium' ? '⚠️' : 'ℹ️'}
+                                </span>
+                                <p className="text-sm">{question.warningMessage}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+            </div>
+            
+            {eligibilityWarnings.length > 0 && (
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h5 className="font-bold text-red-800 mb-2">⚠️ Important Warnings:</h5>
+                <ul className="text-sm text-red-700 space-y-1">
+                  {eligibilityWarnings.map((warning, index) => (
+                    <li key={index}>• {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            <div className="mt-8 flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEligibilityModal(false)}
+              >
+                Review Answers
+              </Button>
+              <Button
+                onClick={() => {
+                  checkEligibility();
+                  setShowEligibilityModal(false);
+                }}
+                disabled={!canProceed}
+                className={!canProceed ? 'bg-red-500 hover:bg-red-600' : ''}
+              >
+                {canProceed ? 'Continue to Booking' : 'Cannot Proceed - High Risk'}
               </Button>
             </div>
           </div>

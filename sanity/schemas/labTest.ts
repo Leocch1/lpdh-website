@@ -39,6 +39,98 @@ export const labTest = defineType({
       description: 'Special preparation instructions for patients'
     }),
     defineField({
+      name: 'requiresEligibilityCheck',
+      title: 'Requires Eligibility Check',
+      type: 'boolean',
+      initialValue: false,
+      description: 'Check if this test requires patient eligibility screening (e.g., MRI, CT scan with contrast)'
+    }),
+    defineField({
+      name: 'eligibilityQuestions',
+      title: 'Eligibility Questions',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          fields: [
+            {
+              name: 'question',
+              title: 'Question',
+              type: 'string',
+              validation: Rule => Rule.required()
+            },
+            {
+              name: 'riskLevel',
+              title: 'Risk Level if "Yes"',
+              type: 'string',
+              options: {
+                list: [
+                  { title: 'High Risk - Cannot proceed', value: 'high' },
+                  { title: 'Medium Risk - Requires doctor approval', value: 'medium' },
+                  { title: 'Low Risk - Proceed with caution', value: 'low' }
+                ]
+              },
+              validation: Rule => Rule.required()
+            },
+            {
+              name: 'warningMessage',
+              title: 'Warning Message',
+              type: 'text',
+              description: 'Message shown to patient if they answer "Yes"'
+            }
+          ],
+          preview: {
+            select: {
+              title: 'question',
+              subtitle: 'riskLevel'
+            },
+            prepare({ title, riskLevel }) {
+              const riskColors = {
+                high: '🔴 High Risk',
+                medium: '🟡 Medium Risk',
+                low: '🟢 Low Risk'
+              };
+              return {
+                title: title,
+                subtitle: riskColors[riskLevel as keyof typeof riskColors] || riskLevel
+              }
+            }
+          }
+        }
+      ],
+      hidden: ({ document }) => !document?.requiresEligibilityCheck,
+      validation: Rule => Rule.custom((value, context) => {
+        const document = context.document;
+        if (document?.requiresEligibilityCheck && (!value || value.length === 0)) {
+          return 'At least one eligibility question is required when eligibility check is enabled';
+        }
+        return true;
+      })
+    }),
+    defineField({
+      name: 'cannotProceedMessage',
+      title: 'Cannot Proceed Message',
+      type: 'object',
+      fields: [
+        defineField({
+          name: 'title',
+          title: 'Alert Title',
+          type: 'string',
+          initialValue: 'Cannot Proceed with Examination',
+          description: 'Title shown when patient cannot proceed'
+        }),
+        defineField({
+          name: 'message',
+          title: 'Alert Message',
+          type: 'text',
+          initialValue: 'Based on your answers, this examination may not be safe for you. Please consult with your doctor before proceeding. You may also contact the hospital for alternative examination options.',
+          description: 'Message shown when patient cannot proceed due to high-risk answers'
+        })
+      ],
+      hidden: ({ document }) => !document?.requiresEligibilityCheck,
+      description: 'Customize the message shown when patients cannot proceed with examination'
+    }),
+    defineField({
       name: 'availableDays',
       title: 'Available Days',
       type: 'array',

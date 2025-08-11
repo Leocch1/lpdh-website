@@ -5,9 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3000",
     "lint": "next lint",
-    "sanity": "sanity dev"
+    "sanity": "sanity dev",
+    "production": "NODE_ENV=production npm run build && npm run start",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:restart": "pm2 restart lpdh-website",
+    "pm2:stop": "pm2 stop lpdh-website",
+    "pm2:logs": "pm2 logs lpdh-website",
+    "health": "bash health-check.sh"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.11",
@@ -19,7 +25,9 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-toast": "^1.2.14",
     "@sanity/client": "^7.8.1",
+    "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.1.0",
+    "@sanity/ui": "^3.0.5",
     "@sanity/vision": "^4.1.1",
     "@types/nodemailer": "^6.4.17",
     "@types/uuid": "^10.0.0",

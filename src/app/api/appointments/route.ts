@@ -2,22 +2,92 @@ import { NextRequest, NextResponse } from 'next/server';
 import { client } from '@/lib/sanity';
 import nodemailer from 'nodemailer';
 
-// Use Gmail instead of Outlook
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS, // Gmail app password
-  },
-});
+// Use Microsoft 365/Exchange Online with fallback options
+const createTransporter = () => {
+  // Check if EMAIL_USER is an Outlook/Microsoft 365 account
+  if (process.env.EMAIL_USER?.includes('@outlook.') || 
+      process.env.EMAIL_USER?.includes('@hotmail.') ||
+      process.env.EMAIL_USER?.includes('@live.') ||
+      process.env.EMAIL_USER?.includes('@laspinas.sti.edu.ph')) {
+    console.log('🔄 Using Microsoft 365/Outlook configuration for:', process.env.EMAIL_USER);
+    return nodemailer.createTransport({
+      host: 'smtp.office365.com',
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+      tls: {
+        ciphers: 'SSLv3'
+      }
+    });
+  }
 
-// Test the connection
+  // Check if EMAIL_USER is Gmail or a domain connected to Gmail
+  if (process.env.EMAIL_USER?.includes('@gmail.com') || 
+      (process.env.EMAIL_USER?.includes('@lpdhinc.com') && process.env.GMAIL_ACCOUNT)) {
+    console.log('🔄 Using Gmail configuration for domain:', process.env.EMAIL_USER);
+    console.log('🔑 Authenticating with Gmail account:', process.env.GMAIL_ACCOUNT);
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        // Use Gmail account for authentication
+        user: process.env.GMAIL_ACCOUNT,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
+  
+  // Check if we have backup Gmail credentials for testing
+  if (process.env.EMAIL_USER_BACKUP && process.env.EMAIL_PASS_BACKUP) {
+    console.log('🔄 Using backup Gmail configuration for testing');
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER_BACKUP,
+        pass: process.env.EMAIL_PASS_BACKUP,
+      },
+    });
+  }
+  
+  console.log('🔑 Using App Password authentication for Microsoft 365');
+  return nodemailer.createTransport({
+    host: 'smtp.office365.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+      ciphers: 'SSLv3'
+    }
+  });
+};
+
+const transporter = createTransporter();
+
+// Test the connection with better error handling
 transporter.verify((error, success) => {
   if (error) {
-    console.error('❌ Gmail configuration failed:', error);
-    console.log('🔧 Please check your Gmail app password');
+    console.error('❌ Email configuration failed:', error);
+    
+    // Provide specific guidance based on error code
+    if ((error as any).responseCode === 535) {
+      console.log('🚨 SMTP Authentication is disabled by your organization\'s security policy');
+      console.log('📋 Required actions in Exchange Admin Center:');
+      console.log('   1. Go to Recipients → Mailboxes');
+      console.log('   2. Select lpdhitdept2013@lpdhinc.com');
+      console.log('   3. Enable "Authenticated SMTP" in Email Apps settings');
+      console.log('   4. Or use PowerShell: Set-CASMailbox -Identity "lpdhitdept2013@lpdhinc.com" -SmtpClientAuthenticationDisabled $false');
+    } else if ((error as any).code === 'EAUTH') {
+      console.log('🔐 Authentication failed - check credentials or SMTP settings');
+    } else {
+      console.log('🔧 Please check your email configuration and network connectivity');
+    }
   } else {
-    console.log('✅ Gmail transporter is ready!');
+    console.log('✅ Email transporter is ready!');
   }
 });
 
