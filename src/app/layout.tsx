@@ -4,9 +4,12 @@ import { ConditionalLayout } from '@/components/conditional-layout';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'LPDH Connect',
+  title: 'Las Pinas Doctors Hospital',
   description: 'Las Piñas Doctors Hospital - Your health, our commitment.',
+  icons: '/favicon.ico',
 };
+
+
 
 export default function RootLayout({
   children,

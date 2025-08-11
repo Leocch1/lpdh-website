@@ -129,6 +129,20 @@ export const JOB_OPENING_QUERY = `*[_type == "jobOpening" && slug.current == $sl
 // Simple test query to check if documents exist
 export const TEST_QUERY = `*[_type == "homepage"]`
 
+
+export const FIND_DOCTOR_PAGE_QUERY = `*[_type == "findDoctorPage"][0]{
+  _id,
+  heroSection{
+    heroImage{
+      asset,
+      alt,
+      dataAiHint
+    },
+    title,
+    subtitle
+  }
+}`
+
 // Doctors query
 export const DOCTORS_QUERY = `*[_type == "doctor" && isActive == true] | order(name asc){
   _id,

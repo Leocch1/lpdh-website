@@ -76,6 +76,13 @@ export default defineConfig({
                   .title('Doctor Management')
                   .items([
                     S.listItem()
+                      .title('Find Doctor Page')
+                      .child(
+                        S.document()
+                          .schemaType('findDoctorPage')
+                          .documentId('findDoctorPage')
+                      ),
+                    S.listItem()
                       .title('Doctors\' Information')
                       .child(S.documentTypeList('doctor').title('Doctors\' Information')),
                     S.listItem()
@@ -138,7 +145,11 @@ export default defineConfig({
                   ])
               ),
             ...S.documentTypeListItems().filter(
+<<<<<<< HEAD
               (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage'].includes(listItem.getId() || '')
+=======
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'findDoctorPage'].includes(listItem.getId() || '')
+>>>>>>> 751adfc42fbca1e69776805cdbcf1d29b2c85747
             ),
           ]),
     }),

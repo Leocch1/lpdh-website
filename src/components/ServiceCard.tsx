@@ -97,7 +97,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, isOpen, onTog
       {/* Expanded Content - This remains exactly as your original dropdown content */}
       <div
         className={`absolute left-0 w-full bg-white p-4 pt-0 shadow-xl rounded-b-lg border-t-0 border border-gray-100 z-20
-                    transition-all duration-300 ease-in-out overflow-hidden
+                    transition-all duration-300 ease-in-out overflow-y-auto
                     ${isOpen ? 'visible max-h-[300px] opacity-100 top-[calc(100% - 1px)]' : 'invisible max-h-0 opacity-0 top-[100%]'}
                     `}
       >
