@@ -241,8 +241,8 @@ export default function ScheduleLabPage() {
       return "Phone number is required";
     } else if (digitsOnly.length !== 11) {
       return "Phone number must be exactly 11 digits";
-    } else if (!/^\d+$/.test(digitsOnly)) {
-      return "Phone number can only contain digits";
+    } else if (!/^09\d{9}$/.test(digitsOnly)) {
+      return "Phone number must be 11 digits and start with '09'";
     }
     return "";
   };
@@ -581,9 +581,9 @@ export default function ScheduleLabPage() {
           fill
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
-          <h1 className="font-headline text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+          <h1 className="font-headline text-4xl tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
             {heroSection.title}
           </h1>
           <p className="mt-4 text-lg max-w-3xl lg:text-xl">
@@ -657,7 +657,7 @@ export default function ScheduleLabPage() {
                 {Object.keys(groupedTests).length === 0 && !loading && (
                   <Card>
                     <CardContent className="p-8 text-center">
-                      <p className="text-muted-foreground">No lab tests available at the moment.</p>
+                      <p className="text-muted-foreground">No tests available at the moment.</p>
                       <p className="text-sm text-muted-foreground mt-2">Please check back later or contact us directly.</p>
                     </CardContent>
                   </Card>
@@ -669,7 +669,7 @@ export default function ScheduleLabPage() {
             <div className="space-y-6">
               <Card className="sticky top-4">
                 <CardHeader>
-                  <CardTitle>Schedule Your Appointment</CardTitle>
+                  <CardTitle className="text-primary">Schedule Your Appointment</CardTitle>
                   {selectedTests.length > 0 && (
                     <div className="text-sm text-muted-foreground">
                       {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
@@ -791,7 +791,7 @@ export default function ScheduleLabPage() {
                           Doctor's Request/Prescription *
                         </Label>
                         <p className="text-xs text-muted-foreground mt-1">
-                          A doctor's request or prescription is required for all lab appointments
+                          A doctor's request or prescription is required for all diagnostic appointments
                         </p>
                       </div>
                       
@@ -888,7 +888,7 @@ export default function ScheduleLabPage() {
       </section>
 
       {/* General Info Section */}
-      <section className="bg-gray-50 dark:bg-gray-900 py-12 md:py-24">
+      <section className="bg-secondary dark:bg-gray-900 py-12 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl font-bold text-foreground mb-12 lg:text-3xl">
             {infoSection.title}

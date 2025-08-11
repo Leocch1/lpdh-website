@@ -39,7 +39,7 @@ const navLinks = [
     dropdown: [
       { href: "/services", label: "Services" },
       { href: "/services/admission", label: "Admission" },
-      { href: "/services/schedule-lab", label: "Schedule a Lab" }
+      { href: "/services/schedule-lab", label: "Schedule a Diagnostic Test" }
     ]
   },
   { href: "/careers", label: "Careers" },
