@@ -87,14 +87,14 @@ NEXT_PUBLIC_SANITY_DATASET=production
 SANITY_API_TOKEN=skIat8RHAvJkCWUSgcSSlZMs8hptZgpZmFKrO2HeQXQdyF52EgR6exTDgzNJPa9nyi8rH0rDiZReIN3oetsxpLpvzPvfG3PHcsCt0gSzTD3Q6Vu0SvokTWyoAQNpSSzaRsyyREAyWoNQEKqnbokuiAVaehTEL9IpvdyE6Xcfy1PtBYKk3l7o
 
 # Hospital email configuration
-EMAIL_USER=tachagon.217009@laspinas.sti.edu.ph
-EMAIL_PASS=xjbjbvsnkcvkgwmf
-GMAIL_ACCOUNT=lpdhit514@gmail.com
+EMAIL_USER=your-email@your-domain.com
+EMAIL_PASS=your-email-app-password
+GMAIL_ACCOUNT=your-gmail@gmail.com
 
 # Azure OAuth2 (for Microsoft 365)
-AZURE_CLIENT_ID=1896382b-875c-4d61-b195-7f85befd145d
-AZURE_CLIENT_SECRET=P6l8Q~2J_-Rnk1gdfwmErZg4e.XnKFGnqqHaBbxC
-AZURE_TENANT_ID=8b35b5ad-943d-447b-9851-2f11b289e940
+AZURE_CLIENT_ID=your-azure-client-id-here
+AZURE_CLIENT_SECRET=your-azure-client-secret-here
+AZURE_TENANT_ID=your-azure-tenant-id-here
 
 # Site URL (replace with your domain)
 NEXT_PUBLIC_SITE_URL=https://lpdhinc.com
