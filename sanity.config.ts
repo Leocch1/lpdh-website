@@ -144,13 +144,9 @@ export default defineConfig({
                       ),
                   ])
               ),
-            ...S.documentTypeListItems().filter(
-<<<<<<< HEAD
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage'].includes(listItem.getId() || '')
-=======
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'findDoctorPage'].includes(listItem.getId() || '')
->>>>>>> 751adfc42fbca1e69776805cdbcf1d29b2c85747
-            ),
+...S.documentTypeListItems().filter(
+  (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage', 'findDoctorPage'].includes(listItem.getId() || '')
+),
           ]),
     }),
     // visionTool(), // Temporarily disabled due to dependency issues
