@@ -379,7 +379,7 @@ export default function Home() {
         <div className="mx-auto w-full max-w-screen-2xl px-4 md:px-8 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Ready to Take the Next Step?</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Your journey to better health starts here. Contact us to learn more.
+            Your journey to better health starts here. <br></br> Contact us to learn more.
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button asChild size="lg" className="[box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
