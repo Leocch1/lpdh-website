@@ -48,16 +48,14 @@
     --ring: 149 74% 45%;
   }
 
-  @layer base{
-    * {
+  * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
-  }
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */

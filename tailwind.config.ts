@@ -11,15 +11,26 @@ export default {
   	extend: {
   		fontFamily: {
   			body: [
+  				'var(--font-poppins)',
   				'Poppins',
   				'sans-serif'
   			],
   			headline: [
   				'Arial Black',
+  				'Arial',
+  				'sans-serif'
+  			],
+  			header: [
+  				'Arial',
   				'sans-serif'
   			],
   			code: [
   				'monospace'
+  			],
+  			sans: [
+  				'var(--font-poppins)',
+  				'Poppins',
+  				'sans-serif'
   			]
   		},
   		colors: {
