@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, Mail, TestTube } from "lucide-react";
+import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, Mail, TestTube, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
@@ -170,6 +170,8 @@ export default function ScheduleLabPage() {
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [submissionStep, setSubmissionStep] = useState<'idle' | 'uploading' | 'scheduling' | 'complete'>('idle');
   const [bookedTimes, setBookedTimes] = useState<string[]>([]);
   
   // Add missing state declarations
@@ -539,6 +541,24 @@ export default function ScheduleLabPage() {
       return;
     }
 
+    // Validate appointment date is at least 2 days in advance
+    const selectedDate = new Date(formData.date);
+    const today = new Date();
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(today.getDate() + 2);
+    twoDaysFromNow.setHours(0, 0, 0, 0); // Set to start of day
+    selectedDate.setHours(0, 0, 0, 0); // Set to start of day
+    
+    if (selectedDate < twoDaysFromNow) {
+      setCustomAlert({
+        isOpen: true,
+        type: 'warning',
+        title: 'Appointment Date Too Soon',
+        message: 'Appointments must be scheduled at least 2 days in advance. Please select a date that is 2 or more days from today.'
+      });
+      return;
+    }
+
     // Check if any selected tests require eligibility checking
     const testsRequiringCheck = labTests.filter(test => 
       selectedTests.includes(test._id) && test.requiresEligibilityCheck
@@ -574,6 +594,7 @@ export default function ScheduleLabPage() {
 
   const handleConfirmSubmission = async () => {
     setSubmitting(true);
+    setSubmissionStep('uploading');
     setIsConfirmationModalOpen(false);
 
     try {
@@ -608,8 +629,13 @@ export default function ScheduleLabPage() {
       // Upload doctor's request image (now required)
       let doctorRequestImageAsset = null;
       try {
+        setUploading(true);
         doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile!);
+        setUploading(false);
+        setSubmissionStep('scheduling');
       } catch (error) {
+        setUploading(false);
+        setSubmissionStep('idle');
         setCustomAlert({
           isOpen: true,
           type: 'error',
@@ -639,6 +665,7 @@ export default function ScheduleLabPage() {
       // Create appointment in Sanity using API route
       const newAppointment = await createAppointment(appointmentData);
       
+      setSubmissionStep('complete');
       console.log('Appointment created successfully:', newAppointment);
       
       // Reset form and clear errors
@@ -713,6 +740,7 @@ export default function ScheduleLabPage() {
       }
     } finally {
       setSubmitting(false);
+      setSubmissionStep('idle');
     }
   };
 
@@ -971,6 +999,7 @@ export default function ScheduleLabPage() {
                           required
                           value={formData.firstName}
                           onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                          disabled={submitting || uploading}
                         />
                       </div>
                       <div>
@@ -980,6 +1009,7 @@ export default function ScheduleLabPage() {
                           required
                           value={formData.lastName}
                           onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                          disabled={submitting || uploading}
                         />
                       </div>
                     </div>
@@ -992,6 +1022,7 @@ export default function ScheduleLabPage() {
                         required
                         value={formData.email}
                         onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        disabled={submitting || uploading}
                       />
                     </div>
 
@@ -1005,6 +1036,7 @@ export default function ScheduleLabPage() {
                         onChange={handlePhoneChange}
                         placeholder="09xxxxxxxxx (11 digits)"
                         className={phoneError ? "border-red-500 focus:border-red-500" : ""}
+                        disabled={submitting || uploading}
                       />
                       {phoneError && (
                         <p className="text-xs text-red-500 mt-1">
@@ -1022,10 +1054,32 @@ export default function ScheduleLabPage() {
                         id="date"
                         type="date"
                         required
-                        min={new Date().toISOString().split('T')[0]}
+                        min={(() => {
+                          const today = new Date();
+                          today.setDate(today.getDate() + 2); // 2 days ahead
+                          return today.toISOString().split('T')[0];
+                        })()}
                         value={formData.date}
                         onChange={(e) => setFormData({...formData, date: e.target.value, time: ""})}
+                        disabled={submitting || uploading}
                       />
+                      <div className="mt-1 space-y-1">
+                        <p className="text-xs text-muted-foreground">
+                          Appointments must be scheduled at least 2 days in advance
+                        </p>
+                        <p className="text-xs text-blue-600">
+                          Earliest available: {(() => {
+                            const earliest = new Date();
+                            earliest.setDate(earliest.getDate() + 2);
+                            return earliest.toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            });
+                          })()}
+                        </p>
+                      </div>
                     </div>
 
                     <div>
@@ -1033,7 +1087,7 @@ export default function ScheduleLabPage() {
                       <SimpleSelect
                         value={formData.time}
                         onValueChange={(value) => setFormData({...formData, time: value})}
-                        disabled={!formData.date || selectedTests.length === 0}
+                        disabled={!formData.date || selectedTests.length === 0 || submitting || uploading}
                         placeholder={
                           !formData.date 
                             ? "Select date first" 
@@ -1066,6 +1120,7 @@ export default function ScheduleLabPage() {
                         placeholder="Any special requirements or notes..."
                         value={formData.notes}
                         onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                        disabled={submitting || uploading}
                       />
                     </div>
 
@@ -1095,8 +1150,9 @@ export default function ScheduleLabPage() {
                                   onChange={handleDoctorRequestFile}
                                   className="hidden"
                                   required
+                                  disabled={submitting || uploading}
                                 />
-                                <label htmlFor="doctorRequest" className="cursor-pointer">
+                                <label htmlFor="doctorRequest" className={`cursor-pointer ${submitting || uploading ? 'pointer-events-none opacity-50' : ''}`}>
                                   <Upload className="h-8 w-8 mx-auto text-red-400 mb-2" />
                                   <p className="text-sm text-gray-600">
                                     Click to upload doctor's request *
@@ -1120,7 +1176,8 @@ export default function ScheduleLabPage() {
                                 <button
                                   type="button"
                                   onClick={removeDoctorRequestFile}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={submitting || uploading}
                                 >
                                   <X className="h-4 w-4" />
                                 </button>
@@ -1143,6 +1200,7 @@ export default function ScheduleLabPage() {
                             value={formData.doctorRequestNotes}
                             onChange={(e) => setFormData({...formData, doctorRequestNotes: e.target.value})}
                             className="mt-1"
+                            disabled={submitting || uploading}
                           />
                         </div>
                       </div>
@@ -1155,12 +1213,22 @@ export default function ScheduleLabPage() {
                         selectedTests.length === 0 || 
                         !formData.time || 
                         submitting || 
+                        uploading ||
                         phoneError !== "" ||
                         !doctorRequestFile // Add this validation
                       }
                     >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      {submitting ? 'Scheduling...' : 'Schedule Appointment'}
+                      {(submitting || uploading) ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          {uploading ? 'Uploading...' : 'Scheduling Appointment...'}
+                        </>
+                      ) : (
+                        <>
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Schedule Appointment
+                        </>
+                      )}
                     </Button>
                   </form>
                 </CardContent>
@@ -1412,9 +1480,22 @@ export default function ScheduleLabPage() {
                           </Button>
                           <Button
                             onClick={handleConfirmSubmission}
-                            disabled={submitting}
+                            disabled={submitting || uploading}
+                            className="min-w-[140px]"
                           >
-                            {submitting ? 'Submitting...' : 'Confirm Appointment'}
+                            {uploading ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : submitting ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              'Confirm Appointment'
+                            )}
                           </Button>
                         </div>
                       </>
@@ -1628,6 +1709,50 @@ export default function ScheduleLabPage() {
                 {canProceed ? 'Continue to Booking' : 'Cannot Proceed - High Risk'}
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Full-Screen Loading Overlay - Like Career Page */}
+      {(submitting || uploading) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-md mx-4 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              {submissionStep === 'uploading' && 'Uploading Document'}
+              {submissionStep === 'scheduling' && 'Scheduling Appointment'}
+              {submissionStep === 'complete' && 'Almost Done!'}
+              {(submissionStep === 'idle' || !submissionStep) && uploading && 'Uploading Document'}
+              {(submissionStep === 'idle' || !submissionStep) && !uploading && submitting && 'Processing Request'}
+            </h3>
+            <p className="text-muted-foreground text-sm mb-4">
+              {submissionStep === 'uploading' && 'Please wait while we securely upload your doctor\'s request document...'}
+              {submissionStep === 'scheduling' && 'Scheduling your lab appointment and sending confirmation emails...'}
+              {submissionStep === 'complete' && 'Finalizing your appointment details...'}
+              {(submissionStep === 'idle' || !submissionStep) && uploading && 'Uploading your document securely...'}
+              {(submissionStep === 'idle' || !submissionStep) && !uploading && submitting && 'Processing your appointment request...'}
+            </p>
+            
+            {/* Progress Steps */}
+            <div className="flex justify-center items-center space-x-2">
+              <div className={`w-2 h-2 rounded-full ${
+                submissionStep === 'uploading' || submissionStep === 'scheduling' || submissionStep === 'complete' 
+                  ? 'bg-primary' : 'bg-gray-300'
+              }`}></div>
+              <div className={`w-2 h-2 rounded-full ${
+                submissionStep === 'scheduling' || submissionStep === 'complete' 
+                  ? 'bg-primary' : 'bg-gray-300'
+              }`}></div>
+              <div className={`w-2 h-2 rounded-full ${
+                submissionStep === 'complete' ? 'bg-primary' : 'bg-gray-300'
+              }`}></div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              {submissionStep === 'uploading' && 'Step 1 of 3'}
+              {submissionStep === 'scheduling' && 'Step 2 of 3'}
+              {submissionStep === 'complete' && 'Step 3 of 3'}
+              {(submissionStep === 'idle' || !submissionStep) && 'Processing...'}
+            </p>
           </div>
         </div>
       )}

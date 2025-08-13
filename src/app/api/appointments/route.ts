@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity';
+import { client, urlFor } from '@/lib/sanity';
 import nodemailer from 'nodemailer';
 
 // Use Microsoft 365/Exchange Online with fallback options
@@ -80,7 +80,7 @@ transporter.verify((error, success) => {
 });
 
 // Function to send appointment notification email
-async function sendAppointmentNotification(appointmentData: any, labDepartments: any[]) {
+async function sendAppointmentNotification(appointmentData: any, labDepartments: any[], doctorRequestImageAsset: any = null) {
   try {
     // Get unique department emails from selected tests
     const departmentEmails = new Set<string>();
@@ -116,7 +116,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
     const emailSubject = `New Lab Appointment - ${appointmentData.appointmentNumber}`;
     
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #28a745;">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 25px; text-align: center;">
           <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Las Piñas Doctor's Hospital</h1>
@@ -194,16 +194,28 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           
           <!-- Doctor's Request -->
           <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #28a745;">
-            <h4 style="margin: 0 0 10px 0; color: #155724; font-size: 16px;">Doctor's Request/Prescription</h4>
-            <p style="margin: 0; color: #155724; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and is available in the admin system.</p>
+            <h4 style="margin: 0 0 15px 0; color: #155724; font-size: 16px;"> Doctor's Request/Prescription</h4>
+            ${doctorRequestImageAsset ? `
+              <div style="text-align: center; margin: 15px 0;">
+                <img src="${urlFor(doctorRequestImageAsset).width(400).quality(80).url()}" 
+                     alt="Doctor's Request Document" 
+                     style="max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                <p style="margin: 10px 0 0 0; color: #155724; font-size: 12px; font-style: italic;">Doctor's Request Document (Attached)</p>
+              </div>
+            ` : `
+              <p style="margin: 0; color: #155724; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and is available in the admin system.</p>
+            `}
             ${appointmentData.doctorRequest?.notes ? `<p style="margin: 10px 0 0 0; color: #155724;"><strong>Additional Notes:</strong> ${appointmentData.doctorRequest.notes}</p>` : ''}
+            <p style="margin: 10px 0 0 0; color: #155724; font-size: 12px;">
+              📋 <strong>For Lab Staff:</strong> Please verify this request matches the tests scheduled above.
+            </p>
           </div>
           
           <!-- Action Required -->
           <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196f3; text-align: center;">
             <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">Next Steps - Action Required</h4>
             <p style="margin: 0 0 15px 0; color: #0d47a1;">Please review this appointment and confirm the patient's schedule:</p>
-            <a href="${process.env.NEXT_PUBLIC_SITE_URL}/studio" 
+            <a href="https://www.lpdhinc.com/studio/structure/laboratory;labScheduling;labAppointments" 
                style="display: inline-block; background-color: #2196f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
               📋 Open Admin Panel & Review Appointment
             </a>
@@ -257,7 +269,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
 }
 
 // Function to send patient confirmation email
-async function sendPatientConfirmation(appointmentData: any, selectedTestsData: any[]) {
+async function sendPatientConfirmation(appointmentData: any, selectedTestsData: any[], doctorRequestImageAsset: any = null) {
   try {
     console.log('📧 Sending confirmation email to patient:', appointmentData.patientInfo.email);
     
@@ -314,9 +326,9 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
                     <span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 10px;">✓</span>
                     <strong style="color: #28a745; font-size: 16px;">${test.name}</strong>
                   </div>
-                  ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px;">📍 Department: ${test.labDepartment.name}</p>` : ''}
+                  ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px;"> Department: ${test.labDepartment.name}</p>` : ''}
                   ${test.preparationNotes ? `<div style="background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 8px 0; border-radius: 4px;"><strong style="color: #856404;">⚠️ Preparation Required:</strong><br><span style="color: #856404; font-size: 13px;">${test.preparationNotes}</span></div>` : ''}
-                  ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">⏱️ Result Time: ${test.resultTime}</p>` : ''}
+                  ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">⏱ Result Time: ${test.resultTime}</p>` : ''}
                 </div>`
               ).join('')}
             </div>
@@ -344,6 +356,23 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
               <li><strong>Reschedule if needed:</strong> Contact us at least 24 hours in advance</li>
             </ul>
           </div>
+
+          <!-- Doctor's Request -->
+          ${doctorRequestImageAsset ? `
+            <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #2196f3;">
+              <h3 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">🏥 Your Doctor's Request</h3>
+              <p style="margin: 0 0 15px 0; color: #0d47a1; font-size: 14px;">Here's a copy of your doctor's prescription/request for your records:</p>
+              <div style="text-align: center; margin: 15px 0;">
+                <img src="${urlFor(doctorRequestImageAsset).width(500).quality(85).url()}" 
+                     alt="Doctor's Request Document" 
+                     style="max-width: 100%; height: auto; border: 2px solid #2196f3; border-radius: 8px; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);" />
+                <p style="margin: 10px 0 0 0; color: #0d47a1; font-size: 12px; font-style: italic;">Your Doctor's Request/Prescription</p>
+              </div>
+              <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 13px; text-align: center;">
+                💡 <strong>Tip:</strong> Save this image to your phone for easy access during your appointment
+              </p>
+            </div>
+          ` : ''}
 
           <!-- Contact Information -->
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
@@ -425,6 +454,21 @@ export async function POST(request: NextRequest) {
     if (!hasDoctorRequest || !doctorRequestImage) {
       return NextResponse.json(
         { error: 'Doctor\'s request is required for all lab appointments' },
+        { status: 400 }
+      );
+    }
+
+    // Validate appointment date is at least 2 days in advance
+    const appointmentDate = new Date(date);
+    const today = new Date();
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(today.getDate() + 2);
+    twoDaysFromNow.setHours(0, 0, 0, 0); // Set to start of day
+    appointmentDate.setHours(0, 0, 0, 0); // Set to start of day
+    
+    if (appointmentDate < twoDaysFromNow) {
+      return NextResponse.json(
+        { error: 'Appointments must be scheduled at least 2 days in advance' },
         { status: 400 }
       );
     }
@@ -589,10 +633,10 @@ export async function POST(request: NextRequest) {
       ) as LabDepartment[];
 
     // Send email notifications to lab departments
-    const emailResult = await sendAppointmentNotification(emailData, uniqueDepartments);
+    const emailResult = await sendAppointmentNotification(emailData, uniqueDepartments, doctorRequestImage);
 
     // Send confirmation email to patient
-    const patientEmailResult = await sendPatientConfirmation(emailData, selectedTestsData);
+    const patientEmailResult = await sendPatientConfirmation(emailData, selectedTestsData, doctorRequestImage);
 
     // Update appointment with notification status
     if (emailResult.success) {
