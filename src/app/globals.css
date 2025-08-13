@@ -48,21 +48,32 @@
     --ring: 149 74% 45%;
   }
 
-  @layer base{
-    * {
+  * {
     @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-poppins), sans-serif;
     -ms-overflow-style: none; /* IE and Edge */
     scrollbar-width: none; /* Firefox */
-  }
   }
 
   /* Hide scrollbar for Chrome, Safari and Opera */
   ::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@layer utilities {
+  /* Header font - uses Arial */
+  .font-header {
+    font-family: 'Arial', sans-serif;
+  }
+  
+  /* Body font - uses Poppins (default) */
+  .font-body {
+    font-family: var(--font-poppins), sans-serif;
   }
 }
 
