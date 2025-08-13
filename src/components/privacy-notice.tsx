@@ -55,7 +55,7 @@ We reserve the right to update this Privacy Notice to reflect changes in our pra
 
 8. CONTACT US
 If you have questions about this Privacy Notice, how we handle your personal information, or wish to exercise your rights, please contact our Data Protection Officer at:
-
+Email: DPO@lpdhinc.com
 Phone: (02) 8825-5236
 Address: #8009 CAA Road, Pulonglupa II, Las Pinas City, Metro Manila, Philippines
 
