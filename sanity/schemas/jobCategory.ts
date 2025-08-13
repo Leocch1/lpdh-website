@@ -39,6 +39,14 @@ export const jobCategory = defineType({
       initialValue: true,
       description: 'Toggle to show/hide this category',
     }),
+    defineField({
+      name: 'hrEmail',
+      title: 'HR Department Email',
+      type: 'string',
+      validation: Rule => Rule.email().error('Please enter a valid email address'),
+      description: 'Email address where job applications for this category will be forwarded',
+      placeholder: 'hr@lpdhinc.com',
+    }),
   ],
   preview: {
     select: {

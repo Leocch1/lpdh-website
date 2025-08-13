@@ -113,13 +113,13 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
     const testsList = appointmentData.selectedTests.map((test: any) => `• ${test.name}`).join('\n');
     const departmentsList = Array.from(departmentNames).join(', ');
 
-    const emailSubject = `🏥 New Lab Appointment - ${appointmentData.appointmentNumber}`;
+    const emailSubject = `New Lab Appointment - ${appointmentData.appointmentNumber}`;
     
     const emailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 25px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 600;">🏥 LPDH Medical Center</h1>
+          <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Las Piñas Doctor's Hospital</h1>
           <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">New Lab Appointment Notification</p>
         </div>
         
@@ -127,22 +127,22 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
         <div style="padding: 30px; background-color: white;">
           <!-- Appointment Details -->
           <div style="margin-bottom: 25px;">
-            <h2 style="color: #28a745; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">📅 Appointment Details</h2>
+            <h2 style="color: #28a745; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Appointment Details</h2>
             <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
               <tr>
                 <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 40%;">Appointment Number:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-weight: 600; color: #28a745;">${appointmentData.appointmentNumber}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">📅 Date:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Date:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">🕐 Time:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Time:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.appointmentTime}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">🏢 Department(s):</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Department(s):</td>
                 <td style="padding: 12px 15px; font-weight: 600; color: #28a745;">${departmentsList}</td>
               </tr>
             </table>
@@ -150,18 +150,18 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           
           <!-- Patient Information -->
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">👤 Patient Information</h3>
+            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Patient Information</h3>
             <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
               <tr>
                 <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 30%;">Full Name:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.patientInfo.firstName} ${appointmentData.patientInfo.lastName}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">📧 Email:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Email:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;"><a href="mailto:${appointmentData.patientInfo.email}" style="color: #28a745; text-decoration: none;">${appointmentData.patientInfo.email}</a></td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">📱 Phone:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Phone:</td>
                 <td style="padding: 12px 15px;"><a href="tel:+63${appointmentData.patientInfo.phone}" style="color: #28a745; text-decoration: none;">+63 ${appointmentData.patientInfo.phone}</a></td>
               </tr>
             </table>
@@ -169,7 +169,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           
           <!-- Selected Tests -->
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">🧪 Selected Laboratory Tests</h3>
+            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Selected Laboratory Tests</h3>
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
               <div style="font-size: 14px; line-height: 1.8;">
                 ${appointmentData.selectedTests.map((test: any) => 
@@ -185,7 +185,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           ${appointmentData.notes ? `
             <!-- Special Instructions -->
             <div style="margin-bottom: 25px;">
-              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">📝 Special Instructions</h3>
+              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Special Instructions</h3>
               <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
                 <p style="margin: 0; font-size: 14px; line-height: 1.6;">${appointmentData.notes}</p>
               </div>
@@ -194,14 +194,14 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           
           <!-- Doctor's Request -->
           <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #28a745;">
-            <h4 style="margin: 0 0 10px 0; color: #155724; font-size: 16px;">✅ Doctor's Request/Prescription</h4>
+            <h4 style="margin: 0 0 10px 0; color: #155724; font-size: 16px;">Doctor's Request/Prescription</h4>
             <p style="margin: 0; color: #155724; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and is available in the admin system.</p>
             ${appointmentData.doctorRequest?.notes ? `<p style="margin: 10px 0 0 0; color: #155724;"><strong>Additional Notes:</strong> ${appointmentData.doctorRequest.notes}</p>` : ''}
           </div>
           
           <!-- Action Required -->
           <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196f3; text-align: center;">
-            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">🎯 Next Steps - Action Required</h4>
+            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">Next Steps - Action Required</h4>
             <p style="margin: 0 0 15px 0; color: #0d47a1;">Please review this appointment and confirm the patient's schedule:</p>
             <a href="${process.env.NEXT_PUBLIC_SITE_URL}/studio" 
                style="display: inline-block; background-color: #2196f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
@@ -260,14 +260,12 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
 async function sendPatientConfirmation(appointmentData: any, selectedTestsData: any[]) {
   try {
     console.log('📧 Sending confirmation email to patient:', appointmentData.patientInfo.email);
-
-    const emailSubject = `✅ Lab Appointment Confirmed - ${appointmentData.appointmentNumber}`;
     
-    const patientEmailContent = `
+    const emailSubject = `Lab Appointment Confirmed - ${appointmentData.appointmentNumber}`;    const patientEmailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 25px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 600;">🏥 Las Piñas Doctor's Hospital</h1>
+          <h1 style="margin: 0; font-size: 24px; font-weight: 600;"> Las Piñas Doctor's Hospital</h1>
           <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">Lab Appointment Confirmation</p>
         </div>
         
@@ -281,26 +279,26 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
 
           <!-- Appointment Details -->
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">📅 Your Appointment Details</h3>
+            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Appointment Details</h3>
             <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
               <tr>
                 <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 35%;">Appointment Number:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-weight: 600; color: #28a745;">${appointmentData.appointmentNumber}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">📅 Date:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Date:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">🕐 Time:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Time:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.appointmentTime}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">📞 Contact Phone:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Contact Phone:</td>
                 <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">${appointmentData.patientInfo.phone}</td>
               </tr>
               <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">📧 Email:</td>
+                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Email:</td>
                 <td style="padding: 12px 15px;">${appointmentData.patientInfo.email}</td>
               </tr>
             </table>
@@ -308,7 +306,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
           
           <!-- Selected Tests -->
           <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">🧪 Your Laboratory Tests</h3>
+            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Laboratory Tests</h3>
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
               ${selectedTestsData.map((test: any) => 
                 `<div style="margin: 12px 0; padding: 15px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
@@ -327,7 +325,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
           ${appointmentData.notes ? `
             <!-- Special Notes -->
             <div style="margin-bottom: 25px;">
-              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">📝 Your Special Notes</h3>
+              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Special Notes</h3>
               <div style="background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; border-radius: 4px;">
                 <p style="margin: 0; color: #0d47a1; font-size: 14px; line-height: 1.6;">${appointmentData.notes}</p>
               </div>
@@ -349,12 +347,9 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
 
           <!-- Contact Information -->
           <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 15px 0; color: #495057;">📞 Need Help or Want to Reschedule?</h4>
+            <h4 style="margin: 0 0 15px 0; color: #495057;">Need Help or Want to Reschedule?</h4>
             <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 14px;">
-              <strong>Hospital Phone:</strong> <a href="tel:+63285551234" style="color: #28a745; text-decoration: none;">+63 (2) 8555-1234</a>
-            </p>
-            <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 14px;">
-              <strong>Laboratory Department:</strong> <a href="tel:+63285551235" style="color: #28a745; text-decoration: none;">+63 (2) 8555-1235</a>
+              <strong>Hospital Phone:</strong> <a href="tel:(02) 8825-5236" style="color: #28a745; text-decoration: none;">+63 (2) 8555-1234</a>
             </p>
             <p style="margin: 0; color: #6c757d; font-size: 14px;">
               <strong>Email:</strong> <a href="mailto:${process.env.EMAIL_USER}" style="color: #28a745; text-decoration: none;">${process.env.EMAIL_USER}</a>
@@ -366,7 +361,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
         <div style="background-color: #343a40; color: white; padding: 20px; text-align: center;">
           <p style="margin: 0 0 5px 0; font-weight: 600;">Las Piñas Doctor's Hospital</p>
           <p style="margin: 0; font-size: 12px; opacity: 0.8;">
-            Quality Healthcare • Advanced Laboratory Services • Trusted Since 1985
+            Quality Healthcare • Advanced Laboratory Services • Trusted Since 1982
           </p>
           <p style="margin: 10px 0 0 0; font-size: 11px; opacity: 0.6;">
             This is an automated confirmation. Please save this email for your records.
