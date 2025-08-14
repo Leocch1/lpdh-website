@@ -393,13 +393,13 @@ export function Header() {
                     {/* Mobile CTA Buttons */}
                     <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
                       <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
-                        <Link href="/contact" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/services/find-doctor" onClick={() => setIsMobileMenuOpen(false)}>
                           <Activity className="h-4 w-4 mr-2" />
                           Find a Doctor
                         </Link>
                       </Button>
                       <Button asChild className="w-full bg-primary hover:bg-primary text-white font-semibold shadow-sm">
-                        <Link href="/services#appointment" onClick={() => setIsMobileMenuOpen(false)}>
+                        <Link href="/get-result" onClick={() => setIsMobileMenuOpen(false)}>
                           <Paperclip className="h-4 w-4 mr-2" />
                           Get Result Online
                         </Link>
