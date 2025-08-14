@@ -110,7 +110,7 @@ interface LabTest {
   order: number;
   availableDays: string[];
   availableTimeSlots: string[];
-  preparationNotes?: string;
+  preparationNotes?: string[];
   resultTime?: string;
   requiresEligibilityCheck?: boolean;
   eligibilityQuestions?: Array<{
@@ -952,10 +952,12 @@ export default function ScheduleLabPage() {
                                     <Badge variant="secondary">Results: {test.resultTime}</Badge>
                                   )}
                                 </div>
-                                {test.preparationNotes && (
-                                  <p className="text-xs text-muted-foreground mt-2 ml-7">
-                                    {test.preparationNotes}
-                                  </p>
+                                {test.preparationNotes && test.preparationNotes.length > 0 && (
+                                  <ul className="text-xs text-muted-foreground mt-2 ml-7 list-disc list-inside">
+                                    {test.preparationNotes.map((note, index) => (
+                                      <li key={index}>{note}</li>
+                                    ))}
+                                  </ul>
                                 )}
                               </div>
                             </div>

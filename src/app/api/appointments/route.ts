@@ -327,7 +327,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
                     <strong style="color: #28a745; font-size: 16px;">${test.name}</strong>
                   </div>
                   ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px;"> Department: ${test.labDepartment.name}</p>` : ''}
-                  ${test.preparationNotes ? `<div style="background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 8px 0; border-radius: 4px;"><strong style="color: #856404;">⚠️ Preparation Required:</strong><br><span style="color: #856404; font-size: 13px;">${test.preparationNotes}</span></div>` : ''}
+                  ${test.preparationNotes && test.preparationNotes.length > 0 ? `<div style="background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 8px 0; border-radius: 4px;"><strong style="color: #856404;">⚠️ Preparation Required:</strong><ul style="color: #856404; font-size: 13px; margin: 8px 0 0 0; padding-left: 20px;">${test.preparationNotes.map((note: string) => `<li style="margin: 4px 0;">${note}</li>`).join('')}</ul></div>` : ''}
                   ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">⏱ Result Time: ${test.resultTime}</p>` : ''}
                 </div>`
               ).join('')}

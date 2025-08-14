@@ -35,8 +35,11 @@ export const labTest = defineType({
     defineField({
       name: 'preparationNotes',
       title: 'Preparation Notes',
-      type: 'text',
-      description: 'Special preparation instructions for patients'
+      type: 'array',
+      of: [{
+        type: 'string'
+      }],
+      description: 'Special preparation instructions for patients - each item will be displayed as a bullet point'
     }),
     defineField({
       name: 'requiresEligibilityCheck',
