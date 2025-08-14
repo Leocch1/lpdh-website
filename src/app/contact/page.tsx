@@ -135,7 +135,7 @@ export default function ContactPage() {
             <div className="overflow-hidden shadow-lg rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-5 min-h-[600px] bg-card">
                 {/* Photo Section - Full Height */}
-                <div className="relative w-80 h-64 md:h-auto md:col-span-2">
+                <div className="relative w-90 h-64 md:h-auto md:col-span-2">
                   <Image
                     src="/contact.jpg"
                     alt="Contact background"
