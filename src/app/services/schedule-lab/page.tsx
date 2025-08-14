@@ -1056,8 +1056,13 @@ export default function ScheduleLabPage() {
                         required
                         min={(() => {
                           const today = new Date();
-                          today.setDate(today.getDate() + 2); // 2 days ahead
-                          return today.toISOString().split('T')[0];
+                          // Add 2 days to today
+                          today.setDate(today.getDate() + 2);
+                          // Ensure we're working with local timezone
+                          const year = today.getFullYear();
+                          const month = String(today.getMonth() + 1).padStart(2, '0');
+                          const day = String(today.getDate()).padStart(2, '0');
+                          return `${year}-${month}-${day}`;
                         })()}
                         value={formData.date}
                         onChange={(e) => setFormData({...formData, date: e.target.value, time: ""})}
@@ -1407,7 +1412,16 @@ export default function ScheduleLabPage() {
                             type="date"
                             value={tempFormData.date}
                             onChange={(e) => setTempFormData({...tempFormData, date: e.target.value})}
-                            min={new Date().toISOString().split('T')[0]}
+                            min={(() => {
+                              const today = new Date();
+                              // Add 2 days to today
+                              today.setDate(today.getDate() + 2);
+                              // Ensure we're working with local timezone
+                              const year = today.getFullYear();
+                              const month = String(today.getMonth() + 1).padStart(2, '0');
+                              const day = String(today.getDate()).padStart(2, '0');
+                              return `${year}-${month}-${day}`;
+                            })()}
                             required
                           />
                         </div>
