@@ -116,124 +116,124 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
     const emailSubject = `New Lab Appointment - ${appointmentData.appointmentNumber}`;
     
     const emailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #28a745;">
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 25px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 600;">Las Piñas Doctor's Hospital</h1>
-          <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">New Lab Appointment Notification</p>
+        <div style="background-color: #28a745; color: white; padding: 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctor's Hospital</h1>
+          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - New Appointment</p>
         </div>
         
         <!-- Main Content -->
-        <div style="padding: 30px; background-color: white;">
-          <!-- Appointment Details -->
-          <div style="margin-bottom: 25px;">
-            <h2 style="color: #28a745; margin: 0 0 15px 0; font-size: 20px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Appointment Details</h2>
-            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 40%;">Appointment Number:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-weight: 600; color: #28a745;">${appointmentData.appointmentNumber}</td>
+        <div style="padding: 40px 30px; background-color: white;">
+          <!-- Appointment Summary -->
+          <div style="margin-bottom: 35px;">
+            <h2 style="color: #1f4e79; margin: 0 0 20px 0; font-size: 22px; font-weight: 400; border-bottom: 2px solid #1f4e79; padding-bottom: 10px;">Appointment Information</h2>
+            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6; width: 30%;">Appointment Number</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #1f4e79; font-family: monospace;">${appointmentData.appointmentNumber}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Date:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+              <tr style="background-color: #f8f9fa;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Date</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 500;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Time:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.appointmentTime}</td>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Time</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #28a745;">${appointmentData.appointmentTime}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Department(s):</td>
-                <td style="padding: 12px 15px; font-weight: 600; color: #28a745;">${departmentsList}</td>
+              <tr style="background-color: #f8f9fa;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057;">Department(s)</td>
+                <td style="padding: 15px 20px; font-weight: 500; color: #1f4e79;">${departmentsList}</td>
               </tr>
             </table>
           </div>
           
           <!-- Patient Information -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Patient Information</h3>
-            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 30%;">Full Name:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.patientInfo.firstName} ${appointmentData.patientInfo.lastName}</td>
+          <div style="margin-bottom: 35px;">
+            <h3 style="color: #1f4e79; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #1f4e79; padding-bottom: 8px;">Patient Information</h3>
+            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6; width: 25%;">Full Name</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.patientInfo.firstName} ${appointmentData.patientInfo.lastName}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Email:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;"><a href="mailto:${appointmentData.patientInfo.email}" style="color: #28a745; text-decoration: none;">${appointmentData.patientInfo.email}</a></td>
+              <tr style="background-color: #f8f9fa;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Email Address</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6;"><a href="mailto:${appointmentData.patientInfo.email}" style="color: #1f4e79; text-decoration: none;">${appointmentData.patientInfo.email}</a></td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Phone:</td>
-                <td style="padding: 12px 15px;"><a href="tel:+63${appointmentData.patientInfo.phone}" style="color: #28a745; text-decoration: none;">+63 ${appointmentData.patientInfo.phone}</a></td>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057;">Phone Number</td>
+                <td style="padding: 15px 20px;"><a href="tel:+63${appointmentData.patientInfo.phone}" style="color: #1f4e79; text-decoration: none;">+63 ${appointmentData.patientInfo.phone}</a></td>
               </tr>
             </table>
           </div>
           
-          <!-- Selected Tests -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Selected Laboratory Tests</h3>
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
-              <div style="font-size: 14px; line-height: 1.8;">
-                ${appointmentData.selectedTests.map((test: any) => 
-                  `<div style="margin: 8px 0; padding: 8px; background-color: white; border-radius: 4px; border-left: 3px solid #28a745;">
-                    <strong>• ${test.name}</strong>
-                    ${test.labDepartment ? `<br><span style="color: #6c757d; font-size: 12px;">Department: ${test.labDepartment.name}</span>` : ''}
-                  </div>`
-                ).join('')}
-              </div>
+          <!-- Laboratory Tests -->
+          <div style="margin-bottom: 35px;">
+            <h3 style="color: #1f4e79; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #1f4e79; padding-bottom: 8px;">Laboratory Tests Requested</h3>
+            <div style="background-color: #e8f5e8; padding: 25px; border: 1px solid #c8e6c9;">
+              ${appointmentData.selectedTests.map((test: any) => 
+                `<div style="margin: 12px 0; padding: 15px; background-color: white; border-radius: 6px; border-left: 4px solid #28a745; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <h4 style="margin: 0 0 8px 0; color: #2e7d32; font-size: 16px; font-weight: 600;">✓ ${test.name}</h4>
+                  ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px; font-weight: 500;">Department: ${test.labDepartment.name}</p>` : ''}
+                  ${test.duration ? `<p style="margin: 5px 0; color: #6c757d; font-size: 13px;">Duration: ${test.duration}</p>` : ''}
+                  ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">Result Time: ${test.resultTime}</p>` : ''}
+                </div>`
+              ).join('')}
             </div>
           </div>
           
           ${appointmentData.notes ? `
             <!-- Special Instructions -->
-            <div style="margin-bottom: 25px;">
-              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Special Instructions</h3>
-              <div style="background-color: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107;">
-                <p style="margin: 0; font-size: 14px; line-height: 1.6;">${appointmentData.notes}</p>
+            <div style="margin-bottom: 35px;">
+              <h3 style="color: #1f4e79; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #1f4e79; padding-bottom: 8px;">Special Instructions</h3>
+              <div style="background-color: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; border: 1px solid #ffecb3;">
+                <p style="margin: 0; color: #856404; font-size: 15px; line-height: 1.6;">${appointmentData.notes}</p>
               </div>
             </div>
           ` : ''}
           
           <!-- Doctor's Request -->
-          <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #28a745;">
-            <h4 style="margin: 0 0 15px 0; color: #155724; font-size: 16px;"> Doctor's Request/Prescription</h4>
+          <div style="background-color: #e3f2fd; padding: 25px; border: 1px solid #bbdefb; margin-bottom: 35px;">
+            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 18px; font-weight: 500;">📋 Doctor's Request/Prescription</h4>
             ${doctorRequestImageAsset ? `
               <div style="text-align: center; margin: 15px 0;">
                 <img src="${urlFor(doctorRequestImageAsset).width(400).quality(80).url()}" 
                      alt="Doctor's Request Document" 
-                     style="max-width: 100%; height: auto; border: 2px solid #28a745; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
-                <p style="margin: 10px 0 0 0; color: #155724; font-size: 12px; font-style: italic;">Doctor's Request Document (Attached)</p>
+                     style="max-width: 100%; height: auto; border: 2px solid #2196f3; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);" />
+                <p style="margin: 10px 0 0 0; color: #0d47a1; font-size: 12px; font-style: italic;">Doctor's Request Document</p>
               </div>
             ` : `
-              <p style="margin: 0; color: #155724; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and is available in the admin system.</p>
+              <p style="margin: 0; color: #0d47a1; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and attached to this appointment.</p>
             `}
-            ${appointmentData.doctorRequest?.notes ? `<p style="margin: 10px 0 0 0; color: #155724;"><strong>Additional Notes:</strong> ${appointmentData.doctorRequest.notes}</p>` : ''}
-            <p style="margin: 10px 0 0 0; color: #155724; font-size: 12px;">
-              📋 <strong>For Lab Staff:</strong> Please verify this request matches the tests scheduled above.
+            ${appointmentData.doctorRequest?.notes ? `<p style="margin: 10px 0 0 0; color: #0d47a1;"><strong>Additional Notes:</strong> ${appointmentData.doctorRequest.notes}</p>` : ''}
+            <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 14px;">
+              <strong>For Lab Staff:</strong> Please verify this request matches the tests scheduled above before proceeding.
             </p>
           </div>
           
           <!-- Action Required -->
-          <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; border-left: 4px solid #2196f3; text-align: center;">
-            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">Next Steps - Action Required</h4>
-            <p style="margin: 0 0 15px 0; color: #0d47a1;">Please review this appointment and confirm the patient's schedule:</p>
-            <a href="https://www.lpdhinc.com/studio/structure/laboratory;labScheduling;labAppointments" 
-               style="display: inline-block; background-color: #2196f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">
-              📋 Open Admin Panel & Review Appointment
+          <div style="background-color: #f8f9fa; padding: 30px; border: 2px solid #1f4e79; text-align: center;">
+            <h4 style="margin: 0 0 20px 0; color: #1f4e79; font-size: 20px; font-weight: 500;">Action Required</h4>
+            <p style="margin: 0 0 25px 0; color: #495057; font-size: 16px;">Please review this lab appointment and confirm the patient's schedule.</p>
+            <a href="${process.env.NEXT_PUBLIC_SITE_URL}/studio" 
+               style="display: inline-block; background-color: #1f4e79; color: white; padding: 15px 30px; text-decoration: none; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px;">
+              Access Administrative Panel
             </a>
-            <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 12px;">
-              Click the button above to access the full appointment details and doctor's request image
+            <p style="margin: 20px 0 0 0; color: #6c757d; font-size: 13px;">
+              Click the button above to review appointment details and doctor's request image.
             </p>
           </div>
         </div>
         
         <!-- Footer -->
-        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
-          <p style="margin: 0; color: #6c757d; font-size: 12px; line-height: 1.4;">
-            <strong>Las Piñas Doctor's Hospital</strong> - Diagnostic Booking<br>
-            This is an automated notification. Please do not reply to this email.<br>
-            For technical support, contact the IT department.
+        <div style="background-color: #47524A; color: #ffffff; padding: 25px; text-align: center;">
+          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctor's Hospital</p>
+          <p style="margin: 0 0 5px 0; color: #adb5bd; font-size: 14px;">Laboratory Services Department - Appointment System</p>
+          <p style="margin: 0; color: #6c757d; font-size: 12px;">
+            This is an automated notification. Please do not reply to this email.
           </p>
-          <p style="margin: 10px 0 0 0; color: #6c757d; font-size: 11px;">
-            Sent on ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' })} (Philippine Time)
+          <p style="margin: 15px 0 0 0; color: #6c757d; font-size: 11px;">
+            Sent on ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' })} (Philippine Standard Time)
           </p>
         </div>
       </div>
@@ -274,126 +274,168 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
     console.log('📧 Sending confirmation email to patient:', appointmentData.patientInfo.email);
     
     const emailSubject = `Lab Appointment Confirmed - ${appointmentData.appointmentNumber}`;    const patientEmailContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 25px; text-align: center;">
-          <h1 style="margin: 0; font-size: 24px; font-weight: 600;"> Las Piñas Doctor's Hospital</h1>
-          <p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.9;">Lab Appointment Confirmation</p>
+        <div style="background-color: #28a745; color: white; padding: 30px; text-align: center;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctor's Hospital</h1>
+          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - Appointment Confirmed</p>
         </div>
         
         <!-- Main Content -->
-        <div style="padding: 30px; background-color: white;">
+        <div style="padding: 40px 30px; background-color: white;">
           <!-- Greeting -->
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h2 style="color: #28a745; margin: 0 0 10px 0;">Dear ${appointmentData.patientInfo.firstName} ${appointmentData.patientInfo.lastName},</h2>
-            <p style="color: #6c757d; margin: 0; font-size: 16px;">Your lab appointment has been successfully scheduled!</p>
+          <div style="text-align: center; margin-bottom: 35px;">
+            <h2 style="color: #28a745; margin: 0 0 10px 0; font-size: 24px; font-weight: 400;">Dear ${appointmentData.patientInfo.firstName} ${appointmentData.patientInfo.lastName},</h2>
+            <p style="color: #6c757d; margin: 0; font-size: 16px; line-height: 1.6;">Your laboratory appointment has been successfully scheduled and confirmed!</p>
           </div>
 
           <!-- Appointment Details -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Appointment Details</h3>
-            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border-radius: 8px; overflow: hidden;">
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; width: 35%;">Appointment Number:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-weight: 600; color: #28a745;">${appointmentData.appointmentNumber}</td>
+          <div style="margin-bottom: 35px;">
+            <h3 style="color: #28a745; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #28a745; padding-bottom: 8px;">Your Appointment Details</h3>
+            <table style="width: 100%; border-collapse: collapse; background-color: #f8f9fa; border: 1px solid #e9ecef;">
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6; width: 35%;">Appointment Number</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-family: monospace; font-weight: 600; color: #28a745; font-size: 16px;">${appointmentData.appointmentNumber}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Date:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
+              <tr style="background-color: #f8f9fa;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Date</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #1f4e79;">${new Date(appointmentData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Time:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6; font-weight: 600;">${appointmentData.appointmentTime}</td>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Time</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #dc3545; font-size: 16px;">${appointmentData.appointmentTime}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef; border-bottom: 1px solid #dee2e6;">Contact Phone:</td>
-                <td style="padding: 12px 15px; border-bottom: 1px solid #dee2e6;">${appointmentData.patientInfo.phone}</td>
+              <tr style="background-color: #f8f9fa;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Contact Phone</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6;">${appointmentData.patientInfo.phone}</td>
               </tr>
-              <tr>
-                <td style="padding: 12px 15px; font-weight: 600; background-color: #e9ecef;">Email:</td>
-                <td style="padding: 12px 15px;">${appointmentData.patientInfo.email}</td>
+              <tr style="background-color: #ffffff;">
+                <td style="padding: 15px 20px; font-weight: 600; color: #495057;">Email Address</td>
+                <td style="padding: 15px 20px;">${appointmentData.patientInfo.email}</td>
               </tr>
             </table>
           </div>
           
-          <!-- Selected Tests -->
-          <div style="margin-bottom: 25px;">
-            <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Laboratory Tests</h3>
-            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745;">
+          <!-- Laboratory Tests -->
+          <div style="margin-bottom: 35px;">
+            <h3 style="color: #28a745; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #28a745; padding-bottom: 8px;">Your Laboratory Tests</h3>
+            <div style="background-color: #e8f5e8; padding: 25px; border: 1px solid #c8e6c9;">
+              <h4 style="margin: 0 0 15px 0; color: #2e7d32; font-size: 18px; font-weight: 500;">Tests Scheduled for You:</h4>
               ${selectedTestsData.map((test: any) => 
-                `<div style="margin: 12px 0; padding: 15px; background-color: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                    <span style="background-color: #28a745; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 10px;">✓</span>
-                    <strong style="color: #28a745; font-size: 16px;">${test.name}</strong>
+                `<div style="margin: 15px 0; padding: 20px; background-color: white; border-radius: 8px; border-left: 4px solid #28a745; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                  <div style="margin-bottom: 8px;">
+                    <span style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 10px;">✓ SCHEDULED</span>
+                    <strong style="color: #28a745; font-size: 18px;">${test.name}</strong>
                   </div>
-                  ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px;"> Department: ${test.labDepartment.name}</p>` : ''}
-                  ${test.preparationNotes && test.preparationNotes.length > 0 ? `<div style="background-color: #fff3cd; padding: 10px; border-left: 3px solid #ffc107; margin: 8px 0; border-radius: 4px;"><strong style="color: #856404;">⚠️ Preparation Required:</strong><ul style="color: #856404; font-size: 13px; margin: 8px 0 0 0; padding-left: 20px;">${test.preparationNotes.map((note: string) => `<li style="margin: 4px 0;">${note}</li>`).join('')}</ul></div>` : ''}
-                  ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">⏱ Result Time: ${test.resultTime}</p>` : ''}
+                  ${test.labDepartment ? `<p style="margin: 8px 0; color: #6c757d; font-size: 14px; font-weight: 500;"> Department: ${test.labDepartment.name}</p>` : ''}
+                  ${test.duration ? `<p style="margin: 5px 0; color: #6c757d; font-size: 13px;">⏱ Duration: ${test.duration}</p>` : ''}
+                  ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px; font-weight: 500;">Results Available: ${test.resultTime}</p>` : ''}
+                  ${test.preparationNotes && test.preparationNotes.length > 0 ? `
+                    <div style="background-color: #fff3cd; padding: 15px; border-left: 3px solid #ffc107; margin: 10px 0; border-radius: 4px;">
+                      <strong style="color: #856404; font-size: 14px;">⚠️ Important - Preparation Required:</strong>
+                      <ul style="color: #856404; font-size: 13px; margin: 10px 0 5px 0; padding-left: 20px;">
+                        ${test.preparationNotes.map((note: string) => `<li style="margin: 5px 0; line-height: 1.4;">${note}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
                 </div>`
               ).join('')}
             </div>
           </div>
 
           ${appointmentData.notes ? `
-            <!-- Special Notes -->
-            <div style="margin-bottom: 25px;">
-              <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #e1e5e9; padding-bottom: 8px;">Your Special Notes</h3>
-              <div style="background-color: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; border-radius: 4px;">
-                <p style="margin: 0; color: #0d47a1; font-size: 14px; line-height: 1.6;">${appointmentData.notes}</p>
+            <!-- Your Special Notes -->
+            <div style="margin-bottom: 35px;">
+              <h3 style="color: #28a745; margin: 0 0 20px 0; font-size: 20px; font-weight: 400; border-bottom: 2px solid #28a745; padding-bottom: 8px;">Your Special Instructions</h3>
+              <div style="background-color: #e3f2fd; padding: 20px; border-left: 4px solid #2196f3; border: 1px solid #bbdefb;">
+                <p style="margin: 0; color: #0d47a1; font-size: 15px; line-height: 1.6; font-style: italic;">"${appointmentData.notes}"</p>
               </div>
             </div>
           ` : ''}
 
           <!-- Important Reminders -->
-          <div style="background: linear-gradient(135deg, #d4edda, #c3e6cb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #28a745;">
-            <h3 style="margin: 0 0 15px 0; color: #155724; font-size: 16px;">📋 Important Reminders</h3>
-            <ul style="margin: 0; padding-left: 20px; color: #155724; font-size: 14px; line-height: 1.8;">
-              <li><strong>Arrive 15 minutes early</strong> for check-in and preparation</li>
-              <li><strong>Bring valid ID</strong> and your health insurance card (if applicable)</li>
-              <li><strong>Follow preparation instructions</strong> for your selected tests (see above)</li>
-              <li><strong>Bring your doctor's prescription/request</strong> (we have a copy on file)</li>
-              <li><strong>Fasting may be required</strong> for certain tests - check preparation notes</li>
-              <li><strong>Reschedule if needed:</strong> Contact us at least 24 hours in advance</li>
-            </ul>
+          <div style="background-color: #fff8e1; padding: 25px; border: 1px solid #ffcc02; margin-bottom: 35px;">
+            <h3 style="margin: 0 0 20px 0; color: #f57f17; font-size: 18px; font-weight: 500;">Important Reminders for Your Visit</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top; width: 30px;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Arrive 15 minutes early</strong> for check-in and preparation procedures</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Bring valid ID</strong> and your health insurance card (PhilHealth, HMO, etc.)</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Follow preparation instructions</strong> listed above for each test</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Bring your doctor's prescription</strong> (we have a copy but please bring yours)</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Fasting may be required</strong> for certain tests - check preparation notes above</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Need to reschedule?</strong> Contact us at least 24 hours in advance</td>
+              </tr>
+            </table>
           </div>
 
-          <!-- Doctor's Request -->
           ${doctorRequestImageAsset ? `
-            <div style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); padding: 20px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #2196f3;">
-              <h3 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 16px;">🏥 Your Doctor's Request</h3>
-              <p style="margin: 0 0 15px 0; color: #0d47a1; font-size: 14px;">Here's a copy of your doctor's prescription/request for your records:</p>
-              <div style="text-align: center; margin: 15px 0;">
+            <!-- Your Doctor's Request -->
+            <div style="background-color: #e3f2fd; padding: 25px; border: 1px solid #bbdefb; margin-bottom: 35px;">
+              <h3 style="margin: 0 0 20px 0; color: #0d47a1; font-size: 18px; font-weight: 500;"> Your Doctor's Request/Prescription</h3>
+              <p style="margin: 0 0 20px 0; color: #0d47a1; font-size: 14px; line-height: 1.6;">Here's a copy of your doctor's prescription/request for your records:</p>
+              <div style="text-align: center; margin: 20px 0;">
                 <img src="${urlFor(doctorRequestImageAsset).width(500).quality(85).url()}" 
                      alt="Doctor's Request Document" 
-                     style="max-width: 100%; height: auto; border: 2px solid #2196f3; border-radius: 8px; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);" />
-                <p style="margin: 10px 0 0 0; color: #0d47a1; font-size: 12px; font-style: italic;">Your Doctor's Request/Prescription</p>
+                     style="max-width: 100%; height: auto; border: 3px solid #2196f3; border-radius: 12px; box-shadow: 0 8px 16px rgba(33, 150, 243, 0.3);" />
+                <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 13px; font-style: italic; font-weight: 500;">Your Doctor's Request/Prescription Document</p>
               </div>
-              <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 13px; text-align: center;">
-                💡 <strong>Tip:</strong> Save this image to your phone for easy access during your appointment
-              </p>
+              <div style="background-color: #bbdefb; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px;">
+                <p style="margin: 0; color: #0d47a1; font-size: 14px; font-weight: 500;">
+                   <strong>Pro Tip:</strong> Save this image to your phone for easy access during your appointment!
+                </p>
+              </div>
             </div>
           ` : ''}
 
-          <!-- Contact Information -->
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center;">
-            <h4 style="margin: 0 0 15px 0; color: #495057;">Need Help or Want to Reschedule?</h4>
-            <p style="margin: 0 0 10px 0; color: #6c757d; font-size: 14px;">
-              <strong>Hospital Phone:</strong> <a href="tel:(02) 8825-5236" style="color: #28a745; text-decoration: none;">+63 (2) 8555-1234</a>
-            </p>
-            <p style="margin: 0; color: #6c757d; font-size: 14px;">
-              <strong>Email:</strong> <a href="mailto:${process.env.EMAIL_USER}" style="color: #28a745; text-decoration: none;">${process.env.EMAIL_USER}</a>
-            </p>
+          <!-- Contact & Support -->
+          <div style="background-color: #f8f9fa; padding: 30px; border: 2px solid #28a745; text-align: center;">
+            <h4 style="margin: 0 0 20px 0; color: #28a745; font-size: 20px; font-weight: 500;">Need Help or Want to Reschedule?</h4>
+            <div style="margin-bottom: 20px;">
+              <p style="margin: 0 0 10px 0; color: #495057; font-size: 16px; font-weight: 500;">
+                <strong>Hospital Main Line:</strong> 
+                <a href="tel:(02)8555-1234" style="color: #28a745; text-decoration: none; font-weight: 600;">+63 (2) 8555-1234</a>
+              </p>
+              <p style="margin: 0 0 10px 0; color: #495057; font-size: 16px; font-weight: 500;">
+                <strong>Laboratory Direct:</strong> 
+                <a href="tel:(02)8555-1234" style="color: #28a745; text-decoration: none; font-weight: 600;">+63 (2) 8555-1234</a>
+              </p>
+              <p style="margin: 0; color: #495057; font-size: 16px; font-weight: 500;">
+                <strong>Email:</strong> 
+                <a href="mailto:${process.env.EMAIL_USER}" style="color: #28a745; text-decoration: none; font-weight: 600;">${process.env.EMAIL_USER}</a>
+              </p>
+            </div>
+            <a href="https://www.lpdhinc.com/services/schedule-lab" 
+               style="display: inline-block; background-color: #28a745; color: white; padding: 15px 30px; text-decoration: none; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px;">
+              Schedule Another Test
+            </a>
           </div>
         </div>
 
         <!-- Footer -->
-        <div style="background-color: #343a40; color: white; padding: 20px; text-align: center;">
-          <p style="margin: 0 0 5px 0; font-weight: 600;">Las Piñas Doctor's Hospital</p>
-          <p style="margin: 0; font-size: 12px; opacity: 0.8;">
-            Quality Healthcare • Advanced Laboratory Services • Trusted Since 1982
+        <div style="background-color: #47524A; color: #ffffff; padding: 25px; text-align: center;">
+          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctor's Hospital</p>
+          <p style="margin: 0 0 5px 0; color: #adb5bd; font-size: 14px;">Quality Healthcare • Advanced Laboratory Services • Trusted Since 1982</p>
+          <p style="margin: 0; color: #6c757d; font-size: 12px;">
+            This is your appointment confirmation. Please save this email for your records.
           </p>
-          <p style="margin: 10px 0 0 0; font-size: 11px; opacity: 0.6;">
-            This is an automated confirmation. Please save this email for your records.
+          <p style="margin: 15px 0 0 0; color: #6c757d; font-size: 11px;">
+            Sent on ${new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' })} (Philippine Standard Time)
           </p>
         </div>
       </div>
