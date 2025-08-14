@@ -982,16 +982,15 @@ export default function ScheduleLabPage() {
 
             {/* Booking Form */}
             <div className="space-y-6">
-              <Card className="sticky top-4">
-                <CardHeader>
-                  <CardTitle className="text-primary">Schedule Your Appointment</CardTitle>
-                  {selectedTests.length > 0 && (
+              {selectedTests.length > 0 ? (
+                <Card className="sticky top-4">
+                  <CardHeader>
+                    <CardTitle className="text-primary">Schedule Your Appointment</CardTitle>
                     <div className="text-sm text-muted-foreground">
                       {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
                     </div>
-                  )}
-                </CardHeader>
-                <CardContent>
+                  </CardHeader>
+                  <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -1240,8 +1239,36 @@ export default function ScheduleLabPage() {
                   </form>
                 </CardContent>
               </Card>
-
-             
+              ) : (
+                <Card className="sticky top-4">
+                  <CardHeader>
+                    <CardTitle className="text-primary">Select Tests First</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center py-12">
+                    <div className="space-y-4">
+                      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
+                        <TestTube className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold text-gray-900">Choose Your Lab Tests</h3>
+                        <p className="text-sm text-gray-600 max-w-sm mx-auto">
+                          Select one or more diagnostic tests from the list on the left to start scheduling your appointment.
+                        </p>
+                      </div>
+                      <div className="hidden md:block">
+                        <p className="text-xs text-gray-500 mt-4">
+                          👈 Browse available tests by department
+                        </p>
+                      </div>
+                      <div className="md:hidden">
+                        <p className="text-xs text-gray-500 mt-4">
+                          👆 Browse available tests above
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         </div>
