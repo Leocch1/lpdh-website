@@ -228,7 +228,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
         <!-- Footer -->
         <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #e9ecef;">
           <p style="margin: 0; color: #6c757d; font-size: 12px; line-height: 1.4;">
-            <strong>LPDH Medical Center</strong> - Laboratory Scheduling System<br>
+            <strong>Las Piñas Doctor's Hospital</strong> - Diagnostic Booking<br>
             This is an automated notification. Please do not reply to this email.<br>
             For technical support, contact the IT department.
           </p>
