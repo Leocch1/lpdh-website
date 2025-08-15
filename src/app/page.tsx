@@ -383,7 +383,7 @@ export default function Home() {
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button asChild size="lg" className="[box-shadow:0_3px_5px_rgba(0,0,0,0.2)] hover:[box-shadow:0_6px_6px_rgba(0,0,0,0.15)] transition-shadow duration-300">
-              <Link href="/services/schedule-lab">Book an Appointment</Link>
+              <Link href="/services/schedule-lab/page">Book an Appointment</Link>
             </Button>
             <Button asChild variant="ghost" size="lg" className="hover:bg-transparent hover:text-primary transition-colors">
               <Link href="/contact">Contact Us</Link>
