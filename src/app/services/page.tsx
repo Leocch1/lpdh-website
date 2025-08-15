@@ -590,6 +590,16 @@ export default function ServicesPage() {
     setOpenItems(new Set());
     // Update URL hash
     window.history.replaceState(null, '', `#${tabKey}`);
+    
+    // Smooth scroll to services section
+    const servicesSection = document.getElementById('services-section');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
   };
 
   if (loading) {
@@ -710,7 +720,7 @@ export default function ServicesPage() {
       </section>
 
       {/* What We Offer Section */}
-      <section className="py-16 bg-background">
+      <section id="services-section" className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">
