@@ -313,8 +313,50 @@ export async function POST(request: NextRequest) {
       jobSlug
     };
 
-    console.log('📝 Processing job application for:', applicationData.position);
+    console.log('📝 Processing job application for:', `POSITION: ${applicationData.position}`);
     console.log('👤 Applicant:', `${firstName} ${lastName} (${email})`);
+
+    // First, save the application to Sanity
+    let savedApplication;
+    try {
+      // Upload resume file to Sanity if provided
+      let resumeAsset;
+      if (resumeBuffer && resumeFilename) {
+        console.log('📤 Uploading resume to Sanity...');
+        resumeAsset = await client.assets.upload('file', resumeBuffer, {
+          filename: resumeFilename,
+          contentType: resumeFile.type || 'application/pdf'
+        });
+        console.log('✅ Resume uploaded to Sanity successfully');
+      }
+
+      // Create the job application document
+      const applicationDoc = {
+        _type: 'jobApplication',
+        applicantName: `${firstName} ${middleName ? middleName + ' ' : ''}${lastName}`.trim(),
+        jobPosition: position,
+        email: email,
+        contactNumber: phone,
+        message: message || undefined,
+        resume: resumeAsset ? {
+          _type: 'file',
+          asset: {
+            _type: 'reference',
+            _ref: resumeAsset._id
+          }
+        } : undefined,
+        applicationStatus: 'new',
+        submittedAt: new Date().toISOString()
+      };
+
+      console.log('💾 Saving job application to Sanity...');
+      savedApplication = await client.create(applicationDoc);
+      console.log('✅ Job application saved to Sanity successfully with ID:', savedApplication._id);
+
+    } catch (sanityError) {
+      console.error('❌ Failed to save job application to Sanity:', sanityError);
+      // Continue with email sending even if Sanity save fails
+    }
 
     // Send email notifications
     const emailResult = await sendJobApplicationEmail(applicationData, resumeBuffer, resumeFilename);
@@ -324,17 +366,23 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Application submitted successfully! HR department has been notified.',
         data: {
+          applicationId: savedApplication?._id,
           applicant: `${firstName} ${lastName}`,
           position: position,
           submittedAt: new Date().toISOString(),
-          notificationsSent: emailResult.sentTo
+          notificationsSent: emailResult.sentTo,
+          savedToDatabase: !!savedApplication
         }
       });
     } else {
       return NextResponse.json({
         success: false,
         error: 'Application received but email notification failed',
-        details: emailResult.error
+        details: emailResult.error,
+        data: {
+          applicationId: savedApplication?._id,
+          savedToDatabase: !!savedApplication
+        }
       }, { status: 500 });
     }
 

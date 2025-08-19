@@ -1,6 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { client } from '@/lib/sanity';
+import { client, EMAIL_SETTINGS_QUERY } from '@/lib/sanity';
 import nodemailer from 'nodemailer';
+
+// Interface for email settings
+interface EmailSettings {
+  _id: string;
+  settingsName: string;
+  generalInquiryEmail: string;
+  complaintEmail: string;
+  ccEmails: Array<{
+    email: string;
+    description?: string;
+  }>;
+  isActive: boolean;
+  lastUpdated: string;
+}
+
+// Function to get active email settings from Sanity
+async function getEmailSettings(): Promise<EmailSettings | null> {
+  try {
+    const settings = await client.fetch(EMAIL_SETTINGS_QUERY);
+    return settings;
+  } catch (error) {
+    console.error('❌ Error fetching email settings:', error);
+    return null;
+  }
+}
 
 // Create transporter for email notifications
 const createTransporter = () => {
@@ -38,7 +63,7 @@ const createTransporter = () => {
 const transporter = createTransporter();
 
 // Function to send notification email to staff
-async function sendContactNotification(contactData: any) {
+async function sendContactNotification(contactData: any, emailSettings: EmailSettings | null) {
   try {
     const { messageType, name, email, subject, message } = contactData;
     
@@ -46,6 +71,29 @@ async function sendContactNotification(contactData: any) {
     const isComplaint = messageType === 'complaint';
     const priority = isComplaint ? 'high' : 'normal';
     const urgencyText = isComplaint ? '🚨 COMPLAINT ALERT' : '📩 New Contact Message';
+    
+    // Determine recipient email based on message type and settings
+    let recipientEmail: string;
+    let ccEmails: string[] = [];
+    
+    if (emailSettings) {
+      recipientEmail = isComplaint ? emailSettings.complaintEmail : emailSettings.generalInquiryEmail;
+      // Add CC emails if configured
+      ccEmails = emailSettings.ccEmails?.map(cc => cc.email) || [];
+      console.log(`📧 Using configured email settings: ${emailSettings.settingsName}`);
+      console.log(`📧 Recipient: ${recipientEmail}`);
+      if (ccEmails.length > 0) {
+        console.log(`📧 CC: ${ccEmails.join(', ')}`);
+      }
+    } else {
+      // Fallback to environment variable
+      recipientEmail = process.env.EMAIL_USER || '';
+      console.log('⚠️ No email settings found in Sanity, using fallback email');
+    }
+    
+    if (!recipientEmail) {
+      throw new Error('No recipient email configured');
+    }
     
     const emailSubject = `${urgencyText} - ${subject}`;
     
@@ -131,17 +179,32 @@ async function sendContactNotification(contactData: any) {
     `;
 
     // Send email to hospital staff
-    const hospitalEmail = process.env.EMAIL_USER;
-    await transporter.sendMail({
+    const mailOptions: any = {
       from: `"LPDH Contact System" <${process.env.EMAIL_USER}>`,
-      to: hospitalEmail,
+      to: recipientEmail,
       subject: emailSubject,
       html: emailContent,
-      priority: isComplaint ? 'high' : 'normal'
-    });
+      priority: isComplaint ? 'high' as const : 'normal' as const
+    };
+    
+    // Add CC emails if configured
+    if (ccEmails.length > 0) {
+      mailOptions.cc = ccEmails.join(', ');
+    }
+    
+    await transporter.sendMail(mailOptions);
 
-    console.log(`✅ Contact notification sent successfully to: ${hospitalEmail}`);
-    return { success: true, sentTo: hospitalEmail };
+    console.log(`✅ Contact notification sent successfully to: ${recipientEmail}`);
+    if (ccEmails.length > 0) {
+      console.log(`✅ CC sent to: ${ccEmails.join(', ')}`);
+    }
+    
+    return { 
+      success: true, 
+      sentTo: recipientEmail,
+      ccEmails: ccEmails,
+      settingsUsed: emailSettings?.settingsName || 'Fallback Email'
+    };
     
   } catch (error) {
     console.error('❌ Error sending contact notification:', error);
@@ -171,6 +234,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fetch email settings from Sanity
+    const emailSettings = await getEmailSettings();
+    
+    if (!emailSettings && !process.env.EMAIL_USER) {
+      console.error('❌ No email configuration found');
+      return NextResponse.json(
+        { error: 'Email configuration not available. Please contact the administrator.' },
+        { status: 500 }
+      );
+    }
+
     // Create the contact message document
     const contactDoc = {
       _type: 'contactMessage',
@@ -189,7 +263,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Contact message saved to Sanity:', result._id);
 
     // Send email notification to staff
-    const emailResult = await sendContactNotification(data);
+    const emailResult = await sendContactNotification(data, emailSettings);
 
     // Update document with notification status
     if (emailResult.success) {
@@ -197,6 +271,8 @@ export async function POST(request: NextRequest) {
         notificationStatus: {
           emailSent: true,
           sentTo: emailResult.sentTo,
+          ccEmails: emailResult.ccEmails || [],
+          settingsUsed: emailResult.settingsUsed,
           sentAt: new Date().toISOString()
         }
       }).commit();

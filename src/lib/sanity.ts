@@ -357,3 +357,17 @@ export const ADMISSION_QUERY = `*[_type == "admission"][0] {
     isActive
   }
 }`;
+
+// Email Settings Query
+export const EMAIL_SETTINGS_QUERY = `*[_type == "emailSettings" && isActive == true] | order(_updatedAt desc) [0]{
+  _id,
+  settingsName,
+  generalInquiryEmail,
+  complaintEmail,
+  ccEmails[]{
+    email,
+    description
+  },
+  isActive,
+  lastUpdated
+}`;

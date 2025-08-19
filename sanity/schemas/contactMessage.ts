@@ -93,6 +93,44 @@ export default {
         timeFormat: 'HH:mm',
       },
     },
+    {
+      name: 'notificationStatus',
+      title: 'Email Notification Status',
+      type: 'object',
+      fields: [
+        {
+          name: 'emailSent',
+          title: 'Email Sent',
+          type: 'boolean',
+          initialValue: false
+        },
+        {
+          name: 'sentTo',
+          title: 'Sent To',
+          type: 'string',
+          description: 'Primary recipient email address'
+        },
+        {
+          name: 'ccEmails',
+          title: 'CC Email Addresses',
+          type: 'array',
+          of: [{ type: 'string' }],
+          description: 'Additional emails that were CC\'d'
+        },
+        {
+          name: 'settingsUsed',
+          title: 'Email Settings Used',
+          type: 'string',
+          description: 'Which email configuration was used'
+        },
+        {
+          name: 'sentAt',
+          title: 'Sent At',
+          type: 'datetime'
+        }
+      ],
+      readOnly: true
+    },
   ],
   preview: {
     select: {

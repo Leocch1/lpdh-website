@@ -17,5 +17,7 @@ import { labDepartment } from './labDepartment'
 import { servicesPage } from './servicesPage'
 import contactMessage from './contactMessage'
 import findDoctorPage from './findDoctorPage'
+import emailSettings from './emailSettings'
+import jobApplication from './jobApplication'
 
-export const schemaTypes = [homepage, careers, jobOpening, jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate, labDepartment, appointment, scheduleLabPage, labTest, servicesPage, contactMessage, findDoctorPage]
+export const schemaTypes = [homepage, careers, jobOpening, jobCategory, admission, doctor, department, specialty, aboutPage, historyPage, healthAdvisory, newsUpdate, labDepartment, appointment, scheduleLabPage, labTest, servicesPage, contactMessage, findDoctorPage, emailSettings, jobApplication]
