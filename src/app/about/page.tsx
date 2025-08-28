@@ -287,7 +287,7 @@ export default function AboutPage() {
               </div>
             </div>
             {/* Core Values */}
-            <div className="flex flex-col  text-center px-3 py-4 md:text-left md:pl-4 mx-10">
+            <div className="flex flex-col  text-center px-3 py-4 md:text-left md:pl-4 mx-auto">
               <div>
                 <h3 className="font-headline text-xl mb-3 flex justify-center md:justify-start items-center">Core Values</h3>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
