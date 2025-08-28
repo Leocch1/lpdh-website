@@ -84,7 +84,7 @@ export function Footer() {
                 <div className="mt-4 space-y-2 text-sm text-white/80">
                   <p>#8009 J.I. Aguilar Ave., Pulanglupa II, Las Pinas City</p>
                   <p>(02) 8825 - 5236</p>
-                  <p>lpdh@sample.com</p>
+                  <p>lpdhitdept2013@lpdhinc.com</p>
                 </div>
               </div>
             </div>
