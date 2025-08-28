@@ -188,6 +188,27 @@ export const homepage = defineType({
           initialValue: 'Our Accredited HMO Partners',
         },
         {
+          name: 'subtitle1',
+          title: 'Subtitle Line 1',
+          type: 'string',
+          description: 'First line below the title',
+          initialValue: 'We accept various health insurance plans and HMO partnerships',
+        },
+        {
+          name: 'subtitle2',
+          title: 'Subtitle Line 2',
+          type: 'string',
+          description: 'Second line below the title',
+          initialValue: 'to make quality healthcare accessible to all patients',
+        },
+        {
+          name: 'subtitle3',
+          title: 'Subtitle Line 3',
+          type: 'string',
+          description: 'Third line below the title',
+          initialValue: 'Contact us to verify your insurance coverage and benefits',
+        },
+        {
           name: 'image',
           title: 'HMO Partners Image',
           type: 'image',
