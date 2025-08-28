@@ -44,6 +44,8 @@ interface LabTest {
   duration?: string;
   resultTime?: string;
   preparationNotes?: string[];
+  allowOnlineBooking?: boolean;
+  bookingUnavailableMessage?: string;
   requiresEligibilityCheck?: boolean;
   availableDays?: string[];
   availableTimeSlots?: string[];
@@ -130,6 +132,8 @@ const LAB_TESTS_QUERY = `*[_type == "labTest"] | order(labDepartment.name asc) {
   duration,
   resultTime,
   preparationNotes,
+  allowOnlineBooking,
+  bookingUnavailableMessage,
   requiresEligibilityCheck,
   availableDays,
   availableTimeSlots,
@@ -942,7 +946,7 @@ export default function ScheduleLabPage() {
                           className={`w-full justify-start h-12 text-left text-sm ${
                             selectedDepartment === department.name 
                               ? "bg-green-600 hover:bg-green-700 text-white" 
-                              : "bg-white hover:bg-green-50 text-gray-700 border-gray-300"
+                              : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
                           }`}
                           onClick={() => {
                             if (selectedDepartment === department.name) {
@@ -1029,6 +1033,12 @@ export default function ScheduleLabPage() {
                                       Screening Required
                                     </Badge>
                                   )}
+                                  {test.allowOnlineBooking === false && (
+                                    <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600 flex items-center gap-1">
+                                      <Info className="h-3 w-3" />
+                                      Contact Required
+                                    </Badge>
+                                  )}
                                 </h4>
                               </div>
                               <div className="flex gap-4 mt-2 ml-7">
@@ -1046,17 +1056,34 @@ export default function ScheduleLabPage() {
                               )}
                             </div>
                             <div className="ml-4">
-                              <Button
-                                onClick={() => {
-                                  handleTestSelection(test._id);
-                                  setIsBookingModalOpen(true);
-                                }}
-                                variant={selectedTests.includes(test._id) ? "default" : "outline"}
-                                size="sm"
-                              >
-                                <Calendar className="h-4 w-4 mr-2" />
-                                Book Your Appointment
-                              </Button>
+                              {test.allowOnlineBooking !== false ? (
+                                <Button
+                                  onClick={() => {
+                                    handleTestSelection(test._id);
+                                    setIsBookingModalOpen(true);
+                                  }}
+                                  variant={selectedTests.includes(test._id) ? "default" : "outline"}
+                                  size="sm"
+                                >
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  Book Your Appointment
+                                </Button>
+                              ) : (
+                                <div className="text-center">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled
+                                    className="mb-2"
+                                  >
+                                    <Phone className="h-4 w-4 mr-2" />
+                                    Contact Required
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground max-w-32">
+                                    {test.bookingUnavailableMessage || 'Please contact the hospital directly to schedule this test'}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1546,9 +1573,9 @@ export default function ScheduleLabPage() {
                       }}
                       placeholder="09XXXXXXXXX"
                       required
-                      className={validatePhoneNumber(tempFormData.phone) ? "border-red-500" : ""}
+                      className={validatePhoneNumber(tempFormData.phone) !== "" ? "border-red-500" : ""}
                     />
-                    {validatePhoneNumber(tempFormData.phone) && (
+                    {validatePhoneNumber(tempFormData.phone) !== "" && (
                       <p className="text-red-500 text-sm mt-1">
                         {validatePhoneNumber(tempFormData.phone)}
                       </p>

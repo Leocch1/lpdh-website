@@ -42,6 +42,21 @@ export const labTest = defineType({
       description: 'Special preparation instructions for patients - each item will be displayed as a bullet point'
     }),
     defineField({
+      name: 'allowOnlineBooking',
+      title: 'Allow Online Booking',
+      type: 'boolean',
+      initialValue: true,
+      description: 'Toggle to show/hide the "Book your appointment" button for this test'
+    }),
+    defineField({
+      name: 'bookingUnavailableMessage',
+      title: 'Booking Unavailable Message',
+      type: 'string',
+      initialValue: 'Please contact the hospital directly to schedule this test',
+      description: 'Message shown when online booking is disabled for this test',
+      hidden: ({ document }) => document?.allowOnlineBooking !== false
+    }),
+    defineField({
       name: 'requiresEligibilityCheck',
       title: 'Requires Eligibility Check',
       type: 'boolean',
@@ -153,7 +168,14 @@ export const labTest = defineType({
           }
         }
       ],
-      validation: Rule => Rule.min(1).error('At least one day must be selected')
+      validation: Rule => Rule.custom((value, context) => {
+        const document = context.document;
+        if (document?.allowOnlineBooking && (!value || value.length === 0)) {
+          return 'At least one day must be selected when online booking is enabled';
+        }
+        return true;
+      }),
+      hidden: ({ document }) => document?.allowOnlineBooking !== true
     }),
     defineField({
       name: 'availableTimeSlots',
@@ -176,7 +198,14 @@ export const labTest = defineType({
           }
         }
       ],
-      validation: Rule => Rule.min(1).error('At least one time slot must be selected')
+      validation: Rule => Rule.custom((value, context) => {
+        const document = context.document;
+        if (document?.allowOnlineBooking && (!value || value.length === 0)) {
+          return 'At least one time slot must be selected when online booking is enabled';
+        }
+        return true;
+      }),
+      hidden: ({ document }) => document?.allowOnlineBooking !== true
     }),
     defineField({
       name: 'order',
@@ -196,11 +225,16 @@ export const labTest = defineType({
     select: {
       title: 'name',
       subtitle: 'labDepartment.name',
-      isActive: 'isActive'
+      isActive: 'isActive',
+      allowOnlineBooking: 'allowOnlineBooking'
     },
-    prepare({ title, subtitle, isActive }) {
+    prepare({ title, subtitle, isActive, allowOnlineBooking }) {
+      const status = [];
+      if (!isActive) status.push('Inactive');
+      if (!allowOnlineBooking) status.push('No Online Booking');
+      
       return {
-        title: `${title}${!isActive ? ' (Inactive)' : ''}`,
+        title: `${title}${status.length > 0 ? ` (${status.join(', ')})` : ''}`,
         subtitle: subtitle || 'No Department'
       }
     }
