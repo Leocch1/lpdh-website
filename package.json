@@ -31,6 +31,7 @@
     "@sanity/vision": "^4.1.1",
     "@types/nodemailer": "^6.4.17",
     "@types/uuid": "^10.0.0",
+    "@types/xlsx": "^0.0.36",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-autoplay": "^8.6.0",
@@ -43,9 +44,11 @@
     "react-day-picker": "^9.8.1",
     "react-dom": "19.1.0",
     "sanity": "^4.1.1",
+    "sonner": "^1.4.41",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^3.3.1",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
