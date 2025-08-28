@@ -1005,23 +1005,25 @@ export default function ScheduleLabPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3 lg:space-y-4">
+                    {/* Responsive test cards */}
+                    <div className="flex flex-col gap-4">
                       {tests.map((test) => (
-                        <div 
+                        <div
                           key={test._id}
                           className={`p-4 border rounded-lg transition-all duration-200 ${
-                            selectedTests.includes(test._id) 
-                              ? 'border-primary bg-primary/5' 
+                            selectedTests.includes(test._id)
+                              ? 'border-primary bg-primary/5'
                               : 'border-border hover:border-primary/50'
                           }`}
                         >
-                          <div className="flex items-center justify-between">
+                          {/* Stack content vertically on mobile */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <CheckCircle 
+                                <CheckCircle
                                   className={`h-5 w-5 lg:h-6 lg:w-6 ${
-                                    selectedTests.includes(test._id) 
-                                      ? 'text-primary' 
+                                    selectedTests.includes(test._id)
+                                      ? 'text-primary'
                                       : 'text-muted-foreground'
                                   }`}
                                 />
@@ -1041,7 +1043,7 @@ export default function ScheduleLabPage() {
                                   )}
                                 </h4>
                               </div>
-                              <div className="flex gap-4 mt-2 ml-7">
+                              <div className="flex flex-wrap gap-2 mt-2 ml-7">
                                 <Badge variant="outline">{test.duration}</Badge>
                                 {test.resultTime && (
                                   <Badge variant="secondary">Results: {test.resultTime}</Badge>
@@ -1055,7 +1057,7 @@ export default function ScheduleLabPage() {
                                 </ul>
                               )}
                             </div>
-                            <div className="ml-4">
+                            <div className="w-full sm:w-auto">
                               {test.allowOnlineBooking !== false ? (
                                 <Button
                                   onClick={() => {
@@ -1064,6 +1066,7 @@ export default function ScheduleLabPage() {
                                   }}
                                   variant={selectedTests.includes(test._id) ? "default" : "outline"}
                                   size="sm"
+                                  className="w-full sm:w-auto"
                                 >
                                   <Calendar className="h-4 w-4 mr-2" />
                                   Book Your Appointment
@@ -1074,12 +1077,12 @@ export default function ScheduleLabPage() {
                                     variant="outline"
                                     size="sm"
                                     disabled
-                                    className="mb-2"
+                                    className="mb-2 w-full sm:w-auto"
                                   >
                                     <Phone className="h-4 w-4 mr-2" />
                                     Contact Required
                                   </Button>
-                                  <p className="text-xs text-muted-foreground max-w-32">
+                                  <p className="text-xs text-muted-foreground max-w-32 mx-auto">
                                     {test.bookingUnavailableMessage || 'Please contact the hospital directly to schedule this test'}
                                   </p>
                                 </div>
