@@ -402,7 +402,7 @@ export default function AboutPage() {
 
       <section className="py-12 md:py-16" style={{ backgroundColor: '#c2d7c9' }}>
         <div className="container mx-auto px-4 max-w-[1400px]">
-          <h2 className="font-headline text-3xl text-center mb-8 text-foreground">News & Updates</h2>
+          <h2 className="font-headline text-3xl text-center mb-8 text-foreground">Updates</h2>
           <p className="text-center text-muted-foreground text-sm mb-8 flex items-center justify-center gap-1">
             Swipe right <ArrowRight className="h-4 w-4" />
           </p>
