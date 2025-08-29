@@ -113,9 +113,18 @@ async function sendJobApplicationEmail(applicationData: JobApplicationData, resu
     const emailContent = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
         <!-- Header -->
-        <div style="background-color: #1f4e79; color: white; padding: 30px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctor's Hospital</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Human Resources - Job Application</p>
+        <div style="display: flex; align-items: center; background-color: #28a745; color: white; padding: 30px;">
+          <img src="https://lpdhinc.com/LPDH%20LOGO%20OFFICIAL.png"
+               alt="Las Piñas Doctors Hospital Logo"
+               style="height: 80px; margin-right: 32px; border-radius: 8px; display: block;" />
+          <div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">
+              Las Piñas Doctors Hospital INC.
+            </h1>
+            <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">
+              Human Resources - Job Application
+            </p>
+          </div>
         </div>
         
         <!-- Main Content -->
