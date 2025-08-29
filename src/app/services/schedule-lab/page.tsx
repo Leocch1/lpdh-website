@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, Mail, TestTube, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Calendar, CalendarCheck, Clock, FileText, Phone, MapPin, CheckCircle, Upload, X, Mail, TestTube, Loader2, Building2, TestTube2, Stethoscope, AlertTriangle, Info } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { client, urlFor } from "@/lib/sanity";
@@ -29,144 +30,135 @@ function SimpleSelect({ value, onValueChange, disabled, placeholder, options }: 
             disabled={disabled}
             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         >
-            <option value="" disabled>
-                {placeholder}
-            </option>
-            {options.map((option) => (
-                <option key={option} value={option}>
-                    {option}
-                </option>
+            <option value="" disabled>{placeholder}</option>
+            {options.map(option => (
+                <option key={option} value={option}>{option}</option>
             ))}
         </select>
     );
 }
 
-// Sanity queries
-const SCHEDULE_LAB_QUERY = `*[_type == "scheduleLabPage"][0] {
-    _id,
-    heroSection {
-        title,
-        subtitle,
-        backgroundImage {
-            asset
-        }
-    },
-    mainContent {
-        sectionTitle,
-        description
-    },
-    infoSection {
-        title,
-        infoCards[] {
-            _key,
-            title,
-            description,
-            icon
-        }
-    }
-}`;
-
-const LAB_TESTS_QUERY = `*[_type == "labTest" && isActive == true] | order(labDepartment->name asc, order asc) {
-  _id,
-  name,
-  category,
-  duration,
-  isActive,
-  order,
-  availableDays[],
-  availableTimeSlots[],
-  preparationNotes,
-  resultTime,
-  requiresEligibilityCheck,
-  eligibilityQuestions[] {
-    _key,
-    question,
-    riskLevel,
-    warningMessage
-  },
-  cannotProceedMessage {
-    title,
-    message
-  },
-  labDepartment-> {
-    _id,
-    name,
-    email,
-    backupEmail
-  }
-}`;
-
-const BOOKED_APPOINTMENTS_QUERY = `*[_type == "appointment" && appointmentDate == $date && status != "cancelled"] {
-    appointmentTime
-}`;
-
-// Updated interface to handle optional labDepartment
 interface LabTest {
   _id: string;
   name: string;
-  category: string;
-  duration: string;
-  isActive: boolean;
-  order: number;
-  availableDays: string[];
-  availableTimeSlots: string[];
-  preparationNotes?: string[];
+  duration?: string;
   resultTime?: string;
+  preparationNotes?: string[];
+  allowOnlineBooking?: boolean;
+  bookingUnavailableMessage?: string;
   requiresEligibilityCheck?: boolean;
+  availableDays?: string[];
+  availableTimeSlots?: string[];
   eligibilityQuestions?: Array<{
     _key: string;
     question: string;
-    riskLevel: 'high' | 'medium' | 'low';
     warningMessage?: string;
+    riskLevel?: 'low' | 'medium' | 'high';
   }>;
-  cannotProceedMessage?: {
-    title?: string;
-    message?: string;
-  };
   labDepartment?: {
-    _id: string;
     name: string;
-    email: string;
-    backupEmail?: string;
   };
 }
 
 interface ScheduleLabPageData {
-    _id: string;
-    heroSection: {
-        title: string;
-        subtitle: string;
-        backgroundImage?: {
-            asset: any;
-        };
+  heroSection: {
+    title: string;
+    subtitle: string;
+    backgroundImage?: {
+      asset: any;
     };
-    mainContent: {
-        sectionTitle: string;
-        description: string;
-    };
-    infoSection: {
-        title: string;
-        infoCards: Array<{
-            _key: string;
-            title: string;
-            description: string;
-            icon: string;
-        }>;
-    };
+  };
+  mainContent: {
+    sectionTitle: string;
+    description?: string;
+  };
+  infoSection: {
+    title: string;
+    infoCards: Array<{
+      _key: string;
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
 }
 
-// Add interfaces for custom alert
+// Add interface for custom alert modal
 interface CustomAlert {
-    isOpen: boolean;
-    type: 'success' | 'error' | 'warning';
-    title: string;
-    message: string;
-    action?: () => void;
+  isOpen: boolean;
+  type: 'success' | 'error' | 'warning';
+  title: string;
+  message: string;
+  action?: () => void;
 }
+
+// Sanity queries
+const SCHEDULE_LAB_PAGE_QUERY = `*[_type == "scheduleLabPage"][0]{
+  heroSection {
+    title,
+    subtitle,
+    backgroundImage {
+      asset
+    }
+  },
+  mainContent {
+    sectionTitle,
+    description
+  },
+  infoSection {
+    title,
+    infoCards[] {
+      _key,
+      title,
+      description,
+      icon
+    }
+  }
+}`;
+
+const LAB_DEPARTMENTS_QUERY = `*[_type == "labDepartment" && isActive == true] | order(order asc) {
+  _id,
+  name,
+  slug,
+  description,
+  email,
+  phoneNumber,
+  location
+}`;
+
+const LAB_TESTS_QUERY = `*[_type == "labTest"] | order(labDepartment.name asc) {
+  _id,
+  name,
+  duration,
+  resultTime,
+  preparationNotes,
+  allowOnlineBooking,
+  bookingUnavailableMessage,
+  requiresEligibilityCheck,
+  availableDays,
+  availableTimeSlots,
+  eligibilityQuestions[] {
+    _key,
+    question,
+    warningMessage,
+    riskLevel
+  },
+  labDepartment-> {
+    _id,
+    name,
+    email
+  }
+}`;
+
+const BOOKED_APPOINTMENTS_QUERY = `*[_type == "appointment" && appointmentDate == $date] {
+  appointmentTime
+}`;
 
 export default function ScheduleLabPage() {
   const [pageData, setPageData] = useState<ScheduleLabPageData | null>(null);
   const [labTests, setLabTests] = useState<LabTest[]>([]);
+  const [labDepartments, setLabDepartments] = useState<any[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState("All Departments");
   const [selectedTests, setSelectedTests] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -178,6 +170,7 @@ export default function ScheduleLabPage() {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [customAlert, setCustomAlert] = useState<CustomAlert | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     firstName: "",
@@ -187,7 +180,7 @@ export default function ScheduleLabPage() {
     date: "",
     time: "",
     notes: "",
-    hasDoctorRequest: true, // Set to true by default since it's required
+    hasDoctorRequest: true,
     doctorRequestNotes: ""
   });
   
@@ -202,9 +195,9 @@ export default function ScheduleLabPage() {
     notes: "",
     doctorRequestNotes: ""
   });
+  
   const [doctorRequestFile, setDoctorRequestFile] = useState<File | null>(null);
   const [doctorRequestPreview, setDoctorRequestPreview] = useState<string | null>(null);
-
   const [phoneError, setPhoneError] = useState("");
   
   // Eligibility check state
@@ -216,13 +209,15 @@ export default function ScheduleLabPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pageContent, testsData] = await Promise.all([
-          client.fetch(SCHEDULE_LAB_QUERY),
-          client.fetch(LAB_TESTS_QUERY)
+        const [pageResult, testsResult, departmentsResult] = await Promise.all([
+          client.fetch(SCHEDULE_LAB_PAGE_QUERY),
+          client.fetch(LAB_TESTS_QUERY),
+          client.fetch(LAB_DEPARTMENTS_QUERY)
         ]);
         
-        setPageData(pageContent);
-        setLabTests(testsData || []);
+        setPageData(pageResult);
+        setLabTests(testsResult || []);
+        setLabDepartments(departmentsResult || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -234,88 +229,46 @@ export default function ScheduleLabPage() {
   }, []);
 
   useEffect(() => {
-    const fetchBookedAppointments = async () => {
-      if (!formData.date) {
-        setBookedTimes([]);
-        return;
-      }
-
-      try {
-        const bookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
-          date: formData.date
-        });
-
-        const bookedTimeSlots = bookedAppointments.map((apt: any) => apt.appointmentTime);
-        setBookedTimes(bookedTimeSlots);
-      } catch (error) {
-        console.error('Error fetching booked appointments:', error);
-        setBookedTimes([]);
+    const fetchBookedTimes = async () => {
+      if (formData.date) {
+        try {
+          const bookedAppointments = await client.fetch(BOOKED_APPOINTMENTS_QUERY, {
+            date: formData.date
+          });
+          setBookedTimes(bookedAppointments.map((apt: any) => apt.appointmentTime));
+        } catch (error) {
+          console.error('Error fetching booked times:', error);
+        }
       }
     };
 
-    fetchBookedAppointments();
+    fetchBookedTimes();
   }, [formData.date]);
 
   // Eligibility check functions
   const checkEligibility = () => {
     const warnings: string[] = [];
-    let highRisk = false;
-    let highRiskTest: LabTest | undefined;
+    let canContinue = true;
     
-    const testsRequiringCheck = labTests.filter(test => 
-      selectedTests.includes(test._id) && test.requiresEligibilityCheck
-    );
-    
-    testsRequiringCheck.forEach(test => {
-      test.eligibilityQuestions?.forEach(question => {
-        const answer = eligibilityAnswers[test._id]?.[question._key];
-        if (answer === true) {
+    Object.entries(eligibilityAnswers).forEach(([testId, answers]) => {
+      const test = labTests.find(t => t._id === testId);
+      if (!test?.eligibilityQuestions) return;
+      
+      test.eligibilityQuestions.forEach(question => {
+        if (answers[question._key] === true && question.warningMessage) {
+          warnings.push(`${test.name}: ${question.warningMessage}`);
           if (question.riskLevel === 'high') {
-            highRisk = true;
-            highRiskTest = test;
-            warnings.push(`❌ ${test.name}: ${question.warningMessage || question.question}`);
-          } else if (question.riskLevel === 'medium') {
-            warnings.push(`⚠️ ${test.name}: ${question.warningMessage || question.question}`);
-          } else if (question.riskLevel === 'low') {
-            warnings.push(`ℹ️ ${test.name}: ${question.warningMessage || question.question}`);
+            canContinue = false;
           }
         }
       });
     });
     
     setEligibilityWarnings(warnings);
-    setCanProceed(!highRisk);
+    setCanProceed(canContinue);
     
-    if (highRisk && highRiskTest) {
-      // Use custom message from the test that triggered the high risk
-      const customMessage = highRiskTest.cannotProceedMessage;
-      setCustomAlert({
-        isOpen: true,
-        type: 'error',
-        title: customMessage?.title || 'Cannot Proceed with Examination',
-        message: customMessage?.message || 'Based on your answers, this examination may not be safe for you. Please consult with your doctor before proceeding. You may also contact the hospital for alternative examination options.'
-      });
-    } else if (warnings.length > 0) {
-      setCustomAlert({
-        isOpen: true,
-        type: 'warning',
-        title: 'Please Review Medical Warnings',
-        message: 'We have noted some medical considerations for your examination. Please ensure you follow all preparation instructions and inform the medical staff about these conditions during your appointment.'
-      });
-      // Still allow to proceed with warnings, initialize temp form data
-      setTempFormData({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        date: formData.date,
-        time: formData.time,
-        notes: formData.notes,
-        doctorRequestNotes: formData.doctorRequestNotes
-      });
-      setTimeout(() => setIsConfirmationModalOpen(true), 2000);
-    } else {
-      // No issues, proceed to confirmation and initialize temp form data
+    if (canContinue) {
+      // Proceed with confirmation modal
       setTempFormData({
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -327,6 +280,13 @@ export default function ScheduleLabPage() {
         doctorRequestNotes: formData.doctorRequestNotes
       });
       setIsConfirmationModalOpen(true);
+    } else {
+      setCustomAlert({
+        isOpen: true,
+        type: 'error',
+        title: 'Cannot Proceed',
+        message: 'Your answers indicate high-risk conditions that prevent scheduling this appointment. Please consult with your doctor first.'
+      });
     }
   };
   
@@ -341,28 +301,41 @@ export default function ScheduleLabPage() {
   };
 
   const handleTestSelection = (testId: string) => {
-    const isAdding = !selectedTests.includes(testId);
+    const isCurrentlySelected = selectedTests.includes(testId);
     
-    setSelectedTests(prev =>
-      prev.includes(testId)
-        ? prev.filter(id => id !== testId)
-        : [...prev, testId]
-    );
+    if (isCurrentlySelected) {
+      // Remove test from selection
+      setSelectedTests(prev => prev.filter(id => id !== testId));
+    } else {
+      // Replace current selection with just this test (single selection)
+      setSelectedTests([testId]);
+    }
     
-    // If adding a test that requires eligibility check, show modal
-    if (isAdding) {
+    // Reset form data when test selection changes
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      date: "",
+      time: "",
+      notes: "",
+      hasDoctorRequest: true,
+      doctorRequestNotes: ""
+    });
+    
+    // If selecting a test that requires eligibility check, initialize answers
+    if (!isCurrentlySelected) {
       const test = labTests.find(t => t._id === testId);
-      if (test?.requiresEligibilityCheck) {
-        // Initialize eligibility answers for this test
-        if (test.eligibilityQuestions) {
-          setEligibilityAnswers(prev => ({
-            ...prev,
-            [testId]: test.eligibilityQuestions!.reduce((acc, q) => ({
-              ...acc,
-              [q._key]: false
-            }), {})
-          }));
-        }
+      if (test?.requiresEligibilityCheck && test.eligibilityQuestions) {
+        const initialAnswers: Record<string, boolean> = {};
+        test.eligibilityQuestions.forEach(question => {
+          initialAnswers[question._key] = false;
+        });
+        setEligibilityAnswers(prev => ({
+          ...prev,
+          [testId]: initialAnswers
+        }));
       }
     }
   };
@@ -378,8 +351,8 @@ export default function ScheduleLabPage() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create appointment');
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
       const result = await response.json();
@@ -424,24 +397,24 @@ export default function ScheduleLabPage() {
   const handleDoctorRequestFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'File Too Large',
+          message: 'Please select a file smaller than 5MB.'
+        });
+        return;
+      }
+
       // Validate file type
       if (!file.type.startsWith('image/')) {
         setCustomAlert({
           isOpen: true,
           type: 'error',
           title: 'Invalid File Type',
-          message: 'Please select an image file (JPG, PNG, etc.)'
-        });
-        return;
-      }
-      
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setCustomAlert({
-          isOpen: true,
-          type: 'error',
-          title: 'File Too Large',
-          message: 'File size must be less than 5MB'
+          message: 'Please select an image file (JPG, PNG, etc.).'
         });
         return;
       }
@@ -468,55 +441,23 @@ export default function ScheduleLabPage() {
 
   const uploadImageToSanity = async (file: File): Promise<any> => {
     try {
-      console.log('📤 Uploading image:', file.name, file.size, 'bytes');
-      
-      const formData = new FormData()
-      formData.append('file', file)
-      
-      // Add timeout to fetch request
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-      
+      const formData = new FormData();
+      formData.append('file', file);
+
       const response = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
-        signal: controller.signal,
-      })
-
-      clearTimeout(timeoutId);
+      });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        console.error('❌ Upload failed:', response.status, errorData);
-        throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+        throw new Error(`Upload failed: ${response.statusText}`);
       }
 
-      const { asset } = await response.json()
-      console.log('✅ Upload successful:', asset._id);
-      return asset
+      const result = await response.json();
+      return result.asset;
     } catch (error) {
-      console.error('❌ Error uploading image:', error);
-      
-      // Provide user-friendly error messages
-      let userMessage = 'Failed to upload image';
-      
-      if (error instanceof Error) {
-        if (error.name === 'AbortError') {
-          userMessage = 'Upload timeout - please check your internet connection and try again';
-        } else if (error.message.includes('timeout') || error.message.includes('TIMEOUT')) {
-          userMessage = 'Upload timeout - please try again';
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          userMessage = 'Network error - please check your internet connection';
-        } else if (error.message.includes('too large')) {
-          userMessage = 'File is too large (max 10MB allowed)';
-        } else if (error.message.includes('file type') || error.message.includes('image files')) {
-          userMessage = 'Only image files are allowed';
-        } else if (error.message) {
-          userMessage = error.message;
-        }
-      }
-      
-      throw new Error(userMessage);
+      console.error('Error uploading image:', error);
+      throw error;
     }
   };
 
@@ -534,9 +475,9 @@ export default function ScheduleLabPage() {
     if (!doctorRequestFile) {
       setCustomAlert({
         isOpen: true,
-        type: 'warning',
+        type: 'error',
         title: 'Doctor\'s Request Required',
-        message: 'Please upload a doctor\'s request/prescription image. This is required for all lab appointments.'
+        message: 'Please upload a doctor\'s request or prescription image before proceeding.'
       });
       return;
     }
@@ -552,9 +493,9 @@ export default function ScheduleLabPage() {
     if (selectedDate < twoDaysFromNow) {
       setCustomAlert({
         isOpen: true,
-        type: 'warning',
-        title: 'Appointment Date Too Soon',
-        message: 'Appointments must be scheduled at least 2 days in advance. Please select a date that is 2 or more days from today.'
+        type: 'error',
+        title: 'Invalid Date',
+        message: 'Appointments must be scheduled at least 2 days in advance.'
       });
       return;
     }
@@ -568,10 +509,12 @@ export default function ScheduleLabPage() {
       // Initialize eligibility answers for tests that need checking
       const initialAnswers: Record<string, Record<string, boolean>> = {};
       testsRequiringCheck.forEach(test => {
-        initialAnswers[test._id] = {};
-        test.eligibilityQuestions?.forEach(q => {
-          initialAnswers[test._id][q._key] = false;
-        });
+        if (test.eligibilityQuestions) {
+          initialAnswers[test._id] = {};
+          test.eligibilityQuestions.forEach(question => {
+            initialAnswers[test._id][question._key] = false;
+          });
+        }
       });
       setEligibilityAnswers(initialAnswers);
       setShowEligibilityModal(true);
@@ -589,7 +532,8 @@ export default function ScheduleLabPage() {
       notes: formData.notes,
       doctorRequestNotes: formData.doctorRequestNotes
     });
-    setIsConfirmationModalOpen(true);
+    setIsBookingModalOpen(false); // Close booking modal
+    setIsConfirmationModalOpen(true); // Open confirmation modal
   };
 
   const handleConfirmSubmission = async () => {
@@ -611,39 +555,35 @@ export default function ScheduleLabPage() {
       if (recentBookedTimes.includes(finalFormData.time)) {
         setCustomAlert({
           isOpen: true,
-          type: 'warning',
-          title: 'Time Slot Unavailable',
-          message: 'Sorry, this time slot has been booked by another patient. Please select a different time.',
-          action: () => {
-            setBookedTimes(recentBookedTimes);
-            if (editMode) {
-              setTempFormData(prev => ({ ...prev, time: "" }));
-            } else {
-              setFormData(prev => ({ ...prev, time: "" }));
-            }
-          }
+          type: 'error',
+          title: 'Time Slot No Longer Available',
+          message: 'This time slot was just booked by another patient. Please select a different time.'
         });
+        setSubmitting(false);
+        setSubmissionStep('idle');
         return;
       }
 
       // Upload doctor's request image (now required)
       let doctorRequestImageAsset = null;
       try {
-        setUploading(true);
+        setSubmissionStep('uploading');
         doctorRequestImageAsset = await uploadImageToSanity(doctorRequestFile!);
-        setUploading(false);
-        setSubmissionStep('scheduling');
+        console.log('Doctor request image uploaded:', doctorRequestImageAsset);
       } catch (error) {
-        setUploading(false);
-        setSubmissionStep('idle');
+        console.error('Error uploading doctor request image:', error);
         setCustomAlert({
           isOpen: true,
           type: 'error',
           title: 'Upload Failed',
           message: 'Failed to upload doctor\'s request image. Please try again.'
         });
+        setSubmitting(false);
+        setSubmissionStep('idle');
         return;
       }
+
+      setSubmissionStep('scheduling');
 
       // Clean phone number (keep only digits) for submission
       const cleanPhone = finalFormData.phone.replace(/\D/g, '');
@@ -657,7 +597,7 @@ export default function ScheduleLabPage() {
         time: finalFormData.time,
         notes: finalFormData.notes,
         selectedTests: selectedTests,
-        hasDoctorRequest: true, // Always true now
+        hasDoctorRequest: true,
         doctorRequestImage: doctorRequestImageAsset,
         doctorRequestNotes: finalFormData.doctorRequestNotes
       };
@@ -677,7 +617,7 @@ export default function ScheduleLabPage() {
         date: "",
         time: "",
         notes: "",
-        hasDoctorRequest: true, // Keep true since it's required
+        hasDoctorRequest: true,
         doctorRequestNotes: ""
       });
       setTempFormData({
@@ -695,6 +635,7 @@ export default function ScheduleLabPage() {
       setDoctorRequestFile(null);
       setDoctorRequestPreview(null);
       setEditMode(false);
+      setIsBookingModalOpen(false);
       
       setCustomAlert({
         isOpen: true,
@@ -708,34 +649,18 @@ export default function ScheduleLabPage() {
       
       // More detailed error handling
       if (error instanceof Error) {
-        if (error.message.includes('Insufficient permissions')) {
-          setCustomAlert({
-            isOpen: true,
-            type: 'error',
-            title: 'Permission Error',
-            message: 'Unable to schedule appointment due to permissions. Please contact us directly at (02) 8825-5236.'
-          });
-        } else if (error.message.includes('authentication')) {
-          setCustomAlert({
-            isOpen: true,
-            type: 'error',
-            title: 'Authentication Error',
-            message: 'Authentication error. Please refresh the page and try again.'
-          });
-        } else {
-          setCustomAlert({
-            isOpen: true,
-            type: 'error',
-            title: 'Error',
-            message: `Error: ${error.message}. Please try again or contact us directly.`
-          });
-        }
+        setCustomAlert({
+          isOpen: true,
+          type: 'error',
+          title: 'Appointment Failed',
+          message: `Failed to schedule appointment: ${error.message}`
+        });
       } else {
         setCustomAlert({
           isOpen: true,
           type: 'error',
-          title: 'Appointment Error',
-          message: 'There was an error scheduling your appointment. Please try again or contact us directly.'
+          title: 'Appointment Failed',
+          message: 'An unexpected error occurred. Please try again.'
         });
       }
     } finally {
@@ -777,6 +702,44 @@ export default function ScheduleLabPage() {
     setEditMode(false);
   };
 
+  // Get available days based on selected tests and existing appointments
+  const getAvailableDays = () => {
+    if (selectedTests.length === 0) return [];
+    
+    const selectedTestData = labTests.filter(test => selectedTests.includes(test._id));
+    if (selectedTestData.length === 0) return [];
+    
+    // Find common available days for all selected tests
+    let commonDays = selectedTestData[0].availableDays || [];
+    
+    for (const test of selectedTestData) {
+      commonDays = commonDays.filter(day => test.availableDays?.includes(day));
+    }
+    
+    return commonDays;
+  };
+
+  // Check if a specific date is available for selected tests
+  const isDateAvailable = (date: string) => {
+    if (selectedTests.length === 0) return false;
+    
+    const selectedDate = new Date(date);
+    const dayName = selectedDate.toLocaleDateString('en-US', { weekday: 'long' });
+    const availableDays = getAvailableDays();
+    
+    // Check if the day is in available days
+    if (!availableDays.includes(dayName)) return false;
+    
+    // Check if it's at least 2 days from today
+    const today = new Date();
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(today.getDate() + 2);
+    
+    if (selectedDate < twoDaysFromNow) return false;
+    
+    return true;
+  };
+
   // Get available time slots for selected date (excluding booked times)
   const getAvailableTimeSlots = () => {
     if (!formData.date || selectedTests.length === 0) return [];
@@ -793,7 +756,7 @@ export default function ScheduleLabPage() {
     let availableSlots = selectedTestData[0].availableTimeSlots || [];
     
     for (const test of selectedTestData) {
-      if (!test.availableDays.includes(dayName)) {
+      if (!test.availableDays?.includes(dayName)) {
         return []; // If any test is not available on this day, no slots available
       }
       
@@ -807,8 +770,38 @@ export default function ScheduleLabPage() {
     return availableSlots.filter(slot => !bookedTimes.includes(slot));
   };
 
+  // Generate next 30 available dates for calendar preview
+  const getNextAvailableDates = () => {
+    const availableDates = [];
+    const today = new Date();
+    const twoDaysFromNow = new Date();
+    twoDaysFromNow.setDate(today.getDate() + 2);
+    
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(twoDaysFromNow);
+      checkDate.setDate(twoDaysFromNow.getDate() + i);
+      
+      const dateString = checkDate.toISOString().split('T')[0];
+      if (isDateAvailable(dateString)) {
+        availableDates.push({
+          date: dateString,
+          dayName: checkDate.toLocaleDateString('en-US', { weekday: 'short' }),
+          dayNumber: checkDate.getDate(),
+          month: checkDate.toLocaleDateString('en-US', { month: 'short' })
+        });
+      }
+    }
+    
+    return availableDates;
+  };
+
+  // Filter tests by selected department
+  const filteredTests = selectedDepartment === "All Departments" 
+    ? labTests 
+    : labTests.filter(test => test.labDepartment?.name === selectedDepartment);
+
   // Group tests by category
-  const groupedTests = labTests.reduce((acc, test) => {
+  const groupedTests = filteredTests.reduce((acc, test) => {
     const departmentName = test.labDepartment?.name || 'Other Tests';
     if (!acc[departmentName]) {
       acc[departmentName] = [];
@@ -868,6 +861,7 @@ export default function ScheduleLabPage() {
     ? urlFor(pageData.heroSection.backgroundImage.asset).width(1600).height(600).url()
     : "/contact.jpg";
 
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -893,379 +887,226 @@ export default function ScheduleLabPage() {
       {/* Main Content */}
       <section className="py-12 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-12">
+          <div className="lg:grid lg:grid-cols-4 lg:gap-8 max-w-7xl mx-auto">
             
-            {/* Test Selection */}
-            <div className="lg:col-span-2 space-y-6">
-              <div>
-                <h2 className="text-2xl font-bold text-foreground mb-6 lg:text-3xl">
-                  {mainContent.sectionTitle}
-                </h2>
-                
-                {Object.entries(groupedTests).map(([departmentName, tests]) => (
-                  <Card key={departmentName} className="mb-6">
-                    <CardHeader className="border-b">
-                      <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                          <span className="text-green-600 font-semibold text-sm">🏥</span>
-                        </div>
-                        {departmentName}
-                        <Badge variant="outline" className="ml-auto">
-                          {tests.length} {tests.length === 1 ? 'test' : 'tests'}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 lg:space-y-4">
-                        {tests.map((test) => (
-                          <div 
-                            key={test._id}
-                            className={`p-4 border rounded-lg cursor-pointer transition-all duration-200 ${
-                              selectedTests.includes(test._id) 
-                                ? 'border-primary bg-primary/5 scale-[1.02]' 
-                                : 'border-border hover:border-primary/50 hover:scale-[1.01]'
-                            }`}
-                            onClick={() => handleTestSelection(test._id)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <CheckCircle 
-                                    className={`h-5 w-5 lg:h-6 lg:w-6 ${
-                                      selectedTests.includes(test._id) 
-                                        ? 'text-primary' 
-                                        : 'text-muted-foreground'
-                                    }`}
-                                  />
-                                  <h4 className="font-medium flex items-center gap-2">
-                                    {test.name}
-                                    {test.requiresEligibilityCheck && (
-                                      <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800">
-                                        🩺 Screening Required
-                                      </Badge>
-                                    )}
-                                  </h4>
-                                </div>
-                                <div className="flex gap-4 mt-2 ml-7">
-                                  <Badge variant="outline">{test.duration}</Badge>
-                                  {test.resultTime && (
-                                    <Badge variant="secondary">Results: {test.resultTime}</Badge>
-                                  )}
-                                </div>
-                                {test.preparationNotes && test.preparationNotes.length > 0 && (
-                                  <ul className="text-xs text-muted-foreground mt-2 ml-7 list-disc list-inside">
-                                    {test.preparationNotes.map((note, index) => (
-                                      <li key={index}>{note}</li>
-                                    ))}
-                                  </ul>
-                                )}
-                              </div>
-                            </div>
-                          </div>
+            {/* Left Sidebar - Lab Departments */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-6">
+                <Card className="mb-6">
+                  <CardHeader>
+                    <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
+                      <Building2 className="w-6 h-6 text-green-600" />
+                      Lab Departments
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {/* Mobile Dropdown */}
+                    <div className="lg:hidden p-4">
+                      <select
+                        value={selectedDepartment}
+                        onChange={(e) => setSelectedDepartment(e.target.value)}
+                        className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      >
+                        <option value="All Departments">All Departments</option>
+                        {labDepartments.map((department) => (
+                          <option key={department._id} value={department.name}>
+                            {department.name}
+                          </option>
                         ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </select>
+                    </div>
 
-                {/* Show message when no tests available */}
-                {Object.keys(groupedTests).length === 0 && !loading && (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <p className="text-muted-foreground">No tests available at the moment.</p>
-                      <p className="text-sm text-muted-foreground mt-2">Please check back later or contact us directly.</p>
-                    </CardContent>
-                  </Card>
-                )}
+                    {/* Desktop Button List */}
+                    <div className="hidden lg:block space-y-1 p-2">
+                      {/* All Departments Button */}
+                      <Button
+                        variant={selectedDepartment === "All Departments" ? "default" : "outline"}
+                        className={`w-full justify-start h-12 text-left text-sm ${
+                          selectedDepartment === "All Departments" 
+                            ? "bg-green-600 hover:bg-green-700 text-white" 
+                            : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                        }`}
+                        onClick={() => setSelectedDepartment("All Departments")}
+                      >
+                        <div className="mr-3 flex items-center">
+                          <Building2 className={`h-5 w-5 ${
+                            selectedDepartment === "All Departments" 
+                              ? "text-white" 
+                              : "text-green-600"
+                          }`} />
+                        </div>
+                        All Departments
+                      </Button>
+                      
+                      {/* Department Buttons */}
+                      {labDepartments.map((department) => (
+                        <Button
+                          key={department._id}
+                          variant={selectedDepartment === department.name ? "default" : "outline"}
+                          className={`w-full justify-start h-12 text-left text-sm ${
+                            selectedDepartment === department.name 
+                              ? "bg-green-600 hover:bg-green-700 text-white" 
+                              : "bg-white hover:bg-gray-50 text-gray-700 border-gray-300"
+                          }`}
+                          onClick={() => {
+                            if (selectedDepartment === department.name) {
+                              setSelectedDepartment("All Departments");
+                            } else {
+                              setSelectedDepartment(department.name);
+                            }
+                          }}
+                        >
+                          <div className="mr-3 flex items-center">
+                            <TestTube2 className={`h-5 w-5 ${
+                              selectedDepartment === department.name 
+                                ? "text-white" 
+                                : "text-green-600"
+                            }`} />
+                          </div>
+                          <div className="text-left">
+                            <div className="font-medium">{department.name}</div>
+                            {department.location && (
+                              <div className="text-xs opacity-75">{department.location}</div>
+                            )}
+                          </div>
+                        </Button>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </div>
 
-            {/* Booking Form */}
-            <div className="space-y-6">
-              {selectedTests.length > 0 ? (
-                <Card className="sticky top-4">
-                  <CardHeader>
-                    <CardTitle className="text-primary">Schedule Your Appointment</CardTitle>
-                    <div className="text-sm text-muted-foreground">
-                      {selectedTests.length} test{selectedTests.length !== 1 ? 's' : ''} selected
-                    </div>
+            {/* Right Content - Lab Tests */}
+            <div className="lg:col-span-3">
+              {/* Results Header */}
+              <div className="mb-8">
+                <h2 className="text-2xl font-bold text-foreground mb-2 lg:text-3xl">
+                  {filteredTests.length} Test{filteredTests.length !== 1 ? 's' : ''} Available
+                </h2>
+                <p className="text-muted-foreground lg:text-lg">
+                  {selectedDepartment !== "All Departments" 
+                    ? `Showing tests from ${selectedDepartment}` 
+                    : "Showing tests from all departments"
+                  }
+                </p>
+              </div>
+
+              {/* Lab Tests */}
+              {Object.entries(groupedTests).map(([departmentName, tests]) => (
+                <Card key={departmentName} className="mb-6">
+                  <CardHeader className="border-b">
+                    <CardTitle className="text-lg lg:text-xl flex items-center gap-2">
+                      <TestTube2 className="w-6 h-6 text-green-600" />
+                      {departmentName}
+                      <Badge variant="outline" className="ml-auto">
+                        {tests.length} {tests.length === 1 ? 'test' : 'tests'}
+                      </Badge>
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input
-                          id="firstName"
-                          required
-                          value={formData.firstName}
-                          onChange={(e) => setFormData({...formData, firstName: e.target.value})}
-                          disabled={submitting || uploading}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input
-                          id="lastName"
-                          required
-                          value={formData.lastName}
-                          onChange={(e) => setFormData({...formData, lastName: e.target.value})}
-                          disabled={submitting || uploading}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        required
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
-                        disabled={submitting || uploading}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        type="tel"
-                        required
-                        value={formData.phone}
-                        onChange={handlePhoneChange}
-                        placeholder="09xxxxxxxxx (11 digits)"
-                        className={phoneError ? "border-red-500 focus:border-red-500" : ""}
-                        disabled={submitting || uploading}
-                      />
-                      {phoneError && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {phoneError}
-                        </p>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Enter 11-digit phone number (e.g., 09123456789)
-                      </p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="date">Preferred Date</Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        required
-                        min={(() => {
-                          const today = new Date();
-                          // Add 2 days to today
-                          today.setDate(today.getDate() + 2);
-                          // Ensure we're working with local timezone
-                          const year = today.getFullYear();
-                          const month = String(today.getMonth() + 1).padStart(2, '0');
-                          const day = String(today.getDate()).padStart(2, '0');
-                          return `${year}-${month}-${day}`;
-                        })()}
-                        value={formData.date}
-                        onChange={(e) => setFormData({...formData, date: e.target.value, time: ""})}
-                        disabled={submitting || uploading}
-                      />
-                      <div className="mt-1 space-y-1">
-                        <p className="text-xs text-muted-foreground">
-                          Appointments must be scheduled at least 2 days in advance
-                        </p>
-                        <p className="text-xs text-blue-600">
-                          Earliest available: {(() => {
-                            const earliest = new Date();
-                            earliest.setDate(earliest.getDate() + 2);
-                            return earliest.toLocaleDateString('en-US', { 
-                              weekday: 'long', 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            });
-                          })()}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="time">Preferred Time</Label>
-                      <SimpleSelect
-                        value={formData.time}
-                        onValueChange={(value) => setFormData({...formData, time: value})}
-                        disabled={!formData.date || selectedTests.length === 0 || submitting || uploading}
-                        placeholder={
-                          !formData.date 
-                            ? "Select date first" 
-                            : availableTimeSlots.length === 0 
-                              ? "No available slots" 
-                              : "Select time slot"
-                        }
-                        options={availableTimeSlots}
-                      />
-                      {formData.date && selectedTests.length > 0 && availableTimeSlots.length === 0 && (
-                        <p className="text-xs text-red-500 mt-1">
-                          {bookedTimes.length > 0 
-                            ? "All time slots are booked for this date. Please choose another date."
-                            : "Selected tests are not available on this date. Please choose another date."
-                          }
-                        </p>
-                      )}
-                      {bookedTimes.length > 0 && formData.date && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Booked hours: {bookedTimes.join(', ')}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="notes">Special Instructions (Optional)</Label>
-                      <Textarea
-                        id="notes"
-                        rows={3}
-                        placeholder="Any special requirements or notes..."
-                        value={formData.notes}
-                        onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                        disabled={submitting || uploading}
-                      />
-                    </div>
-
-                    {/* Doctor's Request Section - Now Required */}
-                    <div className="border-t pt-4">
-                      <div className="mb-3">
-                        <Label className="text-sm font-medium text-red-600">
-                          Doctor's Request/Prescription *
-                        </Label>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          A doctor's request or prescription is required for all diagnostic appointments
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <Label htmlFor="doctorRequest" className="text-sm">
-                            Upload Request Image *
-                          </Label>
-                          <div className="mt-1">
-                            {!doctorRequestPreview ? (
-                              <div className="border-2 border-dashed border-red-300 rounded-lg p-4 text-center hover:border-red-400 transition-colors">
-                                <input
-                                  type="file"
-                                  id="doctorRequest"
-                                  accept="image/*"
-                                  onChange={handleDoctorRequestFile}
-                                  className="hidden"
-                                  required
-                                  disabled={submitting || uploading}
+                    {/* Responsive test cards */}
+                    <div className="flex flex-col gap-4">
+                      {tests.map((test) => (
+                        <div
+                          key={test._id}
+                          className={`p-4 border rounded-lg transition-all duration-200 ${
+                            selectedTests.includes(test._id)
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-primary/50'
+                          }`}
+                        >
+                          {/* Stack content vertically on mobile */}
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle
+                                  className={`h-5 w-5 lg:h-6 lg:w-6 ${
+                                    selectedTests.includes(test._id)
+                                      ? 'text-primary'
+                                      : 'text-muted-foreground'
+                                  }`}
                                 />
-                                <label htmlFor="doctorRequest" className={`cursor-pointer ${submitting || uploading ? 'pointer-events-none opacity-50' : ''}`}>
-                                  <Upload className="h-8 w-8 mx-auto text-red-400 mb-2" />
-                                  <p className="text-sm text-gray-600">
-                                    Click to upload doctor's request *
-                                  </p>
-                                  <p className="text-xs text-red-500 mt-1">
-                                    Required: JPG, PNG up to 5MB
-                                  </p>
-                                </label>
+                                <h4 className="font-medium flex items-center gap-2">
+                                  {test.name}
+                                  {test.requiresEligibilityCheck && (
+                                    <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-800 flex items-center gap-1">
+                                      <Stethoscope className="h-3 w-3" />
+                                      Screening Required
+                                    </Badge>
+                                  )}
+                                  {test.allowOnlineBooking === false && (
+                                    <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600 flex items-center gap-1">
+                                      <Info className="h-3 w-3" />
+                                      Contact Required
+                                    </Badge>
+                                  )}
+                                </h4>
                               </div>
-                            ) : (
-                              <div className="relative">
-                                <div className="border rounded-lg p-2 border-green-300 bg-green-50">
-                                  <Image
-                                    src={doctorRequestPreview}
-                                    alt="Doctor's request preview"
-                                    width={200}
-                                    height={150}
-                                    className="w-full h-32 object-cover rounded"
-                                  />
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={removeDoctorRequestFile}
-                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  disabled={submitting || uploading}
+                              <div className="flex flex-wrap gap-2 mt-2 ml-7">
+                                <Badge variant="outline">{test.duration}</Badge>
+                                {test.resultTime && (
+                                  <Badge variant="secondary">Results: {test.resultTime}</Badge>
+                                )}
+                              </div>
+                              {test.preparationNotes && test.preparationNotes.length > 0 && (
+                                <ul className="text-xs text-muted-foreground mt-2 ml-7 list-disc list-inside">
+                                  {test.preparationNotes.map((note, index) => (
+                                    <li key={index}>{note}</li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                            <div className="w-full sm:w-auto">
+                              {test.allowOnlineBooking !== false ? (
+                                <Button
+                                  onClick={() => {
+                                    handleTestSelection(test._id);
+                                    setIsBookingModalOpen(true);
+                                  }}
+                                  variant={selectedTests.includes(test._id) ? "default" : "outline"}
+                                  size="sm"
+                                  className="w-full sm:w-auto"
                                 >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </div>
-                            )}
+                                  <Calendar className="h-4 w-4 mr-2" />
+                                  Book Your Appointment
+                                </Button>
+                              ) : (
+                                <div className="text-center">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    disabled
+                                    className="mb-2 w-full sm:w-auto"
+                                  >
+                                    <Phone className="h-4 w-4 mr-2" />
+                                    Contact Required
+                                  </Button>
+                                  <p className="text-xs text-muted-foreground max-w-32 mx-auto">
+                                    {test.bookingUnavailableMessage || 'Please contact the hospital directly to schedule this test'}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Please upload a clear photo or scan of your doctor's prescription or request form
-                          </p>
                         </div>
-
-                        <div>
-                          <Label htmlFor="doctorRequestNotes" className="text-sm">
-                            Additional Notes (Optional)
-                          </Label>
-                          <Textarea
-                            id="doctorRequestNotes"
-                            rows={2}
-                            placeholder="Any additional information about the doctor's request..."
-                            value={formData.doctorRequestNotes}
-                            onChange={(e) => setFormData({...formData, doctorRequestNotes: e.target.value})}
-                            className="mt-1"
-                            disabled={submitting || uploading}
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
+                  </CardContent>
+                </Card>
+              ))}
 
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={
-                        selectedTests.length === 0 || 
-                        !formData.time || 
-                        submitting || 
-                        uploading ||
-                        phoneError !== "" ||
-                        !doctorRequestFile // Add this validation
+              {/* Show message when no tests available */}
+              {Object.keys(groupedTests).length === 0 && !loading && (
+                <Card>
+                  <CardContent className="p-8 text-center">
+                    <p className="text-muted-foreground">
+                      {selectedDepartment === "All Departments" 
+                        ? "No tests available at the moment." 
+                        : `No tests available for ${selectedDepartment} at the moment.`
                       }
-                    >
-                      {(submitting || uploading) ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          {uploading ? 'Uploading...' : 'Scheduling Appointment...'}
-                        </>
-                      ) : (
-                        <>
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Schedule Appointment
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-              ) : (
-                <Card className="sticky top-4">
-                  <CardHeader>
-                    <CardTitle className="text-primary">Select Tests First</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center py-12">
-                    <div className="space-y-4">
-                      <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
-                        <TestTube className="h-8 w-8 text-primary" />
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-lg font-semibold text-gray-900">Choose Your Lab Tests</h3>
-                        <p className="text-sm text-gray-600 max-w-sm mx-auto">
-                          Select one or more diagnostic tests from the list on the left to start scheduling your appointment.
-                        </p>
-                      </div>
-                      <div className="hidden md:block">
-                        <p className="text-xs text-gray-500 mt-4">
-                          👈 Browse available tests by department
-                        </p>
-                      </div>
-                      <div className="md:hidden">
-                        <p className="text-xs text-gray-500 mt-4">
-                          👆 Browse available tests above
-                        </p>
-                      </div>
-                    </div>
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">Please check back later or contact us directly.</p>
                   </CardContent>
                 </Card>
               )}
@@ -1296,11 +1137,322 @@ export default function ScheduleLabPage() {
         </div>
       </section>
 
+      {/* Booking Modal */}
+      <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              Schedule Lab Appointment
+            </DialogTitle>
+          </DialogHeader>
+          
+          {/* Selected Test Display */}
+          {selectedTests.length > 0 && (
+            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg mb-6">
+              <h3 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Selected Test:</h3>
+              <div className="space-y-2">
+                {selectedTests.map((testId) => {
+                  const test = labTests.find(t => t._id === testId);
+                  if (!test) return null;
+                  return (
+                    <div key={test._id} className="flex items-start justify-between bg-white dark:bg-gray-800 p-3 rounded border">
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 dark:text-white">{test.name}</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{test.labDepartment?.name}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Booking Form */}
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Personal Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Personal Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    required
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    required
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  placeholder="09xxxxxxxxx (11 digits)"
+                />
+              </div>
+            </div>
+
+            {/* Appointment Details */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Appointment Details</h3>
+              
+              {/* Available Days Preview */}
+              {selectedTests.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Available Days
+                  </h4>
+                  <div className="flex flex-wrap gap-2">
+                    {getAvailableDays().map((day) => (
+                      <span key={day} className="px-2 py-1 bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 text-sm rounded">
+                        {day}
+                      </span>
+                    ))}
+                  </div>
+                  {getAvailableDays().length === 0 && (
+                    <p className="text-blue-700 dark:text-blue-300 text-sm">Select tests to see available days</p>
+                  )}
+                </div>
+              )}
+
+              {/* Next Available Dates */}
+              {selectedTests.length > 0 && getNextAvailableDates().length > 0 && (
+                <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <h4 className="font-medium text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
+                    <CalendarCheck className="w-4 h-4" />
+                    Next Available Dates (2+ days advance)
+                  </h4>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                    {getNextAvailableDates().slice(0, 12).map((dateObj) => (
+                      <button
+                        key={dateObj.date}
+                        type="button"
+                        onClick={() => setFormData({...formData, date: dateObj.date, time: ""})}
+                        className={`p-2 text-xs rounded border-2 transition-all ${
+                          formData.date === dateObj.date
+                            ? 'border-green-500 bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100'
+                            : 'border-green-200 dark:border-green-700 hover:border-green-400 bg-white dark:bg-green-900/30 text-green-700 dark:text-green-200'
+                        }`}
+                      >
+                        <div className="font-medium">{dateObj.dayNumber}</div>
+                        <div className="text-xs">{dateObj.month}</div>
+                        <div className="text-xs">{dateObj.dayName}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div>
+                <Label htmlFor="date">Preferred Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  required
+                  value={formData.date}
+                  min={(() => {
+                    const today = new Date();
+                    today.setDate(today.getDate() + 2);
+                    return today.toISOString().split('T')[0];
+                  })()}
+                  onChange={(e) => setFormData({...formData, date: e.target.value, time: ""})}
+                  className={!isDateAvailable(formData.date) && formData.date ? 'border-red-500' : ''}
+                />
+                {formData.date && !isDateAvailable(formData.date) && (
+                  <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                    Selected date is not available. Please choose from available dates above or select a different date.
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="time">Preferred Time</Label>
+                <SimpleSelect
+                  value={formData.time}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, time: value }))}
+                  placeholder={availableTimeSlots.length > 0 ? "Select time slot" : "Select date first"}
+                  options={availableTimeSlots}
+                  disabled={availableTimeSlots.length === 0}
+                />
+                {formData.date && availableTimeSlots.length === 0 && (
+                  <p className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                    No available time slots for selected date. Please choose another date.
+                  </p>
+                )}
+                {availableTimeSlots.length > 0 && (
+                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                    {availableTimeSlots.length} time slot{availableTimeSlots.length !== 1 ? 's' : ''} available
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="notes">Special Instructions (Optional)</Label>
+                <Textarea
+                  id="notes"
+                  rows={3}
+                  placeholder="Any special requirements or notes..."
+                  value={formData.notes}
+                  onChange={(e) => setFormData({...formData, notes: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Doctor's Prescription/Request Upload */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Doctor's Request/Prescription
+              </h3>
+              
+              <div>
+                <Label htmlFor="doctorRequest">Upload Doctor's Request (Required)</Label>
+                <div className="mt-2">
+                  {!doctorRequestFile ? (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600 mb-2">
+                        Upload an image of your doctor's prescription or request form
+                      </p>
+                      <p className="text-xs text-gray-500 mb-4">
+                        Accepted formats: JPG, PNG, GIF (Max size: 5MB)
+                      </p>
+                      <input
+                        id="doctorRequest"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleDoctorRequestFile}
+                        className="hidden"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('doctorRequest')?.click()}
+                      >
+                        <Upload className="h-4 w-4 mr-2" />
+                        Choose File
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 bg-green-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <CheckCircle className="h-5 w-5 text-green-600" />
+                          <div>
+                            <p className="text-sm font-medium text-green-900">
+                              {doctorRequestFile.name}
+                            </p>
+                            <p className="text-xs text-green-600">
+                              {(doctorRequestFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={removeDoctorRequestFile}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      
+                      {/* Image Preview */}
+                      {doctorRequestPreview && (
+                        <div className="mt-3">
+                          <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                          <div className="relative w-full max-w-xs">
+                            <Image
+                              src={doctorRequestPreview}
+                              alt="Doctor's request preview"
+                              width={300}
+                              height={200}
+                              className="rounded border object-cover"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="doctorRequestNotes">Additional Notes about Doctor's Request (Optional)</Label>
+                <Textarea
+                  id="doctorRequestNotes"
+                  rows={2}
+                  placeholder="Any additional information about the doctor's request..."
+                  value={formData.doctorRequestNotes}
+                  onChange={(e) => setFormData({...formData, doctorRequestNotes: e.target.value})}
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="pt-6 border-t">
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={
+                  selectedTests.length === 0 || 
+                  !formData.time || 
+                  submitting || 
+                  uploading ||
+                  phoneError !== "" ||
+                  !doctorRequestFile
+                }
+              >
+                {submitting || uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {uploading ? 'Uploading...' : 'Scheduling Appointment...'}
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Book Appointment
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Confirmation Modal */}
       {isConfirmationModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-6 relative m-4 max-h-[90vh] overflow-y-auto">
-            <>
+            <div>
               <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
                 {editMode ? 'Edit Appointment Details' : 'Confirm Appointment'}
               </h3>
@@ -1308,267 +1460,267 @@ export default function ScheduleLabPage() {
                 {editMode ? 'Make changes to your appointment details below.' : 'Please review your appointment details before confirming.'}
               </p>
                   
-                  {!editMode ? (
-                    // Display mode
-                    <div className="space-y-4 text-gray-700">
-                      <div className="flex items-center space-x-3">
-                        <FileText className="h-5 w-5 text-green-500" />
-                        <div>
-                          <span className="font-medium">Patient:</span> {tempFormData.firstName} {tempFormData.lastName}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Mail className="h-5 w-5 text-green-500" />
-                        <div>
-                          <span className="font-medium">Email:</span> {tempFormData.email}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="h-5 w-5 text-green-500" />
-                        <div>
-                          <span className="font-medium">Date:</span> {new Date(tempFormData.date).toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
-                          })}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Clock className="h-5 w-5 text-green-500" />
-                        <div>
-                          <span className="font-medium">Time:</span> {tempFormData.time}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <Phone className="h-5 w-5 text-green-500" />
-                        <div>
-                          <span className="font-medium">Phone:</span> {tempFormData.phone}
-                        </div>
-                      </div>
-                      {tempFormData.notes && (
-                        <div className="flex items-start space-x-3">
-                          <FileText className="h-5 w-5 text-green-500 mt-0.5" />
-                          <div>
-                            <span className="font-medium">Notes:</span> {tempFormData.notes}
-                          </div>
-                        </div>
-                      )}
-                      {tempFormData.doctorRequestNotes && (
-                        <div className="flex items-start space-x-3">
-                          <FileText className="h-5 w-5 text-green-500 mt-0.5" />
-                          <div>
-                            <span className="font-medium">Doctor's Request Notes:</span> {tempFormData.doctorRequestNotes}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex items-start space-x-3">
-                        <TestTube className="h-5 w-5 text-green-500 mt-0.5" />
-                        <div>
-                          <span className="font-medium">Selected Tests:</span>
-                          <ul className="mt-1 ml-4 list-disc">
-                            {selectedTests.map(testId => {
-                              const test = labTests.find(t => t._id === testId);
-                              return (
-                                <li key={testId}>{test?.name}</li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      </div>
+              {!editMode ? (
+                // Display mode
+                <div className="space-y-4 text-gray-700">
+                  <div className="flex items-center space-x-3">
+                    <FileText className="h-5 w-5 text-green-500" />
+                    <div>
+                      <span className="font-medium">Patient:</span> {tempFormData.firstName} {tempFormData.lastName}
                     </div>
-                  ) : (
-                    // Edit mode (unchanged since it's form fields)
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="editFirstName">First Name</Label>
-                          <Input
-                            id="editFirstName"
-                            value={tempFormData.firstName}
-                            onChange={(e) => setTempFormData({...tempFormData, firstName: e.target.value})}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="editLastName">Last Name</Label>
-                          <Input
-                            id="editLastName"
-                            value={tempFormData.lastName}
-                            onChange={(e) => setTempFormData({...tempFormData, lastName: e.target.value})}
-                            required
-                          />
-                        </div>
-                      </div>
-                      
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="h-5 w-5 text-green-500" />
+                    <div>
+                      <span className="font-medium">Email:</span> {tempFormData.email}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Calendar className="h-5 w-5 text-green-500" />
+                    <div>
+                      <span className="font-medium">Date:</span> {new Date(tempFormData.date).toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Clock className="h-5 w-5 text-green-500" />
+                    <div>
+                      <span className="font-medium">Time:</span> {tempFormData.time}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="h-5 w-5 text-green-500" />
+                    <div>
+                      <span className="font-medium">Phone:</span> {tempFormData.phone}
+                    </div>
+                  </div>
+                  {tempFormData.notes && (
+                    <div className="flex items-start space-x-3">
+                      <FileText className="h-5 w-5 text-green-500 mt-0.5" />
                       <div>
-                        <Label htmlFor="editEmail">Email</Label>
-                        <Input
-                          id="editEmail"
-                          type="email"
-                          value={tempFormData.email}
-                          onChange={(e) => setTempFormData({...tempFormData, email: e.target.value})}
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="editPhone">Phone Number</Label>
-                        <Input
-                          id="editPhone"
-                          type="tel"
-                          value={tempFormData.phone}
-                          onChange={(e) => {
-                            const sanitized = e.target.value.replace(/[^\d\s\-\(\)\+]/g, '');
-                            setTempFormData({...tempFormData, phone: sanitized});
-                          }}
-                          placeholder="09XXXXXXXXX"
-                          required
-                          className={validatePhoneNumber(tempFormData.phone) ? "border-red-500" : ""}
-                        />
-                        {validatePhoneNumber(tempFormData.phone) && (
-                          <p className="text-red-500 text-sm mt-1">
-                            {validatePhoneNumber(tempFormData.phone)}
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="editDate">Date</Label>
-                          <Input
-                            id="editDate"
-                            type="date"
-                            value={tempFormData.date}
-                            onChange={(e) => setTempFormData({...tempFormData, date: e.target.value})}
-                            min={(() => {
-                              const today = new Date();
-                              // Add 2 days to today
-                              today.setDate(today.getDate() + 2);
-                              // Ensure we're working with local timezone
-                              const year = today.getFullYear();
-                              const month = String(today.getMonth() + 1).padStart(2, '0');
-                              const day = String(today.getDate()).padStart(2, '0');
-                              return `${year}-${month}-${day}`;
-                            })()}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="editTime">Time</Label>
-                          <SimpleSelect
-                            value={tempFormData.time}
-                            onValueChange={(value) => setTempFormData({...tempFormData, time: value})}
-                            placeholder="Select time"
-                            options={availableTimeSlots}
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="editNotes">Additional Notes (Optional)</Label>
-                        <Textarea
-                          id="editNotes"
-                          value={tempFormData.notes}
-                          onChange={(e) => setTempFormData({...tempFormData, notes: e.target.value})}
-                          placeholder="Any additional information or special requirements"
-                          rows={3}
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="editDoctorRequestNotes">Doctor's Request Notes (Optional)</Label>
-                        <Textarea
-                          id="editDoctorRequestNotes"
-                          value={tempFormData.doctorRequestNotes}
-                          onChange={(e) => setTempFormData({...tempFormData, doctorRequestNotes: e.target.value})}
-                          placeholder="Additional notes about the doctor's request"
-                          rows={2}
-                        />
+                        <span className="font-medium">Notes:</span> {tempFormData.notes}
                       </div>
                     </div>
                   )}
+                  {tempFormData.doctorRequestNotes && (
+                    <div className="flex items-start space-x-3">
+                      <FileText className="h-5 w-5 text-green-500 mt-0.5" />
+                      <div>
+                        <span className="font-medium">Doctor's Request Notes:</span> {tempFormData.doctorRequestNotes}
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-start space-x-3">
+                    <TestTube className="h-5 w-5 text-green-500 mt-0.5" />
+                    <div>
+                      <span className="font-medium">Selected Tests:</span>
+                      <ul className="mt-1 ml-4 list-disc">
+                        {selectedTests.map(testId => {
+                          const test = labTests.find(t => t._id === testId);
+                          return (
+                            <li key={testId}>{test?.name}</li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // Edit mode
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editFirstName">First Name</Label>
+                      <Input
+                        id="editFirstName"
+                        value={tempFormData.firstName}
+                        onChange={(e) => setTempFormData({...tempFormData, firstName: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editLastName">Last Name</Label>
+                      <Input
+                        id="editLastName"
+                        value={tempFormData.lastName}
+                        onChange={(e) => setTempFormData({...tempFormData, lastName: e.target.value})}
+                        required
+                      />
+                    </div>
+                  </div>
                   
-                  <div className="mt-8 flex justify-between">
-                    {!editMode ? (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setEditMode(true)}
-                        >
-                          Edit Details
-                        </Button>
-                        <div className="flex space-x-4">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => {
-                              setIsConfirmationModalOpen(false);
-                              setEditMode(false);
-                              // Reset temp form data to original
-                              setTempFormData({
-                                firstName: formData.firstName,
-                                lastName: formData.lastName,
-                                email: formData.email,
-                                phone: formData.phone,
-                                date: formData.date,
-                                time: formData.time,
-                                notes: formData.notes,
-                                doctorRequestNotes: formData.doctorRequestNotes
-                              });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            onClick={handleConfirmSubmission}
-                            disabled={submitting || uploading}
-                            className="min-w-[140px]"
-                          >
-                            {uploading ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Uploading...
-                              </>
-                            ) : submitting ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Submitting...
-                              </>
-                            ) : (
-                              'Confirm Appointment'
-                            )}
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={handleCancelChanges}
-                        >
-                          Cancel Changes
-                        </Button>
-                        <Button
-                          onClick={handleSaveChanges}
-                          disabled={
-                            !tempFormData.firstName || 
-                            !tempFormData.lastName || 
-                            !tempFormData.email || 
-                            !tempFormData.phone || 
-                            !tempFormData.date || 
-                            !tempFormData.time ||
-                            validatePhoneNumber(tempFormData.phone) !== ""
-                          }
-                        >
-                          Save Changes
-                        </Button>
-                      </>
+                  <div>
+                    <Label htmlFor="editEmail">Email</Label>
+                    <Input
+                      id="editEmail"
+                      type="email"
+                      value={tempFormData.email}
+                      onChange={(e) => setTempFormData({...tempFormData, email: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="editPhone">Phone Number</Label>
+                    <Input
+                      id="editPhone"
+                      type="tel"
+                      value={tempFormData.phone}
+                      onChange={(e) => {
+                        const sanitized = e.target.value.replace(/[^\d\s\-\(\)\+]/g, '');
+                        setTempFormData({...tempFormData, phone: sanitized});
+                      }}
+                      placeholder="09XXXXXXXXX"
+                      required
+                      className={validatePhoneNumber(tempFormData.phone) !== "" ? "border-red-500" : ""}
+                    />
+                    {validatePhoneNumber(tempFormData.phone) !== "" && (
+                      <p className="text-red-500 text-sm mt-1">
+                        {validatePhoneNumber(tempFormData.phone)}
+                      </p>
                     )}
                   </div>
-            </>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editDate">Date</Label>
+                      <Input
+                        id="editDate"
+                        type="date"
+                        value={tempFormData.date}
+                        onChange={(e) => setTempFormData({...tempFormData, date: e.target.value})}
+                        min={(() => {
+                          const today = new Date();
+                          // Add 2 days to today
+                          today.setDate(today.getDate() + 2);
+                          // Ensure we're working with local timezone
+                          const year = today.getFullYear();
+                          const month = String(today.getMonth() + 1).padStart(2, '0');
+                          const day = String(today.getDate()).padStart(2, '0');
+                          return `${year}-${month}-${day}`;
+                        })()}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editTime">Time</Label>
+                      <SimpleSelect
+                        value={tempFormData.time}
+                        onValueChange={(value) => setTempFormData({...tempFormData, time: value})}
+                        placeholder="Select time"
+                        options={availableTimeSlots}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="editNotes">Additional Notes (Optional)</Label>
+                    <Textarea
+                      id="editNotes"
+                      value={tempFormData.notes}
+                      onChange={(e) => setTempFormData({...tempFormData, notes: e.target.value})}
+                      placeholder="Any additional information or special requirements"
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="editDoctorRequestNotes">Doctor's Request Notes (Optional)</Label>
+                    <Textarea
+                      id="editDoctorRequestNotes"
+                      value={tempFormData.doctorRequestNotes}
+                      onChange={(e) => setTempFormData({...tempFormData, doctorRequestNotes: e.target.value})}
+                      placeholder="Additional notes about the doctor's request"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-8 flex justify-between">
+                {!editMode ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setEditMode(true)}
+                    >
+                      Edit Details
+                    </Button>
+                    <div className="flex space-x-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setIsConfirmationModalOpen(false);
+                          setEditMode(false);
+                          // Reset temp form data to original
+                          setTempFormData({
+                            firstName: formData.firstName,
+                            lastName: formData.lastName,
+                            email: formData.email,
+                            phone: formData.phone,
+                            date: formData.date,
+                            time: formData.time,
+                            notes: formData.notes,
+                            doctorRequestNotes: formData.doctorRequestNotes
+                          });
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleConfirmSubmission}
+                        disabled={submitting || uploading}
+                        className="min-w-[140px]"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : submitting ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          'Confirm Appointment'
+                        )}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleCancelChanges}
+                    >
+                      Cancel Changes
+                    </Button>
+                    <Button
+                      onClick={handleSaveChanges}
+                      disabled={
+                        !tempFormData.firstName || 
+                        !tempFormData.lastName || 
+                        !tempFormData.email || 
+                        !tempFormData.phone || 
+                        !tempFormData.date || 
+                        !tempFormData.time ||
+                        validatePhoneNumber(tempFormData.phone) !== ""
+                      }
+                    >
+                      Save Changes
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1578,7 +1730,7 @@ export default function ScheduleLabPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-[350px] flex flex-col p-4 relative items-center justify-center bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-lg">
             <div className="text-center p-3 flex-auto justify-center">
-              {customAlert.type === 'success' && (
+              {customAlert?.type === 'success' && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-12 h-12 flex items-center text-green-500 mx-auto"
@@ -1594,7 +1746,7 @@ export default function ScheduleLabPage() {
                   />
                 </svg>
               )}
-              {customAlert.type === 'error' && (
+              {customAlert?.type === 'error' && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-12 h-12 flex items-center text-red-500 mx-auto"
@@ -1608,7 +1760,7 @@ export default function ScheduleLabPage() {
                   ></path>
                 </svg>
               )}
-              {customAlert.type === 'warning' && (
+              {customAlert?.type === 'warning' && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-12 h-12 flex items-center text-yellow-500 mx-auto"
@@ -1624,20 +1776,21 @@ export default function ScheduleLabPage() {
                   />
                 </svg>
               )}
-              <h2 className="text-xl font-bold py-4 text-gray-800 dark:text-gray-200">{customAlert.title}</h2>
-              <p className="text-sm text-gray-500 px-2">{customAlert.message}</p>
+              <h2 className="text-xl font-bold py-4 text-gray-800 dark:text-gray-200">{customAlert?.title}</h2>
+              <p className="text-sm text-gray-500 px-2">{customAlert?.message}</p>
             </div>
             <div className="p-2 mt-2 text-center">
               <Button
                 onClick={() => {
+                  const actionToExecute = customAlert?.action;
                   setCustomAlert(null);
-                  if (customAlert.action) {
-                    customAlert.action();
+                  if (actionToExecute) {
+                    actionToExecute();
                   }
                 }}
                 className={`px-5 py-2 text-sm shadow-sm font-medium tracking-wider border-2 rounded-full transition ease-in duration-300 ${
-                  customAlert.type === 'success' ? 'bg-green-500 hover:bg-green-600 border-green-400 hover:border-green-600 text-white' :
-                  customAlert.type === 'error' ? 'bg-red-500 hover:bg-red-600 border-red-400 hover:border-red-600 text-white' :
+                  customAlert?.type === 'success' ? 'bg-green-500 hover:bg-green-600 border-green-400 hover:border-green-600 text-white' :
+                  customAlert?.type === 'error' ? 'bg-red-500 hover:bg-red-600 border-red-400 hover:border-red-600 text-white' :
                   'bg-yellow-500 hover:bg-yellow-600 border-yellow-400 hover:border-yellow-600 text-white'
                 }`}
               >
@@ -1707,10 +1860,13 @@ export default function ScheduleLabPage() {
                                 : 'bg-yellow-50 border border-yellow-200 text-yellow-800'
                             }`}>
                               <div className="flex items-start space-x-2">
-                                <span className="flex-shrink-0 text-lg">
-                                  {question.riskLevel === 'high' ? '⚠️' : 
-                                   question.riskLevel === 'medium' ? '⚠️' : 'ℹ️'}
-                                </span>
+                                {question.riskLevel === 'high' ? (
+                                  <AlertTriangle className="flex-shrink-0 text-red-500 h-4 w-4 mt-0.5" />
+                                ) : question.riskLevel === 'medium' ? (
+                                  <AlertTriangle className="flex-shrink-0 text-orange-500 h-4 w-4 mt-0.5" />
+                                ) : (
+                                  <Info className="flex-shrink-0 text-blue-500 h-4 w-4 mt-0.5" />
+                                )}
                                 <p className="text-sm">{question.warningMessage}</p>
                               </div>
                             </div>
@@ -1724,10 +1880,16 @@ export default function ScheduleLabPage() {
             
             {eligibilityWarnings.length > 0 && (
               <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <h5 className="font-bold text-red-800 mb-2">⚠️ Important Warnings:</h5>
+                <h5 className="font-bold text-red-800 mb-2 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Important Warnings:
+                </h5>
                 <ul className="text-sm text-red-700 space-y-1">
                   {eligibilityWarnings.map((warning, index) => (
-                    <li key={index}>• {warning}</li>
+                    <li key={index} className="flex items-start gap-2">
+                      <span className="text-red-500 mt-1">•</span>
+                      <span>{warning}</span>
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -1756,7 +1918,7 @@ export default function ScheduleLabPage() {
         </div>
       )}
 
-      {/* Full-Screen Loading Overlay - Like Career Page */}
+      {/* Full-Screen Loading Overlay */}
       {(submitting || uploading) && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-xl max-w-md mx-4 text-center">

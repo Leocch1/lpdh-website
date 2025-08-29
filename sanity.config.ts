@@ -81,6 +81,9 @@ export default defineConfig({
                                   .title('Complaints')
                                   .filter('messageType == "complaint"')
                               ),
+                            S.listItem()
+                              .title('Email Settings')
+                              .child(S.documentTypeList('emailSettings').title('Email Configuration')),
                           ])
                       ),
                     S.listItem()
@@ -107,6 +110,52 @@ export default defineConfig({
                     S.listItem()
                       .title('Job Categories')
                       .child(S.documentTypeList('jobCategory').title('Job Categories')),
+                    S.listItem()
+                      .title('Job Applications')
+                      .child(
+                        S.list()
+                          .title('Job Application Management')
+                          .items([
+                            S.listItem()
+                              .title('All Applications')
+                              .child(S.documentTypeList('jobApplication').title('All Job Applications')),
+                            S.listItem()
+                              .title('New Applications')
+                              .child(
+                                S.documentTypeList('jobApplication')
+                                  .title('New Applications')
+                                  .filter('applicationStatus == "new"')
+                              ),
+                            S.listItem()
+                              .title('Under Review')
+                              .child(
+                                S.documentTypeList('jobApplication')
+                                  .title('Under Review')
+                                  .filter('applicationStatus == "under-review"')
+                              ),
+                            S.listItem()
+                              .title('Interview Scheduled')
+                              .child(
+                                S.documentTypeList('jobApplication')
+                                  .title('Interview Scheduled')
+                                  .filter('applicationStatus == "interview-scheduled"')
+                              ),
+                              S.listItem()
+                              .title('Pulling')
+                              .child(
+                                S.documentTypeList('jobApplication')
+                                  .title('Pulling')
+                                  .filter('applicationStatus == "pulling"')
+                              ),
+                            S.listItem()
+                              .title('Hired Candidates')
+                              .child(
+                                S.documentTypeList('jobApplication')
+                                  .title('Hired Candidates')
+                                  .filter('applicationStatus == "hired"')
+                              ),
+                          ])
+                      ),
                   ])
               ),
             S.listItem()
@@ -170,7 +219,7 @@ export default defineConfig({
               ),
             // Other document types that don't belong to specific departments
             ...S.documentTypeListItems().filter(
-              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage', 'findDoctorPage', 'servicesPage', 'admission'].includes(listItem.getId() || '')
+              (listItem) => !['homepage', 'aboutPage', 'historyPage', 'healthAdvisory', 'newsUpdate', 'careers', 'jobOpening', 'jobCategory', 'doctor', 'department', 'specialty', 'scheduleLabPage', 'labTest', 'appointment', 'labDepartment', 'contactMessage', 'findDoctorPage', 'servicesPage', 'admission', 'emailSettings', 'jobApplication'].includes(listItem.getId() || '')
             ),
           ]),
     }),

@@ -524,6 +524,17 @@ export default function ServicesPage() {
         const foundTab = allTabs.find(tab => tab.tabKey === hash);
         if (foundTab) {
           setActiveTabKey(hash);
+          // Smooth scroll to services section after a short delay to ensure DOM is updated
+          setTimeout(() => {
+            const servicesSection = document.getElementById('services-section');
+            if (servicesSection) {
+              servicesSection.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start',
+                inline: 'nearest'
+              });
+            }
+          }, 100);
         }
       }
     };
@@ -550,11 +561,36 @@ export default function ServicesPage() {
             const hash = window.location.hash.substring(1);
             const foundTab = sortedTabs.find(tab => tab.tabKey === hash);
             setActiveTabKey(foundTab ? hash : sortedTabs[0].tabKey);
+            
+            // If we have a hash and found the tab, scroll to services section after a delay
+            if (hash && foundTab) {
+              setTimeout(() => {
+                const servicesSection = document.getElementById('services-section');
+                if (servicesSection) {
+                  servicesSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                  });
+                }
+              }, 500); // Longer delay to ensure page is fully loaded
+            }
           } else {
             // Fallback to legacy system
             const hash = window.location.hash.substring(1);
             if (hash === 'clinical-services' && data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
               setActiveTabKey('clinical-services');
+              // Scroll to services section
+              setTimeout(() => {
+                const servicesSection = document.getElementById('services-section');
+                if (servicesSection) {
+                  servicesSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                  });
+                }
+              }, 500);
             } else if (data.whatWeOfferSection.ourServicesTab?.services?.length > 0) {
               setActiveTabKey('our-services');
             } else if (data.whatWeOfferSection.clinicalServicesTab?.services?.length > 0) {
@@ -590,6 +626,16 @@ export default function ServicesPage() {
     setOpenItems(new Set());
     // Update URL hash
     window.history.replaceState(null, '', `#${tabKey}`);
+    
+    // Smooth scroll to services section
+    const servicesSection = document.getElementById('services-section');
+    if (servicesSection) {
+      servicesSection.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
   };
 
   if (loading) {
@@ -710,7 +756,7 @@ export default function ServicesPage() {
       </section>
 
       {/* What We Offer Section */}
-      <section className="py-16 bg-background">
+      <section id="services-section" className="py-16 bg-background">
         <div className="container mx-auto px-4 max-w-7xl">
           {/* Header */}
           <div className="text-center mb-12">

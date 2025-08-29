@@ -247,33 +247,42 @@ export default function JobApplicationPage() {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirm Application Submission</DialogTitle>
-            <DialogDescription className="text-left">
-              Are you sure you want to submit your job application?
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="space-y-2 text-sm">
-              <p><strong>Applicant:</strong> {applicantName}</p>
-              <p><strong>Position:</strong> {job?.title}</p>
-              <p className="text-muted-foreground mt-4">
-                Once submitted, your application and resume will be sent to our HR department for review. 
-                You will receive a confirmation and we'll contact you if you're selected for an interview.
-              </p>
-            </div>
-          </div>
-          <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={handleCancelSubmit}>
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmSubmit}>
-              Submit Application
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle>Confirm Application Submission</DialogTitle>
+      <DialogDescription className="text-left">
+        Are you sure you want to submit your job application?
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="py-4">
+      <div className="space-y-2 text-sm">
+        <p>
+          <strong>Applicant:</strong> {applicantName}
+        </p>
+        <p>
+          <strong>Position:</strong> {job?.title}
+        </p>
+        <p className="text-muted-foreground mt-4">
+          Once submitted, your application and resume will be sent to our HR
+          department for review. You will receive a confirmation and we'll
+          contact you if you're selected for an interview.
+        </p>
+      </div>
+    </div>
+
+    <DialogFooter>
+      <div className="flex justify-center gap-2 w-full">
+        <Button variant="outline" onClick={handleCancelSubmit}>
+          Cancel
+        </Button>
+        <Button onClick={handleConfirmSubmit}>
+          Submit Application
+        </Button>
+      </div>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

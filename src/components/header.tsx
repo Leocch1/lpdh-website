@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Phone, Paperclip, MapPin, ChevronDown, Activity } from "lucide-react";
+import { Menu, Phone, MapPin, ChevronDown, Activity } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/logo";
@@ -390,18 +390,12 @@ export function Header() {
                       ))}
                     </nav>
 
-                    {/* Mobile CTA Buttons */}
-                    <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
-                      <Button asChild variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
+                    {/* Mobile CTA Button - Find a Doctor with primary background */}
+                    <div className="mt-6 pt-6 border-t border-slate-200">
+                      <Button asChild className="w-full bg-primary text-white hover:bg-primary/90">
                         <Link href="/services/find-doctor" onClick={() => setIsMobileMenuOpen(false)}>
                           <Activity className="h-4 w-4 mr-2" />
                           Find a Doctor
-                        </Link>
-                      </Button>
-                      <Button asChild className="w-full bg-primary hover:bg-primary text-white font-semibold shadow-sm">
-                        <Link href="/get-result" onClick={() => setIsMobileMenuOpen(false)}>
-                          <Paperclip className="h-4 w-4 mr-2" />
-                          Get Result Online
                         </Link>
                       </Button>
                     </div>
@@ -474,7 +468,7 @@ export function Header() {
               </nav>
             </div>
 
-            {/* Desktop: CTA Buttons */}
+            {/* Desktop: CTA Buttons - Call Us (outline) and Find a Doctor (primary) */}
             <div className="hidden xl:flex items-center justify-end gap-2 flex-shrink-0">
               {/* Call Us Dropdown */}
               <div className={cn(
@@ -522,16 +516,11 @@ export function Header() {
                 )}
               </div>
 
-              <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary hover:text-white hover:border-primary">
+              {/* Find a Doctor button with primary background */}
+              <Button asChild className="bg-primary text-white hover:bg-primary/90">
                 <Link href="/services/find-doctor">
                   <Activity className="h-4 w-4 mr-2" />
                   Find a Doctor
-                </Link>
-              </Button>
-              <Button asChild className="bg-primary hover:bg-primary text-white font-semibold shadow-sm">
-                <Link href="/get-result">
-                  <Paperclip className="h-4 w-4 mr-2" />
-                  Get Result Online
                 </Link>
               </Button>
             </div>

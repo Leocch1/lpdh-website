@@ -1,6 +1,6 @@
 export default {
   name: 'healthAdvisory',
-  title: 'Health Advisory',
+  title: 'What\'s Happening Section',
   type: 'document',
   fields: [
     {
