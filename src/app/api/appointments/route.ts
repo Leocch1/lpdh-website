@@ -118,9 +118,14 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
     const emailContent = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
         <!-- Header -->
-        <div style="background-color: #28a745; color: white; padding: 30px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctor's Hospital</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - New Appointment</p>
+        <div style="display: flex; align-items: center; background-color: #28a745; color: white; padding: 30px;">
+          <img src="https://lpdhinc.com/LPDH%20LOGO%20OFFICIAL.png"
+               alt="Las Piñas Doctors Hospital Logo"
+               style="height: 80px; margin-right: 32px; border-radius: 8px; display: block;" />
+          <div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctors Hospital INC.</h1>
+            <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - New Appointment</p>
+          </div>
         </div>
         
         <!-- Main Content -->
@@ -139,7 +144,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
               </tr>
               <tr style="background-color: #ffffff;">
                 <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Time</td>
-                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #28a745;">${appointmentData.appointmentTime}</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 500;">${appointmentData.appointmentTime}</td>
               </tr>
               <tr style="background-color: #f8f9fa;">
                 <td style="padding: 15px 20px; font-weight: 600; color: #495057;">Department(s)</td>
@@ -173,7 +178,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
             <div style="background-color: #e8f5e8; padding: 25px; border: 1px solid #c8e6c9;">
               ${appointmentData.selectedTests.map((test: any) => 
                 `<div style="margin: 12px 0; padding: 15px; background-color: white; border-radius: 6px; border-left: 4px solid #28a745; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                  <h4 style="margin: 0 0 8px 0; color: #2e7d32; font-size: 16px; font-weight: 600;">✓ ${test.name}</h4>
+                  <h4 style="margin: 0 0 8px 0; color: #2e7d32; font-size: 16px; font-weight: 600;">${test.name}</h4>
                   ${test.labDepartment ? `<p style="margin: 5px 0; color: #6c757d; font-size: 14px; font-weight: 500;">Department: ${test.labDepartment.name}</p>` : ''}
                   ${test.duration ? `<p style="margin: 5px 0; color: #6c757d; font-size: 13px;">Duration: ${test.duration}</p>` : ''}
                   ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px;">Result Time: ${test.resultTime}</p>` : ''}
@@ -194,7 +199,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           
           <!-- Doctor's Request -->
           <div style="background-color: #e3f2fd; padding: 25px; border: 1px solid #bbdefb; margin-bottom: 35px;">
-            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 18px; font-weight: 500;">📋 Doctor's Request/Prescription</h4>
+            <h4 style="margin: 0 0 15px 0; color: #0d47a1; font-size: 18px; font-weight: 500;">Doctor's Request/Prescription</h4>
             ${doctorRequestImageAsset ? `
               <div style="text-align: center; margin: 15px 0;">
                 <img src="${urlFor(doctorRequestImageAsset).width(400).quality(80).url()}" 
@@ -203,7 +208,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
                 <p style="margin: 10px 0 0 0; color: #0d47a1; font-size: 12px; font-style: italic;">Doctor's Request Document</p>
               </div>
             ` : `
-              <p style="margin: 0; color: #0d47a1; font-weight: 600;">✓ Doctor's prescription/request image has been uploaded and attached to this appointment.</p>
+              <p style="margin: 0; color: #0d47a1; font-weight: 600;">Doctor's prescription/request image has been uploaded and attached to this appointment.</p>
             `}
             ${appointmentData.doctorRequest?.notes ? `<p style="margin: 10px 0 0 0; color: #0d47a1;"><strong>Additional Notes:</strong> ${appointmentData.doctorRequest.notes}</p>` : ''}
             <p style="margin: 15px 0 0 0; color: #0d47a1; font-size: 14px;">
@@ -215,7 +220,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
           <div style="background-color: #f8f9fa; padding: 30px; border: 2px solid #1f4e79; text-align: center;">
             <h4 style="margin: 0 0 20px 0; color: #1f4e79; font-size: 20px; font-weight: 500;">Action Required</h4>
             <p style="margin: 0 0 25px 0; color: #495057; font-size: 16px;">Please review this lab appointment and confirm the patient's schedule.</p>
-            <a href="${process.env.NEXT_PUBLIC_SITE_URL}/studio" 
+            <a href="https://lpdhinc.com/studio" 
                style="display: inline-block; background-color: #1f4e79; color: white; padding: 15px 30px; text-decoration: none; font-weight: 600; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px;">
               Access Administrative Panel
             </a>
@@ -227,7 +232,7 @@ async function sendAppointmentNotification(appointmentData: any, labDepartments:
         
         <!-- Footer -->
         <div style="background-color: #47524A; color: #ffffff; padding: 25px; text-align: center;">
-          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctor's Hospital</p>
+          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctors Hospital INC.</p>
           <p style="margin: 0 0 5px 0; color: #adb5bd; font-size: 14px;">Laboratory Services Department - Appointment System</p>
           <p style="margin: 0; color: #6c757d; font-size: 12px;">
             This is an automated notification. Please do not reply to this email.
@@ -273,12 +278,18 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
   try {
     console.log('📧 Sending confirmation email to patient:', appointmentData.patientInfo.email);
     
-    const emailSubject = `Lab Appointment Confirmed - ${appointmentData.appointmentNumber}`;    const patientEmailContent = `
+    const emailSubject = `Lab Appointment Confirmed - ${appointmentData.appointmentNumber}`;
+    const patientEmailContent = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 700px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e0e0e0;">
         <!-- Header -->
-        <div style="background-color: #28a745; color: white; padding: 30px; text-align: center;">
-          <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctor's Hospital</h1>
-          <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - Appointment Confirmed</p>
+        <div style="display: flex; align-items: center; background-color: #28a745; color: white; padding: 30px;">
+          <img src="https://lpdhinc.com/LPDH%20LOGO%20OFFICIAL.png"
+               alt="Las Piñas Doctors Hospital Logo"
+               style="height: 80px; margin-right: 32px; border-radius: 8px; display: block;" />
+          <div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 300; letter-spacing: 1px;">Las Piñas Doctors Hospital INC.</h1>
+            <p style="margin: 8px 0 0 0; font-size: 16px; opacity: 0.9; font-weight: 300;">Laboratory Services - Appointment Confirmed</p>
+          </div>
         </div>
         
         <!-- Main Content -->
@@ -303,7 +314,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
               </tr>
               <tr style="background-color: #ffffff;">
                 <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Appointment Time</td>
-                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #dc3545; font-size: 16px;">${appointmentData.appointmentTime}</td>
+                <td style="padding: 15px 20px; border-bottom: 1px solid #dee2e6; font-weight: 600; color: #1f4e79;">${appointmentData.appointmentTime}</td>
               </tr>
               <tr style="background-color: #f8f9fa;">
                 <td style="padding: 15px 20px; font-weight: 600; color: #495057; border-bottom: 1px solid #dee2e6;">Contact Phone</td>
@@ -324,15 +335,15 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
               ${selectedTestsData.map((test: any) => 
                 `<div style="margin: 15px 0; padding: 20px; background-color: white; border-radius: 8px; border-left: 4px solid #28a745; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                   <div style="margin-bottom: 8px;">
-                    <span style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 10px;">✓ SCHEDULED</span>
+                    <span style="background-color: #28a745; color: white; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; margin-right: 10px;">SCHEDULED</span>
                     <strong style="color: #28a745; font-size: 18px;">${test.name}</strong>
                   </div>
                   ${test.labDepartment ? `<p style="margin: 8px 0; color: #6c757d; font-size: 14px; font-weight: 500;"> Department: ${test.labDepartment.name}</p>` : ''}
-                  ${test.duration ? `<p style="margin: 5px 0; color: #6c757d; font-size: 13px;">⏱ Duration: ${test.duration}</p>` : ''}
+                  ${test.duration ? `<p style="margin: 5px 0; color: #6c757d; font-size: 13px;">Duration: ${test.duration}</p>` : ''}
                   ${test.resultTime ? `<p style="margin: 5px 0; color: #28a745; font-size: 13px; font-weight: 500;">Results Available: ${test.resultTime}</p>` : ''}
                   ${test.preparationNotes && test.preparationNotes.length > 0 ? `
                     <div style="background-color: #fff3cd; padding: 15px; border-left: 3px solid #ffc107; margin: 10px 0; border-radius: 4px;">
-                      <strong style="color: #856404; font-size: 14px;">⚠️ Important - Preparation Required:</strong>
+                      <strong style="color: #856404; font-size: 14px;">Important - Preparation Required:</strong>
                       <ul style="color: #856404; font-size: 13px; margin: 10px 0 5px 0; padding-left: 20px;">
                         ${test.preparationNotes.map((note: string) => `<li style="margin: 5px 0; line-height: 1.4;">${note}</li>`).join('')}
                       </ul>
@@ -358,27 +369,27 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
             <h3 style="margin: 0 0 20px 0; color: #f57f17; font-size: 18px; font-weight: 500;">Important Reminders for Your Visit</h3>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
-                <td style="padding: 8px 0; vertical-align: top; width: 30px;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top; width: 30px;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Arrive 15 minutes early</strong> for check-in and preparation procedures</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Bring valid ID</strong> and your health insurance card (PhilHealth, HMO, etc.)</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Follow preparation instructions</strong> listed above for each test</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Bring your doctor's prescription</strong> (we have a copy but please bring yours)</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Fasting may be required</strong> for certain tests - check preparation notes above</td>
               </tr>
               <tr>
-                <td style="padding: 8px 0; vertical-align: top;"><span style="color: #f57f17; font-size: 16px;"></span></td>
+                <td style="padding: 8px 0; vertical-align: top;"></td>
                 <td style="padding: 8px 0; color: #f57f17; font-size: 14px; line-height: 1.6;"><strong>Need to reschedule?</strong> Contact us at least 24 hours in advance</td>
               </tr>
             </table>
@@ -387,7 +398,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
           ${doctorRequestImageAsset ? `
             <!-- Your Doctor's Request -->
             <div style="background-color: #e3f2fd; padding: 25px; border: 1px solid #bbdefb; margin-bottom: 35px;">
-              <h3 style="margin: 0 0 20px 0; color: #0d47a1; font-size: 18px; font-weight: 500;"> Your Doctor's Request/Prescription</h3>
+              <h3 style="margin: 0 0 20px 0; color: #0d47a1; font-size: 18px; font-weight: 500;">Your Doctor's Request/Prescription</h3>
               <p style="margin: 0 0 20px 0; color: #0d47a1; font-size: 14px; line-height: 1.6;">Here's a copy of your doctor's prescription/request for your records:</p>
               <div style="text-align: center; margin: 20px 0;">
                 <img src="${urlFor(doctorRequestImageAsset).width(500).quality(85).url()}" 
@@ -429,7 +440,7 @@ async function sendPatientConfirmation(appointmentData: any, selectedTestsData: 
 
         <!-- Footer -->
         <div style="background-color: #47524A; color: #ffffff; padding: 25px; text-align: center;">
-          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctor's Hospital</p>
+          <p style="margin: 0 0 5px 0; color: #ffffff; font-size: 16px; font-weight: 500;">Las Piñas Doctors Hospital INC.</p>
           <p style="margin: 0 0 5px 0; color: #adb5bd; font-size: 14px;">Quality Healthcare • Advanced Laboratory Services • Trusted Since 1982</p>
           <p style="margin: 0; color: #6c757d; font-size: 12px;">
             This is your appointment confirmation. Please save this email for your records.
