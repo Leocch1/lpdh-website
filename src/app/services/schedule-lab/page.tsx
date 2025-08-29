@@ -824,8 +824,8 @@ export default function ScheduleLabPage() {
   }
 
   const heroSection = pageData?.heroSection || {
-    title: "Schedule Lab Work",
-    subtitle: "Book your laboratory tests and imaging services with our experienced technicians"
+    title: "Schedule a Diagnostic Test",
+    subtitle: ""
   };
 
   const mainContent = pageData?.mainContent || {
